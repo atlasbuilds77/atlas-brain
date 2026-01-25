@@ -1,0 +1,12 @@
+BSAYJvLxGhbD0tHKcF4FtrWQ5kIkdKS
+
+Stored in: /Users/atlasbuilds/.clawdbot/clawdbot.json
+Location: tools.web.search.apiKey
+
+Status: Added to config but Gateway needs restart to activate
+Issue: Gateway restart disabled in config
+
+Next steps:
+- Either enable commands.restart=true in config
+- Or manually restart Gateway
+- Then web_search tool will work for market summaries

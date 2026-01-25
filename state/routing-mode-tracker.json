@@ -1,0 +1,35 @@
+{
+  "version": "1.0",
+  "created_at": "2026-01-24T07:47:00Z",
+  "updated_at": "2026-01-24T07:47:00Z",
+  "group_chat": {
+    "id": 3,
+    "active": true
+  },
+  "participant_modes": {
+    "+14245157194": {
+      "current_mode": "group",
+      "last_switch": "2026-01-24T07:47:00Z",
+      "switch_history": []
+    },
+    "+16195779919": {
+      "current_mode": "group",
+      "last_switch": "2026-01-24T07:47:00Z",
+      "switch_history": []
+    },
+    "+16193845759": {
+      "current_mode": "group",
+      "last_switch": "2026-01-24T07:47:00Z",
+      "switch_history": []
+    }
+  },
+  "mode_definitions": {
+    "group": "All responses go to group chat (chat-id 3)",
+    "direct": "All responses go directly to participant's number"
+  },
+  "auto_reset": {
+    "enabled": true,
+    "timeout_minutes": 15,
+    "description": "Reset all participants to group mode after 15 minutes of inactivity"
+  }
+}

@@ -1,0 +1,37 @@
+#!/bin/bash
+# Quick CLI for prediction market tools
+
+PM_DIR="$HOME/clawd/prediction-markets"
+ARB_VENV="$PM_DIR/arb-bot/venv/bin/activate"
+
+case "$1" in
+    monitor)
+        cd "$PM_DIR" && source "$ARB_VENV" && python monitor.py "${@:2}"
+        ;;
+    arb)
+        cd "$PM_DIR/arb-bot" && source venv/bin/activate && python main.py
+        ;;
+    scan)
+        cd "$PM_DIR/stupidity-scanner" && python3 scanner.py --demo
+        ;;
+    status)
+        echo "📊 Prediction Markets Status"
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo "Kalshi API: $([ -f ~/.clawdbot/credentials/kalshi/config.json ] && echo '✅ Configured' || echo '❌ Not configured')"
+        echo "Arb Bot: $([ -d $PM_DIR/arb-bot/venv ] && echo '✅ Installed' || echo '❌ Not installed')"
+        echo "Monitor: $([ -f $PM_DIR/monitor.py ] && echo '✅ Ready' || echo '❌ Missing')"
+        echo "Scanner: $([ -f $PM_DIR/stupidity-scanner/scanner.py ] && echo '✅ Ready' || echo '❌ Missing')"
+        ;;
+    help|*)
+        echo "Prediction Market Tools"
+        echo ""
+        echo "Usage: pm <command>"
+        echo ""
+        echo "Commands:"
+        echo "  monitor     - Run monitoring daemon (--check-once for single check)"
+        echo "  arb         - Run arb-bot for real-time detection"
+        echo "  scan        - Run stupidity scanner demo"
+        echo "  status      - Show system status"
+        echo "  help        - Show this help"
+        ;;
+esac

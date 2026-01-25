@@ -1,0 +1,60 @@
+# External cloned repos (can re-clone)
+Futures-relay/
+Lean/
+OsEngine/
+Polymarket-Copy-Trading-Bot/
+StockSharp/
+Superalgos/
+TradingAgents/
+backtrader/
+kalshi-ai-trading-bot/
+kalshi-deep-trading-bot/
+machine-learning-for-trading/
+prediction-markets/arb-bot/
+prediction-markets/bettingarbitrage/
+prediction-markets/prediction-market-arbitrage/
+projects/crypto-bots/OctoBot/
+projects/crypto-bots/freqtrade/
+projects/crypto-bots/jesse/
+projects/polymarket-bots/
+webull/
+
+# Credentials & Secrets
+.atlas-credentials
+.env
+.gmail-app-password
+.polygon-api-key
+MAC_MINI_CREDENTIALS.md
+*credentials*
+*secret*
+*.key
+
+# API Keys in any file (be safe)
+clawdbot-config-export.json
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Node
+node_modules/
+
+# OS
+.DS_Store
+*.swp
+*.swo
+*~
+
+# Logs (optional - might want these)
+*.log
+logs/
+
+# Large files / backups
+*.tar.gz
+*.zip
+
+# Temp files
+/tmp/
+*.tmp

@@ -1,0 +1,34 @@
+{
+  "active_group_chat": {
+    "chat_id": 3,
+    "participants": ["+14245157194", "+16195779919", "+16193845759"],
+    "active": true,
+    "strict_mode": true,
+    "started_at": "2026-01-23T23:00:00Z",
+    "enabled_at": "2026-01-24T07:29:00Z",
+    "updated_at": "2026-01-24T07:43:00Z"
+  },
+  "routing_rules": {
+    "mode": "STRICT_GROUP_DEFAULT_WITH_MODE_SWITCHING",
+    "default": "ALL messages from participants route to chat-id 3 by default",
+    "dm_marker": "If message contains 'DM' anywhere, respond directly to sender",
+    "mode_switch_signals": [
+      "move to private",
+      "switch to DM",
+      "let's go private",
+      "talk privately",
+      "direct message me"
+    ],
+    "mode_return_signals": [
+      "back to group",
+      "rejoin group",
+      "return to group",
+      "group chat"
+    ],
+    "current_mode_overrides": {},
+    "implementation": "1. Check for mode switch signals -> change mode for that participant. 2. Check current mode for participant. 3. If in direct mode -> respond directly. 4. If no mode override -> check for DM marker. 5. Default -> group response.",
+    "participants_notified": true,
+    "rule_simplified": true,
+    "mode_switching_enabled": true
+  }
+}

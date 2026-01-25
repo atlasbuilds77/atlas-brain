@@ -1,0 +1,55 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Environment variables
+.env
+.env.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Data files
+data/historical/*
+data/live/*
+!data/historical/.gitkeep
+!data/live/.gitkeep
+
+# Logs
+logs/*
+!logs/.gitkeep
+
+# Backtest results
+backtests/results/*
+!backtests/.gitkeep
+
+# macOS
+.DS_Store
+
+# Jupyter
+.ipynb_checkpoints/

@@ -1,0 +1,25 @@
+{
+  "version": 1,
+  "skills": {
+    "openai-tts": {
+      "version": "1.0.0",
+      "installedAt": 1769048997559
+    },
+    "voice-transcribe": {
+      "version": "1.0.1",
+      "installedAt": 1769048998900
+    },
+    "openai-image-gen": {
+      "version": "1.0.1",
+      "installedAt": 1769049018575
+    },
+    "bird": {
+      "version": "1.0.0",
+      "installedAt": 1769098447187
+    },
+    "exa-plus": {
+      "version": "1.0.0",
+      "installedAt": 1769309568688
+    }
+  }
+}
