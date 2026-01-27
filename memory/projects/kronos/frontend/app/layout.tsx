@@ -20,12 +20,12 @@ export default function RootLayout({
     <html lang="en">
       <body className={inter.className}>
         <Providers>
-          <div className="flex min-h-screen bg-gray-50">
+          <div className="flex min-h-screen bg-black">
             {/* Sidebar */}
             <Sidebar />
             
             {/* Main content */}
-            <main className="flex-1 ml-64 p-8">
+            <main className="flex-1 ml-64">
               {children}
             </main>
           </div>

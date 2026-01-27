@@ -19,28 +19,22 @@ import {
   Plus,
   ChevronRight,
   Activity,
-  Shield
+  Shield,
+  Zap,
+  Target
 } from 'lucide-react'
 import { formatCurrency, formatDate } from '@/lib/utils'
 
-// Mock data - ENHANCED FOR CONVERSION
+// Mock data - PREMIUM METRICS
 const stats = [
   {
     title: 'Active Clients',
     value: '42',
     change: 12,
     changeLabel: 'vs last month',
-    icon: <Users className="w-6 h-6" />,
-    iconBg: 'bg-primary-100',
-    trend: 'up' as const,
-  },
-  {
-    title: 'New Leads',
-    value: '18',
-    change: 8,
-    changeLabel: 'this week',
-    icon: <UserPlus className="w-6 h-6" />,
-    iconBg: 'bg-success-100',
+    icon: <Users className="w-8 h-8" />,
+    iconBg: 'bg-orange-500/10',
+    iconColor: 'text-orange-500',
     trend: 'up' as const,
   },
   {
@@ -48,17 +42,29 @@ const stats = [
     value: formatCurrency(28500),
     change: 15,
     changeLabel: 'vs last month',
-    icon: <DollarSign className="w-6 h-6" />,
-    iconBg: 'bg-warning-100',
+    icon: <DollarSign className="w-8 h-8" />,
+    iconBg: 'bg-emerald-500/10',
+    iconColor: 'text-emerald-400',
     trend: 'up' as const,
   },
   {
     title: 'Retention Rate',
     value: '94%',
     change: 2,
-    changeLabel: 'vs last quarter',
-    icon: <TrendingUp className="w-6 h-6" />,
-    iconBg: 'bg-success-100',
+    changeLabel: 'industry: 78%',
+    icon: <TrendingUp className="w-8 h-8" />,
+    iconBg: 'bg-blue-500/10',
+    iconColor: 'text-blue-400',
+    trend: 'up' as const,
+  },
+  {
+    title: 'New Leads',
+    value: '18',
+    change: 8,
+    changeLabel: 'this week',
+    icon: <UserPlus className="w-8 h-8" />,
+    iconBg: 'bg-purple-500/10',
+    iconColor: 'text-purple-400',
     trend: 'up' as const,
   }
 ]
@@ -76,334 +82,361 @@ const recentMessages = [
 ]
 
 const quickActions = [
-  { title: 'Add New Lead', icon: UserPlus, href: '/leads/new', color: 'bg-primary-600 hover:bg-primary-700' },
-  { title: 'Send Tax Organizer', icon: FileText, href: '/organizers/send', color: 'bg-success-600 hover:bg-success-700' },
-  { title: 'Schedule Consultation', icon: Calendar, href: '/calendar/new', color: 'bg-purple-600 hover:bg-purple-700' },
-  { title: 'View Analytics', icon: TrendingUp, href: '/analytics', color: 'bg-indigo-600 hover:bg-indigo-700' },
+  { title: 'Add New Lead', icon: UserPlus, href: '/leads/new', gradient: 'from-orange-600 to-orange-500' },
+  { title: 'Send Organizer', icon: FileText, href: '/organizers/send', gradient: 'from-zinc-800 to-zinc-700' },
+  { title: 'Schedule Call', icon: Calendar, href: '/calendar/new', gradient: 'from-zinc-800 to-zinc-700' },
+  { title: 'View Analytics', icon: TrendingUp, href: '/analytics', gradient: 'from-zinc-800 to-zinc-700' },
 ]
 
 export default function DashboardPage() {
   return (
-    <div className="space-y-8 max-w-[1600px]">
-      {/* Header with context */}
-      <div className="flex items-start justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-slate-900">Welcome back, Laura</h1>
-          <p className="mt-2 text-lg text-slate-600">
-            Here's what needs your attention today
-          </p>
-          <div className="mt-3 flex items-center gap-4 text-sm text-slate-500">
-            <div className="flex items-center gap-1.5">
-              <Activity className="w-4 h-4" />
-              <span>Last updated: Just now</span>
+    <div className="min-h-screen bg-black">
+      {/* HERO SECTION - MASSIVE HEADLINE */}
+      <div className="relative overflow-hidden bg-gradient-to-b from-zinc-900 to-black border-b border-zinc-800/50">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-orange-900/10 via-black to-black"></div>
+        
+        <div className="relative max-w-[1600px] mx-auto px-8 py-20">
+          {/* Status Bar */}
+          <div className="flex items-center gap-6 mb-8">
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
+              <span className="text-sm text-zinc-400">All systems operational</span>
             </div>
-            <div className="flex items-center gap-1.5">
-              <Shield className="w-4 h-4 text-success-600" />
-              <span>All systems operational</span>
-            </div>
-          </div>
-        </div>
-        <div className="flex items-center gap-3">
-          <Button variant="secondary" size="lg">
-            <Calendar className="w-4 h-4" />
-            View Calendar
-          </Button>
-          <Button size="lg">
-            <Plus className="w-4 h-4" />
-            Add Client
-          </Button>
-        </div>
-      </div>
-
-      {/* KPI Stats Grid - ABOVE THE FOLD */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {stats.map((stat, index) => (
-          <StatsCard key={index} {...stat} />
-        ))}
-      </div>
-
-      {/* Urgent Actions Alert */}
-      <Card className="border-l-4 border-l-danger-500 bg-danger-50/30">
-        <div className="flex items-start gap-4">
-          <div className="flex-shrink-0">
-            <div className="w-10 h-10 rounded-full bg-danger-100 flex items-center justify-center">
-              <AlertCircle className="w-5 h-5 text-danger-600" />
+            <div className="flex items-center gap-2">
+              <Clock className="w-4 h-4 text-zinc-500" />
+              <span className="text-sm text-zinc-400">Updated just now</span>
             </div>
           </div>
-          <div className="flex-1">
-            <h3 className="text-lg font-semibold text-slate-900">
-              3 urgent tasks need your attention today
-            </h3>
-            <p className="mt-1 text-sm text-slate-600">
-              Address these items to stay on track with client deadlines
+
+          {/* BOLD HEADLINE */}
+          <div className="space-y-6">
+            <h1 className="text-7xl md:text-8xl font-black tracking-tight text-white leading-[0.9]">
+              Welcome back,<br />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-white to-zinc-400">Laura</span>
+            </h1>
+            <p className="text-2xl text-zinc-400 font-light max-w-2xl">
+              Your tax practice command center. Everything you need, nothing you don't.
             </p>
           </div>
-          <Button variant="danger">
-            View All Tasks
-            <ArrowRight className="w-4 h-4" />
-          </Button>
-        </div>
-      </Card>
 
-      {/* Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left Column - Priority Tasks */}
-        <div className="lg:col-span-2 space-y-6">
-          {/* Urgent Tasks */}
-          <Card>
-            <CardHeader 
-              title="Priority Tasks" 
-              subtitle="Complete these to stay on schedule"
-              badge={
-                <Badge variant="danger" className="text-xs">
-                  {urgentTasks.length} urgent
-                </Badge>
-              }
-              action={
-                <Button variant="ghost" size="sm">
-                  View All
-                  <ChevronRight className="w-4 h-4" />
-                </Button>
-              }
-            />
-            <div className="mt-6 space-y-3">
-              {urgentTasks.map((task) => (
-                <div 
-                  key={task.id} 
-                  className="group flex items-center justify-between p-4 bg-slate-50 hover:bg-slate-100 rounded-xl transition-all cursor-pointer border border-transparent hover:border-slate-200"
-                >
-                  <div className="flex items-center gap-4 flex-1">
-                    <div className={`flex-shrink-0 w-10 h-10 rounded-lg ${
-                      task.priority === 'high' 
-                        ? 'bg-danger-100 text-danger-600' 
-                        : 'bg-warning-100 text-warning-600'
-                    } flex items-center justify-center`}>
-                      <task.icon className="w-5 h-5" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-slate-900">
-                        {task.client}
-                      </p>
-                      <p className="text-sm text-slate-600 mt-0.5">
-                        {task.action}
-                      </p>
-                      <div className="flex items-center gap-2 mt-2">
-                        <Clock className="w-3.5 h-3.5 text-slate-400" />
-                        <span className="text-xs text-slate-500">
-                          Due {formatDate(task.dueDate)}
-                        </span>
+          {/* CTA Buttons */}
+          <div className="flex items-center gap-4 mt-12">
+            <button className="group px-8 py-4 bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-500 hover:to-orange-600 text-white font-bold rounded-2xl shadow-2xl shadow-orange-900/50 hover:shadow-orange-900/70 transition-all duration-300 hover:scale-105 active:scale-95 text-lg flex items-center gap-3">
+              <Plus className="w-6 h-6" />
+              Add Client
+            </button>
+            <button className="group px-8 py-4 bg-zinc-800/50 hover:bg-zinc-800 text-white font-semibold rounded-2xl border border-zinc-700 hover:border-zinc-600 transition-all duration-300 text-lg flex items-center gap-3 backdrop-blur-sm">
+              <Calendar className="w-5 h-5 text-zinc-400 group-hover:text-white" />
+              View Calendar
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* MAIN CONTENT */}
+      <div className="max-w-[1600px] mx-auto px-8 py-16 space-y-20">
+        
+        {/* MASSIVE STATS - ABOVE THE FOLD */}
+        <div className="space-y-8">
+          <div className="flex items-end justify-between">
+            <div>
+              <h2 className="text-5xl font-bold text-white mb-2">Performance</h2>
+              <p className="text-xl text-zinc-500">Real-time business metrics</p>
+            </div>
+            <button className="text-zinc-400 hover:text-orange-500 transition-colors flex items-center gap-2 text-sm font-medium">
+              View detailed analytics
+              <ArrowRight className="w-4 h-4" />
+            </button>
+          </div>
+
+          {/* STATS GRID - HUGE NUMBERS */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {stats.map((stat, index) => (
+              <div 
+                key={index}
+                className="group relative bg-gradient-to-b from-zinc-900/80 to-zinc-900/40 backdrop-blur-sm rounded-3xl p-8 border border-zinc-800 hover:border-zinc-700 transition-all duration-500 hover:shadow-2xl hover:shadow-orange-900/10"
+              >
+                {/* Icon */}
+                <div className={`inline-flex p-4 rounded-2xl ${stat.iconBg} ${stat.iconColor} mb-6`}>
+                  {stat.icon}
+                </div>
+
+                {/* Title */}
+                <div className="text-sm font-medium text-zinc-500 uppercase tracking-wider mb-4">
+                  {stat.title}
+                </div>
+
+                {/* HUGE Value */}
+                <div className="text-6xl font-black text-white mb-4 tracking-tight">
+                  {stat.value}
+                </div>
+
+                {/* Change Indicator */}
+                <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1 text-emerald-400">
+                    <TrendingUp className="w-4 h-4" />
+                    <span className="text-sm font-bold">+{stat.change}%</span>
+                  </div>
+                  <span className="text-sm text-zinc-600">{stat.changeLabel}</span>
+                </div>
+
+                {/* Hover Effect Border */}
+                <div className="absolute inset-0 rounded-3xl bg-gradient-to-r from-orange-500/0 via-orange-500/0 to-orange-500/0 group-hover:from-orange-500/10 group-hover:via-orange-500/5 group-hover:to-orange-500/10 transition-all duration-500 pointer-events-none"></div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* QUICK ACTIONS - GENEROUS SPACING */}
+        <div className="space-y-8">
+          <h3 className="text-4xl font-bold text-white">Quick Actions</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {quickActions.map((action, index) => (
+              <button
+                key={index}
+                className={`group relative p-8 bg-gradient-to-br ${action.gradient} rounded-2xl transition-all duration-300 hover:scale-105 active:scale-95 overflow-hidden shadow-2xl`}
+              >
+                <div className="relative z-10 flex flex-col items-start gap-4">
+                  <div className="p-3 bg-white/10 rounded-xl group-hover:bg-white/20 transition-colors">
+                    <action.icon className="w-7 h-7 text-white" />
+                  </div>
+                  <span className="text-xl font-bold text-white text-left">
+                    {action.title}
+                  </span>
+                </div>
+                <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* PRIORITY TASKS */}
+        <div className="space-y-8">
+          <div className="flex items-end justify-between">
+            <div>
+              <h3 className="text-4xl font-bold text-white mb-2">Priority Tasks</h3>
+              <p className="text-lg text-zinc-500">{urgentTasks.length} items need attention</p>
+            </div>
+            <button className="text-orange-500 hover:text-orange-400 transition-colors flex items-center gap-2 font-semibold">
+              View all
+              <ChevronRight className="w-5 h-5" />
+            </button>
+          </div>
+
+          <div className="space-y-4">
+            {urgentTasks.map((task) => (
+              <div 
+                key={task.id} 
+                className="group flex items-center justify-between p-6 bg-zinc-900/50 hover:bg-zinc-900 rounded-2xl transition-all cursor-pointer border border-zinc-800 hover:border-zinc-700"
+              >
+                <div className="flex items-center gap-6 flex-1">
+                  <div className={`flex-shrink-0 w-14 h-14 rounded-xl ${
+                    task.priority === 'high' 
+                      ? 'bg-orange-500/10 text-orange-500' 
+                      : 'bg-yellow-500/10 text-yellow-500'
+                  } flex items-center justify-center`}>
+                    <task.icon className="w-7 h-7" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-xl font-bold text-white mb-1">
+                      {task.client}
+                    </p>
+                    <p className="text-base text-zinc-400">
+                      {task.action}
+                    </p>
+                    <div className="flex items-center gap-3 mt-3">
+                      <div className="flex items-center gap-2 text-sm text-zinc-600">
+                        <Clock className="w-4 h-4" />
+                        <span>Due {formatDate(task.dueDate)}</span>
+                      </div>
+                      <div className={`px-3 py-1 rounded-lg text-xs font-bold uppercase ${
+                        task.priority === 'high' 
+                          ? 'bg-orange-500/10 text-orange-500' 
+                          : 'bg-yellow-500/10 text-yellow-500'
+                      }`}>
+                        {task.priority}
                       </div>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Badge 
-                      variant={task.priority === 'high' ? 'danger' : 'warning'}
-                      className="capitalize"
-                    >
-                      {task.priority}
-                    </Badge>
-                    <Button 
-                      variant="primary" 
-                      size="sm"
-                      className="opacity-0 group-hover:opacity-100 transition-opacity"
-                    >
-                      Complete
-                    </Button>
-                  </div>
                 </div>
-              ))}
-            </div>
-            <div className="mt-6 pt-4 border-t border-slate-200">
-              <button className="w-full text-center text-sm font-medium text-primary-600 hover:text-primary-700 transition-colors">
-                + Add New Task
+                <button className="px-6 py-3 bg-orange-600 hover:bg-orange-500 text-white font-bold rounded-xl opacity-0 group-hover:opacity-100 transition-all hover:scale-105 active:scale-95">
+                  Complete
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* RECENT MESSAGES */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-2 space-y-8">
+            <div className="flex items-end justify-between">
+              <div>
+                <h3 className="text-4xl font-bold text-white mb-2">Messages</h3>
+                <p className="text-lg text-zinc-500">2 unread conversations</p>
+              </div>
+              <button className="text-orange-500 hover:text-orange-400 transition-colors flex items-center gap-2 font-semibold">
+                View all
+                <ChevronRight className="w-5 h-5" />
               </button>
             </div>
-          </Card>
 
-          {/* Recent Messages */}
-          <Card>
-            <CardHeader 
-              title="Recent Messages" 
-              subtitle="Stay on top of client communications"
-              badge={
-                <Badge variant="primary" className="text-xs">
-                  2 unread
-                </Badge>
-              }
-              action={
-                <Button variant="ghost" size="sm">
-                  View All
-                  <ChevronRight className="w-4 h-4" />
-                </Button>
-              }
-            />
-            <div className="mt-6 space-y-3">
+            <div className="space-y-4">
               {recentMessages.map((message) => (
                 <div 
                   key={message.id} 
-                  className="group flex items-start gap-4 p-4 hover:bg-slate-50 rounded-xl transition-all cursor-pointer"
+                  className="group flex items-start gap-5 p-6 hover:bg-zinc-900/50 rounded-2xl transition-all cursor-pointer border border-transparent hover:border-zinc-800"
                 >
-                  <div className="flex-shrink-0">
-                    <div className={`w-10 h-10 rounded-full ${
-                      message.unread 
-                        ? 'bg-primary-100 text-primary-700' 
-                        : 'bg-slate-100 text-slate-600'
-                    } flex items-center justify-center font-semibold text-sm`}>
-                      {message.from.split(' ').map(n => n[0]).join('')}
-                    </div>
+                  <div className={`flex-shrink-0 w-14 h-14 rounded-full ${
+                    message.unread 
+                      ? 'bg-gradient-to-br from-orange-600 to-orange-500 text-white' 
+                      : 'bg-zinc-800 text-zinc-400'
+                  } flex items-center justify-center font-bold text-lg shadow-xl`}>
+                    {message.from.split(' ').map(n => n[0]).join('')}
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
-                      <p className={`font-semibold ${
-                        message.unread ? 'text-slate-900' : 'text-slate-600'
-                      }`}>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-3 mb-2">
+                      <p className="text-lg font-bold text-white">
                         {message.from}
                       </p>
                       {message.unread && (
-                        <span className="w-2 h-2 bg-primary-600 rounded-full"></span>
+                        <span className="w-2.5 h-2.5 bg-orange-500 rounded-full animate-pulse"></span>
                       )}
                       {message.urgent && (
-                        <Badge variant="danger" className="text-xs">Urgent</Badge>
+                        <span className="px-2 py-0.5 bg-orange-500/20 text-orange-500 text-xs font-bold rounded uppercase">
+                          Urgent
+                        </span>
                       )}
                     </div>
-                    <p className="text-sm text-slate-600">
+                    <p className="text-base text-zinc-300 mb-2">
                       {message.subject}
                     </p>
-                    <p className="text-xs text-slate-400 mt-1.5">
+                    <p className="text-sm text-zinc-600">
                       {formatDate(message.date)}
                     </p>
                   </div>
-                  <Button 
-                    variant="ghost" 
-                    size="sm"
-                    className="opacity-0 group-hover:opacity-100 transition-opacity"
-                  >
+                  <button className="px-5 py-2.5 bg-zinc-800 hover:bg-zinc-700 text-white font-semibold rounded-xl opacity-0 group-hover:opacity-100 transition-all text-sm">
                     Reply
-                  </Button>
+                  </button>
                 </div>
               ))}
             </div>
-          </Card>
-        </div>
+          </div>
 
-        {/* Right Column - Quick Actions & Insights */}
-        <div className="space-y-6">
-          {/* Quick Actions */}
-          <Card>
-            <CardHeader 
-              title="Quick Actions" 
-              subtitle="Common tasks"
-            />
-            <div className="mt-6 grid grid-cols-2 gap-3">
-              {quickActions.map((action, index) => (
-                <button
-                  key={index}
-                  className={`${action.color} text-white p-4 rounded-xl transition-all hover:scale-105 hover:shadow-lg active:scale-95 flex flex-col items-center gap-3 group`}
-                >
-                  <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center group-hover:bg-white/30 transition-colors">
-                    <action.icon className="w-6 h-6" />
+          {/* PERFORMANCE SUMMARY - DARK CARD */}
+          <div className="space-y-8">
+            <div className="bg-gradient-to-br from-zinc-900 via-zinc-900 to-black rounded-3xl p-8 border border-zinc-800 shadow-2xl">
+              <div className="flex items-center gap-3 mb-8">
+                <div className="p-3 bg-orange-500/10 rounded-xl">
+                  <Zap className="w-6 h-6 text-orange-500" />
+                </div>
+                <div>
+                  <h4 className="text-2xl font-bold text-white">This Month</h4>
+                  <p className="text-sm text-zinc-500">Performance snapshot</p>
+                </div>
+              </div>
+
+              <div className="space-y-6">
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium text-zinc-400">Lead Conversion</span>
+                    <span className="text-2xl font-black text-emerald-400">68%</span>
                   </div>
-                  <span className="text-sm font-semibold text-center">
-                    {action.title}
-                  </span>
+                  <div className="h-2 bg-zinc-800 rounded-full overflow-hidden">
+                    <div className="h-full w-[68%] bg-gradient-to-r from-emerald-600 to-emerald-400 rounded-full"></div>
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium text-zinc-400">Client Satisfaction</span>
+                    <span className="text-2xl font-black text-blue-400">4.8/5</span>
+                  </div>
+                  <div className="h-2 bg-zinc-800 rounded-full overflow-hidden">
+                    <div className="h-full w-[96%] bg-gradient-to-r from-blue-600 to-blue-400 rounded-full"></div>
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium text-zinc-400">On-time Filing</span>
+                    <span className="text-2xl font-black text-purple-400">96%</span>
+                  </div>
+                  <div className="h-2 bg-zinc-800 rounded-full overflow-hidden">
+                    <div className="h-full w-[96%] bg-gradient-to-r from-purple-600 to-purple-400 rounded-full"></div>
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium text-zinc-400">Revenue Growth</span>
+                    <span className="text-2xl font-black text-orange-400">+15%</span>
+                  </div>
+                  <div className="h-2 bg-zinc-800 rounded-full overflow-hidden">
+                    <div className="h-full w-[75%] bg-gradient-to-r from-orange-600 to-orange-400 rounded-full"></div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-8 pt-6 border-t border-zinc-800">
+                <button className="w-full px-6 py-4 bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-500 hover:to-orange-600 text-white font-bold rounded-xl transition-all hover:scale-105 active:scale-95 shadow-lg shadow-orange-900/50 flex items-center justify-center gap-2">
+                  <TrendingUp className="w-5 h-5" />
+                  Detailed Analytics
                 </button>
-              ))}
+              </div>
             </div>
-          </Card>
 
-          {/* Today's Appointments */}
-          <Card>
-            <CardHeader 
-              title="Today's Schedule" 
-              subtitle="Upcoming appointments"
-              action={
-                <Button variant="ghost" size="sm">
-                  <Calendar className="w-4 h-4" />
-                </Button>
-              }
-            />
-            <div className="mt-6 space-y-4">
-              <div className="p-4 bg-gradient-to-r from-primary-50 to-primary-100/50 rounded-xl border border-primary-200">
-                <div className="flex items-start justify-between mb-3">
-                  <div>
-                    <p className="font-semibold text-slate-900">Michael Chen</p>
-                    <p className="text-sm text-slate-600 mt-0.5">
-                      Tax Planning Consultation
-                    </p>
+            {/* TODAY'S SCHEDULE */}
+            <div className="bg-zinc-900/50 backdrop-blur-sm rounded-3xl p-8 border border-zinc-800">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="p-2 bg-blue-500/10 rounded-lg">
+                  <Calendar className="w-5 h-5 text-blue-500" />
+                </div>
+                <h4 className="text-xl font-bold text-white">Today's Schedule</h4>
+              </div>
+
+              <div className="space-y-4">
+                <div className="p-5 bg-gradient-to-r from-orange-500/10 to-orange-500/5 rounded-xl border border-orange-500/20">
+                  <div className="flex items-start justify-between mb-3">
+                    <div>
+                      <p className="font-bold text-white mb-1">Michael Chen</p>
+                      <p className="text-sm text-zinc-400">Tax Planning Call</p>
+                    </div>
+                    <span className="px-3 py-1 bg-emerald-500/20 text-emerald-400 text-xs font-bold rounded-lg uppercase">
+                      In 30 min
+                    </span>
                   </div>
-                  <Badge variant="success" className="text-xs">
-                    In 30 min
-                  </Badge>
-                </div>
-                <div className="flex items-center gap-3 text-sm text-slate-600">
-                  <Clock className="w-4 h-4" />
-                  <span>2:00 PM - 3:00 PM</span>
-                </div>
-                <div className="mt-3 pt-3 border-t border-primary-200">
-                  <Button variant="primary" size="sm" fullWidth>
+                  <div className="flex items-center gap-2 text-sm text-zinc-500 mb-4">
+                    <Clock className="w-4 h-4" />
+                    <span>2:00 PM - 3:00 PM</span>
+                  </div>
+                  <button className="w-full px-4 py-2.5 bg-orange-600 hover:bg-orange-500 text-white font-bold rounded-lg transition-all text-sm">
                     Join Meeting
-                  </Button>
+                  </button>
                 </div>
-              </div>
-              
-              <div className="p-4 hover:bg-slate-50 rounded-xl transition-colors border border-slate-200">
-                <div className="flex items-start justify-between mb-3">
-                  <div>
-                    <p className="font-semibold text-slate-900">Sarah Johnson</p>
-                    <p className="text-sm text-slate-600 mt-0.5">
-                      Document Review
-                    </p>
+
+                <div className="p-5 hover:bg-zinc-800/30 rounded-xl transition-colors border border-zinc-800">
+                  <div className="flex items-start justify-between mb-3">
+                    <div>
+                      <p className="font-bold text-white mb-1">Sarah Johnson</p>
+                      <p className="text-sm text-zinc-400">Document Review</p>
+                    </div>
+                    <span className="px-3 py-1 bg-zinc-700 text-zinc-300 text-xs font-semibold rounded-lg">
+                      4:30 PM
+                    </span>
                   </div>
-                  <Badge variant="default" className="text-xs">
-                    4:30 PM
-                  </Badge>
-                </div>
-                <div className="flex items-center gap-3 text-sm text-slate-600">
-                  <Clock className="w-4 h-4" />
-                  <span>4:30 PM - 5:30 PM</span>
+                  <div className="flex items-center gap-2 text-sm text-zinc-500">
+                    <Clock className="w-4 h-4" />
+                    <span>4:30 PM - 5:30 PM</span>
+                  </div>
                 </div>
               </div>
-            </div>
-            
-            <div className="mt-6 pt-4 border-t border-slate-200">
-              <button className="w-full text-center text-sm font-medium text-primary-600 hover:text-primary-700 transition-colors">
+
+              <button className="w-full mt-6 text-center text-sm font-semibold text-orange-500 hover:text-orange-400 transition-colors">
                 View Full Calendar →
               </button>
             </div>
-          </Card>
-
-          {/* Performance Summary */}
-          <Card className="bg-gradient-to-br from-slate-900 to-slate-800 text-white">
-            <CardHeader 
-              title="This Month's Performance" 
-              subtitle="Key metrics snapshot"
-              className="text-white"
-            />
-            <div className="mt-6 space-y-4">
-              <div className="flex items-center justify-between pb-3 border-b border-white/10">
-                <span className="text-sm text-slate-300">Lead Conversion</span>
-                <span className="text-lg font-bold text-success-400">68%</span>
-              </div>
-              <div className="flex items-center justify-between pb-3 border-b border-white/10">
-                <span className="text-sm text-slate-300">Client Satisfaction</span>
-                <span className="text-lg font-bold text-success-400">4.8/5</span>
-              </div>
-              <div className="flex items-center justify-between pb-3 border-b border-white/10">
-                <span className="text-sm text-slate-300">On-time Filing</span>
-                <span className="text-lg font-bold text-success-400">96%</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-slate-300">Revenue Growth</span>
-                <span className="text-lg font-bold text-success-400">+15%</span>
-              </div>
-            </div>
-            <div className="mt-6 pt-4 border-t border-white/10">
-              <Button variant="secondary" fullWidth>
-                View Detailed Analytics
-                <TrendingUp className="w-4 h-4" />
-              </Button>
-            </div>
-          </Card>
+          </div>
         </div>
       </div>
     </div>
