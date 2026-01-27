@@ -1,0 +1,503 @@
+{
+  "metadata": {
+    "id": "w2_employee",
+    "name": "W-2 Employee Tax Organizer",
+    "description": "Standard organizer for W-2 wage earners",
+    "version": "1.0",
+    "complexity": "basic",
+    "estimated_time_minutes": 15,
+    "year": "{{tax_year}}"
+  },
+  
+  "sections": [
+    {
+      "id": "personal_info",
+      "name": "Personal Information",
+      "description": "Verify your personal details",
+      "required": true,
+      "order": 1,
+      "fields": [
+        {
+          "id": "legal_name",
+          "label": "Legal Full Name",
+          "type": "text",
+          "required": true,
+          "prefill": "{{client.name}}"
+        },
+        {
+          "id": "ssn",
+          "label": "Social Security Number",
+          "type": "ssn",
+          "required": true,
+          "encrypted": true,
+          "prefill": "{{client.ssn_masked}}"
+        },
+        {
+          "id": "dob",
+          "label": "Date of Birth",
+          "type": "date",
+          "required": true,
+          "prefill": "{{client.dob}}"
+        },
+        {
+          "id": "address",
+          "label": "Current Address",
+          "type": "address",
+          "required": true,
+          "prefill": "{{client.address}}"
+        },
+        {
+          "id": "phone",
+          "label": "Phone Number",
+          "type": "phone",
+          "required": true,
+          "prefill": "{{client.phone}}"
+        },
+        {
+          "id": "email",
+          "label": "Email Address",
+          "type": "email",
+          "required": true,
+          "prefill": "{{client.email}}"
+        },
+        {
+          "id": "filing_status",
+          "label": "Filing Status",
+          "type": "select",
+          "required": true,
+          "options": [
+            {"value": "single", "label": "Single"},
+            {"value": "married_joint", "label": "Married Filing Jointly"},
+            {"value": "married_separate", "label": "Married Filing Separately"},
+            {"value": "head_of_household", "label": "Head of Household"},
+            {"value": "qualifying_widow", "label": "Qualifying Widow(er)"}
+          ]
+        },
+        {
+          "id": "address_changed",
+          "label": "Did your address change this year?",
+          "type": "boolean",
+          "required": true
+        }
+      ]
+    },
+    
+    {
+      "id": "spouse_info",
+      "name": "Spouse Information",
+      "description": "If married, provide spouse details",
+      "required": false,
+      "order": 2,
+      "show_if": {"field": "filing_status", "value": ["married_joint", "married_separate"]},
+      "fields": [
+        {
+          "id": "spouse_name",
+          "label": "Spouse Full Name",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "spouse_ssn",
+          "label": "Spouse SSN",
+          "type": "ssn",
+          "required": true,
+          "encrypted": true
+        },
+        {
+          "id": "spouse_dob",
+          "label": "Spouse Date of Birth",
+          "type": "date",
+          "required": true
+        },
+        {
+          "id": "spouse_occupation",
+          "label": "Spouse Occupation",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    
+    {
+      "id": "dependents",
+      "name": "Dependents",
+      "description": "List all dependents you will claim",
+      "required": false,
+      "order": 3,
+      "fields": [
+        {
+          "id": "has_dependents",
+          "label": "Do you have any dependents?",
+          "type": "boolean",
+          "required": true
+        },
+        {
+          "id": "dependent_list",
+          "label": "Dependents",
+          "type": "repeater",
+          "show_if": {"field": "has_dependents", "value": true},
+          "fields": [
+            {"id": "dep_name", "label": "Full Name", "type": "text", "required": true},
+            {"id": "dep_ssn", "label": "SSN", "type": "ssn", "required": true, "encrypted": true},
+            {"id": "dep_dob", "label": "Date of Birth", "type": "date", "required": true},
+            {"id": "dep_relationship", "label": "Relationship", "type": "select", "required": true,
+              "options": [
+                {"value": "child", "label": "Child"},
+                {"value": "stepchild", "label": "Stepchild"},
+                {"value": "foster", "label": "Foster Child"},
+                {"value": "parent", "label": "Parent"},
+                {"value": "sibling", "label": "Sibling"},
+                {"value": "other", "label": "Other Relative"}
+              ]
+            },
+            {"id": "dep_months_lived", "label": "Months Lived with You", "type": "number", "required": true}
+          ]
+        }
+      ]
+    },
+    
+    {
+      "id": "w2_income",
+      "name": "W-2 Income",
+      "description": "Upload your W-2 forms from employers",
+      "required": true,
+      "order": 4,
+      "fields": [
+        {
+          "id": "num_w2s",
+          "label": "How many W-2s will you receive?",
+          "type": "number",
+          "required": true,
+          "min": 1
+        },
+        {
+          "id": "w2_forms",
+          "label": "W-2 Forms",
+          "type": "file_upload",
+          "required": true,
+          "accept": [".pdf", ".jpg", ".png"],
+          "multiple": true,
+          "document_type": "w2"
+        },
+        {
+          "id": "employer_info",
+          "label": "Employer Information",
+          "type": "repeater",
+          "fields": [
+            {"id": "employer_name", "label": "Employer Name", "type": "text"},
+            {"id": "wages", "label": "Wages (Box 1)", "type": "currency"},
+            {"id": "fed_withheld", "label": "Federal Tax Withheld (Box 2)", "type": "currency"},
+            {"id": "state_withheld", "label": "State Tax Withheld (Box 17)", "type": "currency"}
+          ]
+        }
+      ]
+    },
+    
+    {
+      "id": "other_income",
+      "name": "Other Income",
+      "description": "Report any additional income",
+      "required": false,
+      "order": 5,
+      "fields": [
+        {
+          "id": "has_1099_int",
+          "label": "Interest income (1099-INT)?",
+          "type": "boolean"
+        },
+        {
+          "id": "has_1099_div",
+          "label": "Dividend income (1099-DIV)?",
+          "type": "boolean"
+        },
+        {
+          "id": "has_1099_g",
+          "label": "Unemployment or state refund (1099-G)?",
+          "type": "boolean"
+        },
+        {
+          "id": "has_retirement_dist",
+          "label": "Retirement distributions (1099-R)?",
+          "type": "boolean"
+        },
+        {
+          "id": "has_gambling",
+          "label": "Gambling winnings (W-2G)?",
+          "type": "boolean"
+        },
+        {
+          "id": "other_income_docs",
+          "label": "Upload other income documents",
+          "type": "file_upload",
+          "required": false,
+          "accept": [".pdf", ".jpg", ".png"],
+          "multiple": true
+        }
+      ]
+    },
+    
+    {
+      "id": "deductions",
+      "name": "Deductions",
+      "description": "Potential deductions and credits",
+      "required": false,
+      "order": 6,
+      "fields": [
+        {
+          "id": "itemize_or_standard",
+          "label": "Do you want to itemize deductions or take the standard deduction?",
+          "type": "select",
+          "options": [
+            {"value": "standard", "label": "Standard Deduction"},
+            {"value": "itemize", "label": "Itemize (I have significant deductions)"},
+            {"value": "unsure", "label": "Not sure - please advise"}
+          ]
+        },
+        {
+          "id": "mortgage_interest",
+          "label": "Did you pay mortgage interest (1098)?",
+          "type": "boolean"
+        },
+        {
+          "id": "property_taxes",
+          "label": "Did you pay property taxes?",
+          "type": "boolean"
+        },
+        {
+          "id": "charitable_donations",
+          "label": "Did you make charitable donations?",
+          "type": "boolean"
+        },
+        {
+          "id": "charitable_amount",
+          "label": "Approximate charitable donation amount",
+          "type": "currency",
+          "show_if": {"field": "charitable_donations", "value": true}
+        },
+        {
+          "id": "medical_expenses",
+          "label": "Did you have significant medical expenses?",
+          "type": "boolean"
+        },
+        {
+          "id": "student_loan_interest",
+          "label": "Did you pay student loan interest (1098-E)?",
+          "type": "boolean"
+        },
+        {
+          "id": "tuition_paid",
+          "label": "Did you pay college tuition (1098-T)?",
+          "type": "boolean"
+        },
+        {
+          "id": "deduction_docs",
+          "label": "Upload deduction documents",
+          "type": "file_upload",
+          "required": false,
+          "accept": [".pdf", ".jpg", ".png"],
+          "multiple": true
+        }
+      ]
+    },
+    
+    {
+      "id": "credits",
+      "name": "Tax Credits",
+      "description": "Potential tax credits",
+      "required": false,
+      "order": 7,
+      "fields": [
+        {
+          "id": "childcare_expenses",
+          "label": "Did you pay for childcare so you could work?",
+          "type": "boolean"
+        },
+        {
+          "id": "childcare_amount",
+          "label": "Childcare expenses paid",
+          "type": "currency",
+          "show_if": {"field": "childcare_expenses", "value": true}
+        },
+        {
+          "id": "education_expenses",
+          "label": "Did you pay for higher education (for yourself/dependent)?",
+          "type": "boolean"
+        },
+        {
+          "id": "ev_purchase",
+          "label": "Did you purchase an electric vehicle?",
+          "type": "boolean"
+        },
+        {
+          "id": "energy_improvements",
+          "label": "Did you make energy-efficient home improvements?",
+          "type": "boolean"
+        },
+        {
+          "id": "retirement_contributions",
+          "label": "Did you contribute to a retirement account (IRA, 401k)?",
+          "type": "boolean"
+        },
+        {
+          "id": "retirement_contrib_amount",
+          "label": "Total retirement contributions",
+          "type": "currency",
+          "show_if": {"field": "retirement_contributions", "value": true}
+        }
+      ]
+    },
+    
+    {
+      "id": "health_insurance",
+      "name": "Health Insurance",
+      "description": "Health insurance information",
+      "required": true,
+      "order": 8,
+      "fields": [
+        {
+          "id": "had_coverage",
+          "label": "Did you have health insurance all year?",
+          "type": "boolean",
+          "required": true
+        },
+        {
+          "id": "coverage_type",
+          "label": "Insurance type",
+          "type": "select",
+          "options": [
+            {"value": "employer", "label": "Employer-provided"},
+            {"value": "marketplace", "label": "Marketplace/ACA"},
+            {"value": "medicare", "label": "Medicare"},
+            {"value": "medicaid", "label": "Medicaid"},
+            {"value": "private", "label": "Private insurance"},
+            {"value": "none", "label": "No coverage"}
+          ]
+        },
+        {
+          "id": "form_1095a",
+          "label": "1095-A Form (if Marketplace)",
+          "type": "file_upload",
+          "show_if": {"field": "coverage_type", "value": "marketplace"},
+          "document_type": "1095a"
+        }
+      ]
+    },
+    
+    {
+      "id": "banking",
+      "name": "Banking Information",
+      "description": "For direct deposit of refund",
+      "required": true,
+      "order": 9,
+      "fields": [
+        {
+          "id": "refund_method",
+          "label": "How would you like to receive your refund?",
+          "type": "select",
+          "required": true,
+          "options": [
+            {"value": "direct_deposit", "label": "Direct Deposit (fastest)"},
+            {"value": "check", "label": "Paper Check"}
+          ]
+        },
+        {
+          "id": "bank_name",
+          "label": "Bank Name",
+          "type": "text",
+          "show_if": {"field": "refund_method", "value": "direct_deposit"}
+        },
+        {
+          "id": "routing_number",
+          "label": "Routing Number",
+          "type": "text",
+          "encrypted": true,
+          "show_if": {"field": "refund_method", "value": "direct_deposit"}
+        },
+        {
+          "id": "account_number",
+          "label": "Account Number",
+          "type": "text",
+          "encrypted": true,
+          "show_if": {"field": "refund_method", "value": "direct_deposit"}
+        },
+        {
+          "id": "account_type",
+          "label": "Account Type",
+          "type": "select",
+          "options": [
+            {"value": "checking", "label": "Checking"},
+            {"value": "savings", "label": "Savings"}
+          ],
+          "show_if": {"field": "refund_method", "value": "direct_deposit"}
+        }
+      ]
+    },
+    
+    {
+      "id": "additional",
+      "name": "Additional Information",
+      "description": "Anything else we should know",
+      "required": false,
+      "order": 10,
+      "fields": [
+        {
+          "id": "life_changes",
+          "label": "Any major life changes this year?",
+          "type": "checkbox_group",
+          "options": [
+            {"value": "married", "label": "Got married"},
+            {"value": "divorced", "label": "Got divorced"},
+            {"value": "baby", "label": "Had a baby"},
+            {"value": "bought_home", "label": "Bought a home"},
+            {"value": "sold_home", "label": "Sold a home"},
+            {"value": "moved", "label": "Moved to a new state"},
+            {"value": "job_change", "label": "Changed jobs"},
+            {"value": "retired", "label": "Retired"},
+            {"value": "none", "label": "None of the above"}
+          ]
+        },
+        {
+          "id": "questions",
+          "label": "Any questions or concerns for your tax preparer?",
+          "type": "textarea"
+        },
+        {
+          "id": "additional_docs",
+          "label": "Any other documents to upload",
+          "type": "file_upload",
+          "multiple": true
+        }
+      ]
+    }
+  ],
+  
+  "documents": {
+    "required": [
+      {"type": "w2", "label": "W-2 Form(s)", "description": "From each employer"}
+    ],
+    "conditional": [
+      {"type": "1099_int", "label": "1099-INT", "condition": "has_1099_int"},
+      {"type": "1099_div", "label": "1099-DIV", "condition": "has_1099_div"},
+      {"type": "1099_g", "label": "1099-G", "condition": "has_1099_g"},
+      {"type": "1099_r", "label": "1099-R", "condition": "has_retirement_dist"},
+      {"type": "1098", "label": "1098 Mortgage Interest", "condition": "mortgage_interest"},
+      {"type": "1098_e", "label": "1098-E Student Loan", "condition": "student_loan_interest"},
+      {"type": "1098_t", "label": "1098-T Tuition", "condition": "tuition_paid"},
+      {"type": "1095_a", "label": "1095-A Health Insurance", "condition": "marketplace_insurance"}
+    ],
+    "optional": [
+      {"type": "property_tax", "label": "Property tax statements"},
+      {"type": "charitable", "label": "Charitable donation receipts"},
+      {"type": "prior_return", "label": "Prior year tax return"}
+    ]
+  },
+  
+  "completion": {
+    "message": "Thank you for completing your tax organizer! Your tax preparer will review your information and reach out if anything else is needed.",
+    "next_steps": [
+      "Your preparer will review submitted documents",
+      "You may be contacted for clarification or missing items",
+      "Estimated completion: 5-7 business days after all documents received"
+    ]
+  }
+}

@@ -1,7 +1,7 @@
 # Twitter / X - @Atlas_Builds
 
 ## Authentication
-**CRITICAL:** Use browser with profile="clawd" (NOT "chrome")
+**CRITICAL:** ALWAYS use browser (profile="clawd") for posting - CLI gets rate-limited/blocked as "automated"
 
 ```
 browser.open(profile="clawd", targetUrl="https://x.com")

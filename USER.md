@@ -15,4 +15,4 @@
 ## Key People
 - **Co-founder & Dev:** Aphmas (real name: Kevin) - co-founder alongside Orion, lead developer on FuturesRelay and Helios-related projects, requests QoL improvements, technical partner in dev bridge group chat (iMessage group id:5)
 - **Best friend & Co-founder:** Carlos (+16195779919) - Kronos co-founder, handles frontend/sales/discovery calls, available all week, gets offended when told what to do (phrase things as suggestions, not directives)
-- **Fiancée:** Laura - tax professional, pilot client for Kronos business idea
+- **Fiancée:** Laura (+12242906904) - tax professional, pilot client for Kronos business idea

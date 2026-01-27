@@ -1,0 +1,29 @@
+# Kronos Celery Worker Dockerfile
+# Background task processing
+
+FROM python:3.11-slim
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PIP_NO_CACHE_DIR=1
+
+WORKDIR /app
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    libpq-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create non-root user
+RUN groupadd -r kronos && useradd -r -g kronos kronos
+
+COPY requirements.txt .
+RUN pip install -r requirements.txt
+
+COPY --chown=kronos:kronos . .
+
+USER kronos
+
+# Celery worker command
+CMD ["celery", "-A", "app.worker", "worker", "--loglevel=info", "--concurrency=4"]

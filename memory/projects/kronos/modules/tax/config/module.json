@@ -1,0 +1,80 @@
+{
+  "name": "tax",
+  "version": "1.0.0",
+  "displayName": "Tax Preparation Module",
+  "description": "Industry module for tax preparation practices - organizers, lifecycle, WISP compliance, lead tracking",
+  "author": "Kronos Platform",
+  "industry": "tax_preparation",
+  "compatibleCoreVersion": ">=1.0.0",
+  
+  "features": {
+    "taxOrganizers": true,
+    "clientLifecycle": true,
+    "wispCompliance": true,
+    "leadSourceTracking": true,
+    "retentionMonitoring": true,
+    "winbackCampaigns": true
+  },
+  
+  "dependencies": {
+    "core": ["users", "clients", "leads", "messages", "files", "tasks", "analytics"],
+    "external": ["email_provider", "secure_storage"]
+  },
+  
+  "databaseTables": [
+    "tax_returns",
+    "tax_organizers", 
+    "tax_documents",
+    "client_tax_profiles",
+    "wisp_access_logs",
+    "wisp_incidents",
+    "lead_source_tracking"
+  ],
+  
+  "apiPrefix": "/api/tax",
+  
+  "scheduledTasks": [
+    {
+      "name": "organizer_reminders",
+      "schedule": "0 9 * * *",
+      "description": "Send daily organizer reminders"
+    },
+    {
+      "name": "retention_enforcement",
+      "schedule": "0 2 * * *",
+      "description": "Enforce 3-year retention policy"
+    },
+    {
+      "name": "winback_campaigns",
+      "schedule": "0 10 * * 1",
+      "description": "Weekly win-back campaign check"
+    },
+    {
+      "name": "retention_risk_scan",
+      "schedule": "0 3 * * *",
+      "description": "Daily scan for at-risk clients"
+    }
+  ],
+  
+  "permissions": [
+    "tax.organizers.create",
+    "tax.organizers.view",
+    "tax.organizers.remind",
+    "tax.returns.create",
+    "tax.returns.view",
+    "tax.returns.edit",
+    "tax.compliance.view",
+    "tax.compliance.admin",
+    "tax.analytics.view"
+  ],
+  
+  "settings": {
+    "configFile": "settings.py",
+    "userConfigurable": [
+      "organizer_reminder_days",
+      "organizer_default_deadline",
+      "winback_trigger_days",
+      "lead_sources"
+    ]
+  }
+}

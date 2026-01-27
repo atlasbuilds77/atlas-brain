@@ -1,0 +1,22 @@
+{
+  "name": "drift-bot",
+  "version": "1.0.0",
+  "description": "",
+  "main": "trade_eth_ts.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "@coral-xyz/anchor": "^0.28.0",
+    "@drift-labs/sdk": "^2.155.0",
+    "@solana/web3.js": "^1.98.4",
+    "bs58": "^6.0.0"
+  }
+}

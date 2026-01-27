@@ -1,0 +1,29 @@
+{
+  "account_address": "0xYourWalletPublicAddressHere",
+  "secret_key": "YourPrivateKeyOrApiWalletPrivateKeyHere"
+}
+
+/*
+INSTRUCTIONS:
+
+1. For wallet-based authentication:
+   - account_address: Your main wallet's public address
+   - secret_key: Your main wallet's private key
+
+2. For API wallet authentication (RECOMMENDED):
+   - Go to https://app.hyperliquid.xyz/API
+   - Connect your main wallet
+   - Generate a new API private key
+   - account_address: Your MAIN wallet's public address (not the API wallet)
+   - secret_key: The API wallet's private key
+
+3. Security notes:
+   - NEVER commit this file to version control
+   - Use environment variables in production
+   - Store private keys in secure secret managers
+   - Use separate API wallets for different trading strategies
+
+4. Testnet vs Mainnet:
+   - Use TESTNET for development/testing
+   - Switch to MAINNET only after thorough testing
+*/

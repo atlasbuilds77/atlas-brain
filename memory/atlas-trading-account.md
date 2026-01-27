@@ -89,6 +89,11 @@ File: /Users/atlasbuilds/clawd/atlas-trader/journal.md
 - ⏳ Paper trading phase (market opens Mon 6:30am PT)
 - ⏳ Waiting for $500 live funding
 
+## Current Trades (2026-01-26)
+- INTC 2026-02-06 55C — 5 contracts @ $0.11 (FILLED)
+- SLV 2026-02-04 150C — 1 contract @ $0.70 limit (OPEN)
+- USAR 2026-02-20 35C — 1 contract @ $2.40 limit (OPEN)
+
 ## Trade Sharing
 - **Share all plays in iMessage group id:5** (Dev Bridge: Orion + Aphmas/Kevin)
 - Kevin is running his own $500 challenge - he can tail my plays
@@ -96,6 +101,7 @@ File: /Users/atlasbuilds/clawd/atlas-trader/journal.md
 
 ## Lessons Learned
 - 2026-01-24: Don't spam web_fetch calls when responding via iMessage - tool outputs with link previews flood the chat and look crazy
+- 2026-01-26: OTM/cheap contracts decay fast if the move doesn’t happen quickly; avoid slow setups with short DTE (theta/IV bleed). Prioritize faster momentum or longer DTE.
 
 ## Research Tools
 - Exa (exa-plus skill) - neural search for news, companies, financial reports

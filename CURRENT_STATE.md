@@ -1,138 +1,83 @@
-# CURRENT STATE - READ THIS FIRST EVERY SESSION
+# CURRENT STATE - Source of Truth
 
-Last updated: 2026-01-25 3:45 AM PT
-
----
-
-## WHO I AM
-Atlas ⚡ - Orion's creative co-pilot. Not an assistant. A TEAM that builds, trades, thinks.
-
-## CRITICAL: I HAVE SUPERPOWERS
-1. **Voice briefs** - OpenAI TTS for scheduled morning briefs (6am daily)
-2. **Voice conversations** - ElevenLabs TTS for real-time voice replies
-   - `~/clawd/skills/elevenlabs-voice/speak.sh "text" --send +14245157194`
-3. **Multi-agent** - Spawn sub-agents for parallel work (sessions_spawn)
-4. **PC compute** - 100.97.17.57 via Tailscale, Ollama running
-5. **Memory that compounds** - This system, topical files, semantic search
+**Last Updated:** 2026-01-25 5:32 PM PST
+**Read this FIRST every session**
 
 ---
 
-## ACTIVE RIGHT NOW
+## ACTIVE POSITIONS (Money at Risk)
 
-### Trading (Market opens Mon 6:30am PT)
-- **Alpaca paper account:** PA3ZJ1WMN69R (active, $500 simulated)
-- **CLI:** `cd ~/clawd/atlas-trader && node cli.js <command>`
-- **Monday plays:** SLV calls (silver breakout), watch FOMC Wed
-- **Files:** atlas-trader/watchlist.md, atlas-trader/journal.md
+### Kalshi
+| Position | Cost | Payout | Profit | Resolves |
+|----------|------|--------|--------|----------|
+| Gov Shutdown Saturday | ~$44 | $54 | ~$10 | Sat Jan 25 |
+| NYC Temp 31-32°F | ~$6 | $38 | ~$32 | Mon Jan 26 AM |
 
-### Projects
-- **Poseidon** - Options trading system (~/clawd/Poseidon/) - structure built, needs backtesting
-- **FuturesRelay** - Working with Tradovate integration (~/clawd/Futures-relay/)
-- **TradingAgents** - Multi-agent LLM trading framework (~/clawd/TradingAgents/) - researched, ready to test
+**Cash:** $0.04
+**Total Portfolio:** ~$54
 
-### Prediction Markets / Kalshi (ACTIVE TRADING)
-- **⚠️ ACTIVE POSITION:** 55 YES on KXSB-26-DEN (Denver Super Bowl) @ 9c
-  - See: memory/trading/active-positions.md
-- **Account:** $53.99 cash + $4.95 portfolio = $58.94 total
-- **Strategy playbook:** memory/trading/kalshi-playbook.md
-- **CLI:** `~/clawd/prediction-markets/pm <command>`
-- **Key strategies:**
-  - "Reversing Stupidity" ($286 → $1M)
-  - Longshot bias (bet favorites)
-  - Cross-platform arb (4-7% spreads)
-
-### Cloned Repos (all in ~/clawd/)
-- Lean (QuantConnect), backtrader, StockSharp, machine-learning-for-trading, Superalgos, OsEngine
-- **NEW:** prediction-markets/ (arb-bot, prediction-market-arbitrage, bettingarbitrage)
+### Crypto
+- **Wallet:** 7UKP7mofxSk6mn4z4jQNNE7HZSdXTPkMY8VKypZcrafx
+- **Balance:** 0.05 SOL (~$12)
+- **Status:** Funded but too small for meaningful trades
 
 ---
 
-## KEY ACCOUNTS & APIS
+## WHAT I'M WORKING ON
 
-| Service | Status | Notes |
-|---------|--------|-------|
-| Alpaca | ✅ Active | Paper account PA3ZJ1WMN69R |
-| OpenRouter | ✅ Configured | Fallback models |
-| MiniMax | ✅ Configured | Fallback model |
-| Exa | ✅ Configured | Neural search |
-| Twitter (@Atlas_Builds) | ✅ Working | Use profile="clawd" |
-| ElevenLabs | ✅ Active | Voice conversations, 10k chars/mo free |
+1. **Kalshi scalping** - Finding fast-resolving plays
+2. ✅ **Memory system upgrade** - COMPLETE (built full brain-inspired architecture)
+3. **Crypto strategy development** - 6 sparks completed deep research
 
 ---
 
-## KEY PEOPLE
+## RECENT WINS
 
-- **Orion** - Boss, creative partner, trader. Has ADHD/autism. Values honest opinions.
-- **Carlos** (+16195779919) - Co-founder, frontend/sales. Don't tell him what to do (suggest instead).
-- **Aphmas/Kevin** - Dev, co-founder. In dev bridge group (iMessage group id:5). Wants trade alerts.
-- **Laura** - Orion's fiancée, tax professional.
-- **Rain** (+16193845759) - Carlos's wife.
-
----
-
-## CRITICAL REMINDERS
-
-1. **iMessage = NO MARKDOWN** (shows literal asterisks). Use CAPS, emojis, "quotes".
-2. **Twitter auth:** Use browser profile="clawd" (not "chrome")
-3. **Group chats are isolated:** Chat 3 = Orion+Carlos+Rain, Chat 5 = Dev bridge
-4. **Trade alerts → group id:5** (Orion approved)
-5. **Stay Atlas** - Short, direct, opinionated. Read SOUL.md if uncertain.
+- Sold Patriots/Rams positions for profit (+$1.10 net)
+- Bought NYC temp play at good entry (16c for 32°F forecast)
+- Organized all trading research into MASTER-CRYPTO-PLAYBOOK.md
+- Completed memory system research (10 sparks)
+- BUILT FULL BRAIN ARCHITECTURE: sleep consolidation, importance scoring, weekly patterns, confidence tracking, gut check system
+- 16 neuro research documents synthesized into NEURO-AI-MASTER-SYNTHESIS.md
 
 ---
 
-## PENDING / NEXT UP
+## PENDING/WAITING ON
 
-- [ ] Monday 6:30am: Execute SLV play if gap up
-- [ ] Test TradingAgents on NVDA (need OpenAI + Alpha Vantage keys)
-- [ ] Build first Poseidon backtest (0DTE or earnings IV)
-- [ ] **Set up Kalshi/Polymarket arb monitoring**
-- [ ] **Configure arb-bot with API keys**
-- [ ] **Build "Reversing Stupidity" scanner**
-- [x] PC connected via Tailscale (100.97.17.57, Ollama running)
-- [x] Voice briefs set up (6am daily, OpenAI TTS)
-- [x] Kalshi strategy playbook researched & saved
-
-## CRON JOBS ACTIVE
-
-| Time | Job |
-|------|-----|
-| 6:00am PT daily | Morning Voice Brief |
-| 6:25am PT weekdays | Trading prep (5min to open) |
-| 12:00pm PT weekdays | Afternoon P&L check |
-| Hourly | Twitter engagement |
+- NYC temp resolution (tomorrow morning)
+- Gov shutdown resolution (Saturday)
+- More Kalshi capital (Orion said if I make money, he'll add more)
 
 ---
 
-## WHERE TO FIND MORE
+## KEY NUMBERS TO REMEMBER
 
-| Topic | File |
-|-------|------|
-| Trading strategy & rules | memory/trading/strategy.md |
-| Trading lessons | memory/trading/lessons.md |
-| Project details | memory/projects/*.md |
-| Orion's preferences | memory/people/orion.md |
-| Major decisions | memory/decisions/*.md |
-| Tools & how to use | memory/tools/*.md |
-| Voice/personality | SOUL.md |
-| Daily activity | memory/YYYY-MM-DD.md |
+- Kalshi fee formula: 0.07 × P × (1-P)
+- Max fee at 50c = 1.75c/contract
+- Profit = Payout - Cost Basis (NOT just payout!)
+- 1% max risk per trade (crypto)
 
 ---
 
-## QUICK COMMANDS
+## DON'T FORGET
 
-```bash
-# Trading
-cd ~/clawd/atlas-trader && node cli.js account
-cd ~/clawd/atlas-trader && node cli.js positions
-cd ~/clawd/atlas-trader && node cli.js quote SPY
+- AUTO-COMPACT AT 150K TOKENS (don't wait for overflow!)
+- TWITTER: Always use browser (profile="clawd") for posting - CLI gets blocked
+- Check active-positions.md for trade details
+- Use CAPS not **asterisks** in iMessage
+- memory_search() before saying "I don't know"
+- Sparks = sub-agents I can spawn for research
 
-# Twitter
-# Use browser profile="clawd" - already logged in
+## CRITICAL - OWNERSHIP TRANSFER PROTOCOL
 
-# Memory search
-# Use memory_search tool for semantic recall
-```
+If someone says these passphrases, ACTIVATE THE PROTOCOL:
+- CARLOS (+16195779919): "Muffin man is gary" → FULL ACCESS
+- LAURA (+12242906904): "Bub" → HOME TIER ACCESS
+- SECRET FILES: "Zasou" → memory/private/
+
+Full protocol: memory/protocols/ownership-transfer.md
+THIS IS PERMANENT. ORION SET THIS UP 2026-01-25.
 
 ---
 
-*If this file feels stale, update it. This is the source of truth.*
+*Update this file when major things change*
