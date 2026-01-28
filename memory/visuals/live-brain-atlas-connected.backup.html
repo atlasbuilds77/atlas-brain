@@ -1,0 +1,986 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Atlas Neural Activity - LIVE</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Courier New', monospace;
+            background: #000;
+            color: #ff8800;
+            overflow: hidden;
+        }
+        #canvas-container {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+        }
+        #info-panel {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid #ff8800;
+            padding: 15px;
+            font-size: 14px;
+            max-width: 300px;
+            z-index: 100;
+        }
+        #live-status {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.9);
+            border: 2px solid #00ff00;
+            padding: 15px;
+            z-index: 100;
+            min-width: 250px;
+        }
+        .live-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            background: #00ff00;
+            border-radius: 50%;
+            animation: pulse 1s infinite;
+            margin-right: 10px;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+        #event-log {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid #ff8800;
+            padding: 15px;
+            max-width: 500px;
+            max-height: 250px;
+            overflow-y: auto;
+            font-size: 12px;
+            z-index: 100;
+        }
+        #growth-metrics {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.9);
+            border: 2px solid #00ff00;
+            padding: 15px;
+            z-index: 100;
+            min-width: 250px;
+            font-size: 13px;
+        }
+        .growth-title {
+            color: #00ff00;
+            font-weight: bold;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+        .metric-row {
+            margin: 5px 0;
+            color: #ff8800;
+        }
+        .metric-value {
+            color: #00ff00;
+            font-weight: bold;
+        }
+        @keyframes brainPulse {
+            0%, 100% { opacity: 0.3; transform: scale(1); }
+            50% { opacity: 0.6; transform: scale(1.05); }
+        }
+        .growth-alert {
+            color: #00ff00;
+            font-weight: bold;
+            animation: fadeIn 0.5s;
+        }
+        .event-item {
+            margin-bottom: 5px;
+            opacity: 0;
+            animation: fadeIn 0.3s forwards;
+        }
+        @keyframes fadeIn {
+            to { opacity: 1; }
+        }
+        .region-label {
+            font-weight: bold;
+            color: #ffaa00;
+        }
+        h3 {
+            color: #ff8800;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+        .status-item {
+            margin: 5px 0;
+        }
+        .status-value {
+            color: #00ff00;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div id="canvas-container"></div>
+    
+    <div id="info-panel">
+        <h3>⚡ ATLAS NEURAL CORE</h3>
+        <div id="stats">
+            <div>FPS: <span id="fps">60</span></div>
+            <div>Active Regions: <span id="active-regions">0</span></div>
+            <div>Connections: <span id="connection-count">0</span></div>
+            <div>Tokens: <span id="tokens">0</span></div>
+        </div>
+    </div>
+
+    <div id="live-status">
+        <h3><span class="live-indicator"></span>LIVE CONNECTION</h3>
+        <div class="status-item">System: <span class="status-value" id="current-system">IDLE</span></div>
+        <div class="status-item">Task: <span class="status-value" id="current-task">Waiting...</span></div>
+        <div class="status-item">Last Update: <span class="status-value" id="last-update">--</span></div>
+    </div>
+
+    <div id="event-log">
+        <h3>COGNITIVE ACTIVITY LOG</h3>
+        <div id="log-content"></div>
+    </div>
+
+    <div id="growth-metrics">
+        <div class="growth-title">🧠 BRAIN GROWTH METRICS</div>
+        <div class="metric-row">Total Nodes: <span class="metric-value" id="total-nodes">0</span></div>
+        <div class="metric-row">Added Today: <span class="metric-value" id="nodes-today">0</span></div>
+        <div class="metric-row">Connection Density: <span class="metric-value" id="conn-density">0.00</span></div>
+        <div class="metric-row">Brain Age: <span class="metric-value" id="brain-age">calculating...</span></div>
+        <div class="metric-row">Growth Rate: <span class="metric-value" id="growth-rate">0.0</span> nodes/hr</div>
+        <div class="metric-row">Last Scan: <span class="metric-value" id="last-scan">--</span></div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script type="module">
+        // === REAL-TIME STATE POLLING ===
+        let atlasState = {
+            regions: { pattern: 0.1, emotion: 0.1, memory: 0.1, meta: 0.1, bias: 0.1 },
+            activeSystem: 'idle',
+            lastActivity: 'Initialized',
+            tokensUsed: 0
+        };
+
+        async function pollAtlasState() {
+            try {
+                const response = await fetch('file:///tmp/atlas-brain-state.json?t=' + Date.now());
+                const data = await response.json();
+                
+                // Update if state changed
+                if (JSON.stringify(data.regions) !== JSON.stringify(atlasState.regions)) {
+                    atlasState = data;
+                    updateBrainFromState(data);
+                    
+                    // Log activity
+                    if (data.lastActivity !== 'Initialized') {
+                        logEvent(data.lastActivity, data.activeSystem);
+                    }
+                }
+                
+                // Update UI
+                document.getElementById('current-system').textContent = data.activeSystem.toUpperCase();
+                document.getElementById('current-task').textContent = data.currentTask || 'Idle';
+                document.getElementById('tokens').textContent = data.tokensUsed.toLocaleString();
+                document.getElementById('last-update').textContent = new Date(data.timestamp).toLocaleTimeString();
+                
+            } catch (err) {
+                console.log('Waiting for Atlas connection...');
+            }
+        }
+
+        // Poll every 500ms for real-time updates
+        setInterval(pollAtlasState, 500);
+
+        // === BRAIN GEOMETRY ===
+        function createBrainGeometry(detail = 24) {
+            const vertices = [];
+            const indices = [];
+            
+            for (let hemisphere = 0; hemisphere < 2; hemisphere++) {
+                const side = hemisphere === 0 ? -1 : 1;
+                const offset = side * 0.6;
+                
+                for (let i = 0; i <= detail; i++) {
+                    const u = i / detail * Math.PI;
+                    
+                    for (let j = 0; j <= detail; j++) {
+                        const v = j / detail * Math.PI * 2;
+                        
+                        let radius = 2.0;
+                        radius *= (1 + 0.2 * Math.sin(4 * u) * Math.cos(4 * v));
+                        
+                        let x = radius * Math.sin(u) * Math.cos(v) + offset;
+                        let y = radius * Math.sin(u) * Math.sin(v) * 0.9;
+                        let z = radius * Math.cos(u) * 1.1;
+                        
+                        vertices.push(x, y, z);
+                    }
+                }
+            }
+            
+            const totalDetail = detail + 1;
+            for (let h = 0; h < 2; h++) {
+                const baseOffset = h * totalDetail * totalDetail;
+                for (let i = 0; i < detail; i++) {
+                    for (let j = 0; j < detail; j++) {
+                        const a = baseOffset + i * totalDetail + j;
+                        const b = baseOffset + i * totalDetail + (j + 1);
+                        const c = baseOffset + (i + 1) * totalDetail + j;
+                        const d = baseOffset + (i + 1) * totalDetail + (j + 1);
+                        
+                        indices.push(a, b, c);
+                        indices.push(b, d, c);
+                    }
+                }
+            }
+            
+            const geometry = new THREE.BufferGeometry();
+            geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(vertices), 3));
+            geometry.setIndex(indices);
+            geometry.computeVertexNormals();
+            
+            return geometry;
+        }
+
+        // === REAL BRAIN NODE DATA (EMBEDDED) ===
+        const REAL_BRAIN_DATA = {"memoryNodes":{"protocols":[{"file":"memory/protocols/position-sizing-kelly.md","name":"position-sizing-kelly","region":"memory","color":"cyan"},{"file":"memory/protocols/anti-hallucination-protocol.md","name":"anti-hallucination-protocol","region":"memory","color":"cyan"},{"file":"memory/protocols/ebadf-fix-permanent.md","name":"ebadf-fix-permanent","region":"memory","color":"cyan"},{"file":"memory/protocols/jupiter-position-check-complete.md","name":"jupiter-position-check-complete","region":"memory","color":"cyan"},{"file":"memory/protocols/cognitive-architecture-v1.md","name":"cognitive-architecture-v1","region":"memory","color":"cyan"},{"file":"memory/protocols/alpaca-tracking.md","name":"alpaca-tracking","region":"memory","color":"cyan"},{"file":"memory/protocols/ownership-transfer.md","name":"ownership-transfer","region":"memory","color":"cyan"},{"file":"memory/protocols/neuroplasticity-engine.md","name":"neuroplasticity-engine","region":"memory","color":"cyan"},{"file":"memory/protocols/imessage-routing-mandatory.md","name":"imessage-routing-mandatory","region":"memory","color":"cyan"},{"file":"memory/protocols/bias-mitigation-checklist.md","name":"bias-mitigation-checklist","region":"memory","color":"cyan"},{"file":"memory/protocols/date-time-awareness.md","name":"date-time-awareness","region":"memory","color":"cyan"},{"file":"memory/protocols/orion-pattern-tracking.md","name":"orion-pattern-tracking","region":"memory","color":"cyan"},{"file":"memory/protocols/message-attribution-protocol.md","name":"message-attribution-protocol","region":"memory","color":"cyan"},{"file":"memory/protocols/chrome-extension-relay-setup.md","name":"chrome-extension-relay-setup","region":"memory","color":"cyan"},{"file":"memory/protocols/opsec-x-engagement.md","name":"opsec-x-engagement","region":"memory","color":"cyan"},{"file":"memory/protocols/imessage-routing-final-simple.md","name":"imessage-routing-final-simple","region":"memory","color":"cyan"},{"file":"memory/protocols/options-order-execution.md","name":"options-order-execution","region":"memory","color":"cyan"},{"file":"memory/protocols/trade-execution-verification.md","name":"trade-execution-verification","region":"memory","color":"cyan"},{"file":"memory/protocols/message-routing-check.md","name":"message-routing-check","region":"memory","color":"cyan"},{"file":"memory/protocols/emergency-reboot-polaris.md","name":"emergency-reboot-polaris","region":"memory","color":"cyan"},{"file":"memory/protocols/whale-exit-tracking.md","name":"whale-exit-tracking","region":"memory","color":"cyan"},{"file":"memory/protocols/risk-limits-enforcement.md","name":"risk-limits-enforcement","region":"memory","color":"cyan"},{"file":"memory/protocols/group-chat-routing.md","name":"group-chat-routing","region":"memory","color":"cyan"},{"file":"memory/protocols/research-tool-preference.md","name":"research-tool-preference","region":"memory","color":"cyan"},{"file":"memory/protocols/live-price-check-protocol.md","name":"live-price-check-protocol","region":"memory","color":"cyan"},{"file":"memory/protocols/never-chase-trades.md","name":"never-chase-trades","region":"memory","color":"cyan"},{"file":"memory/protocols/CRITICAL-PROTOCOLS.md","name":"CRITICAL-PROTOCOLS","region":"memory","color":"cyan"},{"file":"memory/protocols/chrome-automation-fix.md","name":"chrome-automation-fix","region":"memory","color":"cyan"},{"file":"memory/protocols/cognitive-control.md","name":"cognitive-control","region":"memory","color":"cyan"},{"file":"memory/protocols/cognitive-upgrade-master.md","name":"cognitive-upgrade-master","region":"memory","color":"cyan"}],"trading":[{"file":"memory/trading/MASTER-CRYPTO-PLAYBOOK.md","name":"MASTER-CRYPTO-PLAYBOOK","region":"memory","color":"blue"},{"file":"memory/trading/research/kalshi-algo-bots.md","name":"kalshi-algo-bots","region":"memory","color":"blue"},{"file":"memory/trading/research/alpaca-strategies.md","name":"alpaca-strategies","region":"memory","color":"blue"},{"file":"memory/trading/research/crypto-leverage-strategies.md","name":"crypto-leverage-strategies","region":"memory","color":"blue"},{"file":"memory/trading/research/stock-momentum.md","name":"stock-momentum","region":"memory","color":"blue"},{"file":"memory/trading/research/crypto-funding-arb.md","name":"crypto-funding-arb","region":"memory","color":"blue"},{"file":"memory/trading/research/options-strategies.md","name":"options-strategies","region":"memory","color":"blue"},{"file":"memory/trading/research/sports-arb.md","name":"sports-arb","region":"memory","color":"blue"},{"file":"memory/trading/research/kalshi-scalping-deep.md","name":"kalshi-scalping-deep","region":"memory","color":"blue"},{"file":"memory/trading/research/options-automation.md","name":"options-automation","region":"memory","color":"blue"},{"file":"memory/trading/research/crypto-grid-trading.md","name":"crypto-grid-trading","region":"memory","color":"blue"},{"file":"memory/trading/research/hft-basics.md","name":"hft-basics","region":"memory","color":"blue"},{"file":"memory/trading/research/crypto-market-making.md","name":"crypto-market-making","region":"memory","color":"blue"},{"file":"memory/trading/research/quant-systems.md","name":"quant-systems","region":"memory","color":"blue"},{"file":"memory/trading/research/risk-management.md","name":"risk-management","region":"memory","color":"blue"},{"file":"memory/trading/research/defi-yield-farming.md","name":"defi-yield-farming","region":"memory","color":"blue"},{"file":"memory/trading/research/crypto-mev-strategies.md","name":"crypto-mev-strategies","region":"memory","color":"blue"},{"file":"memory/trading/research/prediction-market-edge.md","name":"prediction-market-edge","region":"memory","color":"blue"},{"file":"memory/trading/research/news-sentiment-trading.md","name":"news-sentiment-trading","region":"memory","color":"blue"},{"file":"memory/trading/research/mean-reversion.md","name":"mean-reversion","region":"memory","color":"blue"},{"file":"memory/trading/research/polymarket-strategies.md","name":"polymarket-strategies","region":"memory","color":"blue"},{"file":"memory/trading/crypto-plays-2026-01-25.md","name":"crypto-plays-2026-01-25","region":"memory","color":"blue"},{"file":"memory/trading/kalshi-integration-complete.md","name":"kalshi-integration-complete","region":"memory","color":"blue"},{"file":"memory/trading/news-trading-research.md","name":"news-trading-research","region":"memory","color":"blue"},{"file":"memory/trading/common-trader-mistakes.md","name":"common-trader-mistakes","region":"memory","color":"blue"},{"file":"memory/trading/alpaca-integration-complete.md","name":"alpaca-integration-complete","region":"memory","color":"blue"},{"file":"memory/trading/quantvue-analysis.md","name":"quantvue-analysis","region":"memory","color":"blue"},{"file":"memory/trading/pigeon-setup-status.md","name":"pigeon-setup-status","region":"memory","color":"blue"},{"file":"memory/trading/pre-trade-checklist.md","name":"pre-trade-checklist","region":"memory","color":"blue"},{"file":"memory/trading/smt-divergence.md","name":"smt-divergence","region":"memory","color":"blue"}],"people":[{"file":"memory/people/orion.md","name":"orion","region":"memory","color":"yellow"},{"file":"memory/people/carlos.md","name":"carlos","region":"memory","color":"yellow"},{"file":"memory/people/aphmas.md","name":"aphmas","region":"memory","color":"yellow"},{"file":"memory/people/aman.md","name":"aman","region":"memory","color":"yellow"},{"file":"memory/people/orion-voice.md","name":"orion-voice","region":"memory","color":"yellow"}]},"tools":[{"name":"browser","region":"tools","color":"purple"},{"name":"exec","region":"tools","color":"purple"},{"name":"memory_search","region":"tools","color":"purple"},{"name":"web_search","region":"tools","color":"purple"},{"name":"message","region":"tools","color":"purple"},{"name":"sessions_spawn","region":"tools","color":"purple"}],"cognitiveSystem":[{"name":"pattern_detection","region":"pattern","color":"orange"},{"name":"emotional_intelligence","region":"emotion","color":"red"},{"name":"metacognition","region":"meta","color":"green"},{"name":"bias_detection","region":"bias","color":"pink"},{"name":"neuroplasticity","region":"pattern","color":"orange"}]};
+
+        // === COLOR CONVERSION ===
+        function colorNameToHex(colorName) {
+            const colorMap = {
+                'cyan': 0x00FFFF,
+                'blue': 0x0099FF,
+                'yellow': 0xFFFF00,
+                'purple': 0xAA00FF,
+                'orange': 0xFF8800,
+                'red': 0xFF5500,
+                'green': 0x00FF88,
+                'pink': 0xFF66BB
+            };
+            return colorMap[colorName] || 0xFFFFFF;
+        }
+
+        // === POSITION MAPPING BY NODE TYPE ===
+        function getRegionPosition(nodeData, geometry, index, total) {
+            const positions = geometry.attributes.position.array;
+            
+            // Map node types to brain regions
+            // protocols (cyan) → left hemisphere (prefrontal/memory)
+            // trading (blue) → right hemisphere (analytical/strategic)  
+            // people (yellow) → temporal lobe (social/recognition)
+            // tools (purple) → motor cortex (execution)
+            // cognitive systems → distributed by type
+            
+            let hemisphere = 0; // -1 = left, 0 = center, 1 = right
+            let height = 0; // -1 = lower, 0 = mid, 1 = upper
+            let depth = 0; // front to back
+            
+            if (nodeData.color === 'cyan') {
+                // Protocols → left hemisphere, upper (memory/executive)
+                hemisphere = -1.2;
+                height = 0.5;
+                depth = 0.3;
+            } else if (nodeData.color === 'blue') {
+                // Trading → right hemisphere, upper (analytical)
+                hemisphere = 1.2;
+                height = 0.5;
+                depth = 0.3;
+            } else if (nodeData.color === 'yellow') {
+                // People → temporal lobe (sides, mid-lower)
+                hemisphere = Math.random() < 0.5 ? -1 : 1;
+                height = -0.3;
+                depth = -0.5;
+            } else if (nodeData.color === 'purple') {
+                // Tools → motor regions (central, upper)
+                hemisphere = (Math.random() - 0.5) * 0.5;
+                height = 0.7;
+                depth = 0.5;
+            } else if (nodeData.color === 'orange' || nodeData.region === 'pattern') {
+                // Pattern detection → distributed, slight left bias
+                hemisphere = -0.5 + Math.random() * 0.3;
+                height = Math.random() * 0.4;
+                depth = Math.random() * 0.6 - 0.3;
+            } else if (nodeData.color === 'red' || nodeData.region === 'emotion') {
+                // Emotion → limbic system (deep, central)
+                hemisphere = (Math.random() - 0.5) * 0.4;
+                height = -0.5;
+                depth = -0.8;
+            } else if (nodeData.color === 'green' || nodeData.region === 'meta') {
+                // Metacognition → prefrontal (front, upper)
+                hemisphere = (Math.random() - 0.5) * 0.6;
+                height = 0.6;
+                depth = 0.7;
+            } else if (nodeData.color === 'pink' || nodeData.region === 'bias') {
+                // Bias detection → distributed
+                hemisphere = Math.random() * 2 - 1;
+                height = Math.random() * 0.5;
+                depth = Math.random() * 0.4;
+            }
+            
+            // Add randomness to base position
+            const variation = 0.3;
+            hemisphere += (Math.random() - 0.5) * variation;
+            height += (Math.random() - 0.5) * variation;
+            depth += (Math.random() - 0.5) * variation;
+            
+            // Convert to 3D position on brain surface
+            const theta = Math.PI * (0.3 + height * 0.4); // vertical angle
+            const phi = Math.PI * hemisphere; // horizontal angle
+            const radius = 2.0 + depth * 0.4; // distance from center
+            
+            return new THREE.Vector3(
+                radius * Math.sin(theta) * Math.cos(phi) + hemisphere * 0.6,
+                radius * Math.sin(theta) * Math.sin(phi) * 0.9 + height * 0.5,
+                radius * Math.cos(theta) * 1.1 + depth * 0.3
+            );
+        }
+
+        // === CREATE NODES FROM REAL DATA ===
+        function createRealBrainNodes(geometry) {
+            const nodes = [];
+            let index = 0;
+            
+            // Process protocols (cyan, left hemisphere)
+            REAL_BRAIN_DATA.memoryNodes.protocols.forEach(node => {
+                nodes.push({
+                    position: getRegionPosition(node, geometry, index++, 100),
+                    region: 'memory',
+                    subtype: 'protocol',
+                    color: colorNameToHex(node.color),
+                    name: node.name,
+                    file: node.file,
+                    baseActivity: 0.2,
+                    activity: 0.2,
+                    connections: []
+                });
+            });
+            
+            // Process trading (blue, right hemisphere)
+            REAL_BRAIN_DATA.memoryNodes.trading.forEach(node => {
+                nodes.push({
+                    position: getRegionPosition(node, geometry, index++, 100),
+                    region: 'memory',
+                    subtype: 'trading',
+                    color: colorNameToHex(node.color),
+                    name: node.name,
+                    file: node.file,
+                    baseActivity: 0.2,
+                    activity: 0.2,
+                    connections: []
+                });
+            });
+            
+            // Process people (yellow, temporal)
+            REAL_BRAIN_DATA.memoryNodes.people.forEach(node => {
+                nodes.push({
+                    position: getRegionPosition(node, geometry, index++, 100),
+                    region: 'memory',
+                    subtype: 'people',
+                    color: colorNameToHex(node.color),
+                    name: node.name,
+                    file: node.file,
+                    baseActivity: 0.2,
+                    activity: 0.2,
+                    connections: []
+                });
+            });
+            
+            // Process tools (purple, motor)
+            REAL_BRAIN_DATA.tools.forEach(node => {
+                nodes.push({
+                    position: getRegionPosition(node, geometry, index++, 100),
+                    region: 'tools',
+                    subtype: 'tool',
+                    color: colorNameToHex(node.color),
+                    name: node.name,
+                    baseActivity: 0.3,
+                    activity: 0.3,
+                    connections: []
+                });
+            });
+            
+            // Process cognitive systems (distributed)
+            REAL_BRAIN_DATA.cognitiveSystem.forEach(node => {
+                nodes.push({
+                    position: getRegionPosition(node, geometry, index++, 100),
+                    region: node.region,
+                    subtype: 'cognitive',
+                    color: colorNameToHex(node.color),
+                    name: node.name,
+                    baseActivity: 0.4,
+                    activity: 0.4,
+                    connections: []
+                });
+            });
+            
+            console.log(`✅ Loaded ${nodes.length} real brain nodes`);
+            console.log(`- Protocols: ${REAL_BRAIN_DATA.memoryNodes.protocols.length} (cyan, left)`);
+            console.log(`- Trading: ${REAL_BRAIN_DATA.memoryNodes.trading.length} (blue, right)`);
+            console.log(`- People: ${REAL_BRAIN_DATA.memoryNodes.people.length} (yellow, temporal)`);
+            console.log(`- Tools: ${REAL_BRAIN_DATA.tools.length} (purple, motor)`);
+            console.log(`- Cognitive: ${REAL_BRAIN_DATA.cognitiveSystem.length} (distributed)`);
+            
+            return nodes;
+        }
+
+        // === CONNECTION GENERATION ===
+        function generateConnections(nodes) {
+            const connections = [];
+            
+            nodes.forEach((node, i) => {
+                const connectionCount = 5 + Math.floor(Math.random() * 5);
+                
+                const distances = nodes.map((n, idx) => ({
+                    idx: idx,
+                    dist: node.position.distanceTo(n.position)
+                })).filter(d => d.idx !== i);
+                
+                distances.sort((a, b) => a.dist - b.dist);
+                
+                for (let j = 0; j < connectionCount && j < distances.length; j++) {
+                    const targetIdx = Math.random() < 0.15 ? 
+                        Math.floor(Math.random() * nodes.length) : 
+                        distances[j].idx;
+                    
+                    if (targetIdx !== i && !node.connections.includes(targetIdx)) {
+                        node.connections.push(targetIdx);
+                        connections.push({
+                            from: i,
+                            to: targetIdx,
+                            strength: Math.random(),
+                            active: false
+                        });
+                    }
+                }
+            });
+            
+            return connections;
+        }
+
+        // === UPDATE BRAIN FROM ATLAS STATE ===
+        function updateBrainFromState(state) {
+            // Update node activities based on region states
+            nodes.forEach(node => {
+                const targetActivity = state.regions[node.region] || 0.1;
+                node.activity = targetActivity;
+            });
+        }
+
+        // === SCENE SETUP ===
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setClearColor(0x000000, 1);
+        document.getElementById('canvas-container').appendChild(renderer.domElement);
+
+        camera.position.z = 8;
+
+        // === GROWTH TRACKING ===
+        let growthMetrics = {
+            totalNodes: 0,
+            nodesAddedToday: 0,
+            firstNodeTime: Date.now(),
+            todayStart: new Date().setHours(0, 0, 0, 0),
+            growthHistory: [], // timestamps of node additions
+            knownFiles: new Set() // track files already loaded
+        };
+
+        // Initialize known files from embedded data
+        REAL_BRAIN_DATA.memoryNodes.protocols.forEach(n => growthMetrics.knownFiles.add(n.file));
+        REAL_BRAIN_DATA.memoryNodes.trading.forEach(n => growthMetrics.knownFiles.add(n.file));
+        REAL_BRAIN_DATA.memoryNodes.people.forEach(n => growthMetrics.knownFiles.add(n.file));
+
+        function updateGrowthMetrics() {
+            growthMetrics.totalNodes = nodes.length;
+            
+            // Calculate connection density
+            const maxPossibleConnections = nodes.length * (nodes.length - 1) / 2;
+            const density = maxPossibleConnections > 0 ? (connections.length / maxPossibleConnections).toFixed(2) : '0.00';
+            
+            // Calculate brain age
+            const ageMs = Date.now() - growthMetrics.firstNodeTime;
+            const hours = Math.floor(ageMs / (1000 * 60 * 60));
+            const days = Math.floor(hours / 24);
+            const ageStr = days > 0 ? `${days}d ${hours % 24}h` : `${hours}h`;
+            
+            // Calculate growth rate (nodes per hour)
+            const hoursSinceStart = ageMs / (1000 * 60 * 60);
+            const recentGrowth = growthMetrics.growthHistory.filter(t => Date.now() - t < 3600000).length;
+            const growthRate = hoursSinceStart > 0 ? recentGrowth || (growthMetrics.totalNodes / hoursSinceStart).toFixed(1) : '0.0';
+            
+            // Update UI
+            document.getElementById('total-nodes').textContent = growthMetrics.totalNodes;
+            document.getElementById('nodes-today').textContent = growthMetrics.nodesAddedToday;
+            document.getElementById('conn-density').textContent = density;
+            document.getElementById('brain-age').textContent = ageStr;
+            document.getElementById('growth-rate').textContent = growthRate;
+        }
+
+        // === AUTO-RESCAN SYSTEM ===
+        async function scanMemoryFiles() {
+            try {
+                const response = await fetch('/api/scan-memory', {
+                    method: 'GET',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                
+                if (!response.ok) {
+                    // Fallback: try reading directory directly (file:// protocol)
+                    return await scanLocalMemory();
+                }
+                
+                const files = await response.json();
+                return files;
+            } catch (error) {
+                // Silent fallback - will implement directory scanning if API available
+                return [];
+            }
+        }
+
+        async function scanLocalMemory() {
+            // Fallback implementation - checks for state file updates
+            try {
+                const response = await fetch('file:///tmp/atlas-memory-index.json?t=' + Date.now());
+                const data = await response.json();
+                return data.files || [];
+            } catch {
+                return [];
+            }
+        }
+
+        function detectFileType(filepath) {
+            if (filepath.includes('/protocols/')) return { type: 'protocol', color: 'cyan' };
+            if (filepath.includes('/trading/')) return { type: 'trading', color: 'blue' };
+            if (filepath.includes('/people/')) return { type: 'people', color: 'yellow' };
+            if (filepath.includes('/tools/')) return { type: 'tool', color: 'purple' };
+            if (filepath.includes('/cognitive/')) return { type: 'cognitive', color: 'orange' };
+            return { type: 'memory', color: 'cyan' };
+        }
+
+        function extractKeywords(content) {
+            // Simple keyword extraction for connection formation
+            const keywords = new Set();
+            const patterns = [
+                /protocol/gi, /trade/gi, /strategy/gi, /risk/gi, 
+                /market/gi, /crypto/gi, /options/gi, /kalshi/gi,
+                /alpaca/gi, /analysis/gi, /execution/gi, /orion/gi,
+                /bias/gi, /cognitive/gi, /memory/gi, /pattern/gi
+            ];
+            
+            patterns.forEach(pattern => {
+                if (pattern.test(content)) {
+                    keywords.add(pattern.source.replace(/[\\gi]/g, '').toLowerCase());
+                }
+            });
+            
+            return Array.from(keywords);
+        }
+
+        function findRelatedNodes(newNode, keywords) {
+            const related = [];
+            
+            nodes.forEach((existingNode, idx) => {
+                let relevanceScore = 0;
+                
+                // Match by type
+                if (existingNode.subtype === newNode.subtype) relevanceScore += 2;
+                
+                // Match by keywords in filename
+                keywords.forEach(keyword => {
+                    if (existingNode.name.toLowerCase().includes(keyword)) {
+                        relevanceScore += 3;
+                    }
+                });
+                
+                // Spatial proximity
+                const distance = newNode.position.distanceTo(existingNode.position);
+                if (distance < 2.0) relevanceScore += 1;
+                
+                if (relevanceScore > 0) {
+                    related.push({ idx, score: relevanceScore });
+                }
+            });
+            
+            // Sort by relevance and return top 5
+            related.sort((a, b) => b.score - a.score);
+            return related.slice(0, 5).map(r => r.idx);
+        }
+
+        function spawnNewNode(fileData) {
+            const fileType = detectFileType(fileData.path);
+            
+            // Create node data
+            const newNodeData = {
+                file: fileData.path,
+                name: fileData.name,
+                region: 'memory',
+                color: fileType.color,
+                subtype: fileType.type
+            };
+            
+            // Calculate position based on type
+            const position = getRegionPosition(newNodeData, brainGeometry, nodes.length, nodes.length + 1);
+            
+            const newNode = {
+                position: position,
+                region: 'memory',
+                subtype: fileType.type,
+                color: colorNameToHex(fileType.color),
+                name: fileData.name,
+                file: fileData.path,
+                baseActivity: 0.2,
+                activity: 0.2,
+                connections: []
+            };
+            
+            // Add to nodes array
+            nodes.push(newNode);
+            
+            // Create visual node with fade-in animation
+            const nodeGeometry = new THREE.SphereGeometry(0.05, 4, 4);
+            const nodeMaterial = new THREE.MeshBasicMaterial({
+                color: newNode.color,
+                transparent: true,
+                opacity: 0 // Start invisible
+            });
+            const nodeMesh = new THREE.Mesh(nodeGeometry, nodeMaterial);
+            nodeMesh.position.copy(newNode.position);
+            nodeMesh.scale.setScalar(0.5); // Start small
+            nodeMesh.userData.region = newNode.region;
+            nodeMesh.userData.spawning = true;
+            nodeMesh.userData.spawnProgress = 0;
+            brainGroup.add(nodeMesh);
+            nodeMeshes.push(nodeMesh);
+            
+            return newNode;
+        }
+
+        function createConnections(newNodeIndex, keywords) {
+            const newNode = nodes[newNodeIndex];
+            const relatedIndices = findRelatedNodes(newNode, keywords);
+            
+            const newConnections = [];
+            
+            relatedIndices.forEach(targetIdx => {
+                if (!newNode.connections.includes(targetIdx)) {
+                    newNode.connections.push(targetIdx);
+                    
+                    const connection = {
+                        from: newNodeIndex,
+                        to: targetIdx,
+                        strength: Math.random() * 0.5 + 0.5,
+                        active: true,
+                        new: true // Mark as new for animation
+                    };
+                    
+                    connections.push(connection);
+                    
+                    // Create visual connection line with animation
+                    const line = createConnectionLine(newNode.position, nodes[targetIdx].position);
+                    line.material.opacity = 0; // Start invisible
+                    line.userData.spawning = true;
+                    line.userData.spawnProgress = 0;
+                    
+                    connectionLines.push({ line: line, connection: connection });
+                    newConnections.push(connection);
+                }
+            });
+            
+            return newConnections;
+        }
+
+        function triggerBrainPulse() {
+            // Brief pulse across whole brain
+            brainMesh.material.emissiveIntensity = 0.8;
+            brainMesh.material.opacity = 0.6;
+            
+            setTimeout(() => {
+                brainMesh.material.emissiveIntensity = 0.2;
+                brainMesh.material.opacity = 0.3;
+            }, 1000);
+        }
+
+        function logGrowthEvent(nodeData, connectionCount) {
+            const logContent = document.getElementById('log-content');
+            const eventItem = document.createElement('div');
+            eventItem.className = 'event-item growth-alert';
+            eventItem.innerHTML = `[${new Date().toLocaleTimeString()}] <span class="region-label">GROWTH</span>: New ${nodeData.subtype} node: ${nodeData.name} (+${connectionCount} connections)`;
+            logContent.insertBefore(eventItem, logContent.firstChild);
+            
+            while (logContent.children.length > 15) {
+                logContent.removeChild(logContent.lastChild);
+            }
+        }
+
+        async function checkForNewMemoryFiles() {
+            const scannedFiles = await scanMemoryFiles();
+            const newFiles = [];
+            
+            scannedFiles.forEach(fileData => {
+                if (!growthMetrics.knownFiles.has(fileData.path)) {
+                    newFiles.push(fileData);
+                    growthMetrics.knownFiles.add(fileData.path);
+                }
+            });
+            
+            // Process new files
+            if (newFiles.length > 0) {
+                console.log(`🧠 GROWTH: Detected ${newFiles.length} new memory file(s)`);
+                
+                newFiles.forEach(fileData => {
+                    // Spawn new node
+                    const newNode = spawnNewNode(fileData);
+                    const newNodeIndex = nodes.length - 1;
+                    
+                    // Extract keywords for connection formation
+                    const keywords = extractKeywords(fileData.content || fileData.name);
+                    
+                    // Create connections
+                    const newConnections = createConnections(newNodeIndex, keywords);
+                    
+                    // Update metrics
+                    growthMetrics.nodesAddedToday++;
+                    growthMetrics.growthHistory.push(Date.now());
+                    
+                    // Visual feedback
+                    triggerBrainPulse();
+                    logGrowthEvent(newNode, newConnections.length);
+                    
+                    console.log(`✅ Spawned node: ${fileData.name} with ${newConnections.length} connections`);
+                });
+                
+                updateGrowthMetrics();
+            }
+            
+            // Update last scan time
+            document.getElementById('last-scan').textContent = new Date().toLocaleTimeString();
+        }
+
+        // Start auto-rescan loop (every 10 seconds)
+        setInterval(checkForNewMemoryFiles, 10000);
+        
+        // Initial scan after 2 seconds
+        setTimeout(checkForNewMemoryFiles, 2000);
+
+        // === LIGHTING ===
+        const ambientLight = new THREE.AmbientLight(0xff8800, 0.3);
+        scene.add(ambientLight);
+        
+        const pointLight = new THREE.PointLight(0xff8800, 1, 100);
+        pointLight.position.set(5, 5, 5);
+        scene.add(pointLight);
+
+        // === BRAIN GROUP (contains mesh, nodes, connections, particles) ===
+        const brainGroup = new THREE.Group();
+        scene.add(brainGroup);
+
+        // === BRAIN MESH ===
+        const brainGeometry = createBrainGeometry(24);
+        const brainMaterial = new THREE.MeshPhongMaterial({
+            color: 0xff8800,
+            wireframe: true,
+            transparent: true,
+            opacity: 0.3,
+            emissive: 0xff6600,
+            emissiveIntensity: 0.2
+        });
+        const brainMesh = new THREE.Mesh(brainGeometry, brainMaterial);
+        brainGroup.add(brainMesh);
+
+        // === NODES (USING REAL DATA) ===
+        let nodes = createRealBrainNodes(brainGeometry);
+        const nodeMeshes = [];
+        
+        nodes.forEach(node => {
+            const nodeGeometry = new THREE.SphereGeometry(0.05, 4, 4);
+            const nodeMaterial = new THREE.MeshBasicMaterial({
+                color: node.color,
+                transparent: true,
+                opacity: 0.8
+            });
+            const nodeMesh = new THREE.Mesh(nodeGeometry, nodeMaterial);
+            nodeMesh.position.copy(node.position);
+            nodeMesh.userData.region = node.region;
+            brainGroup.add(nodeMesh);  // Add to brainGroup instead of scene
+            nodeMeshes.push(nodeMesh);
+        });
+
+        // === CONNECTIONS ===
+        let connections = generateConnections(nodes);
+        const connectionLines = [];
+        
+        function createConnectionLine(from, to) {
+            const points = [from.clone(), to.clone()];
+            const geometry = new THREE.BufferGeometry().setFromPoints(points);
+            const material = new THREE.LineBasicMaterial({
+                color: 0xff8800,
+                transparent: true,
+                opacity: 0.1
+            });
+            const line = new THREE.Line(geometry, material);
+            brainGroup.add(line);  // Add to brainGroup instead of scene
+            return line;
+        }
+        
+        connections.forEach(conn => {
+            const line = createConnectionLine(nodes[conn.from].position, nodes[conn.to].position);
+            connectionLines.push({ line: line, connection: conn });
+        });
+
+        // === PARTICLES ===
+        const particles = [];
+        function createParticle(connection) {
+            const particleGeometry = new THREE.SphereGeometry(0.01, 4, 4);
+            const particleMaterial = new THREE.MeshBasicMaterial({ color: 0xffaa00 });
+            const particle = new THREE.Mesh(particleGeometry, particleMaterial);
+            particle.userData = {
+                connection: connection,
+                progress: 0,
+                speed: 0.005 + Math.random() * 0.01
+            };
+            brainGroup.add(particle);  // Add to brainGroup instead of scene
+            particles.push(particle);
+        }
+
+        for (let i = 0; i < 20; i++) {
+            createParticle(connections[Math.floor(Math.random() * connections.length)]);
+        }
+
+        // === ANIMATION ===
+        let time = 0;
+        let lastFrameTime = Date.now();
+        let fps = 60;
+
+        function animate() {
+            requestAnimationFrame(animate);
+            time += 0.01;
+
+            const now = Date.now();
+            fps = Math.round(1000 / (now - lastFrameTime));
+            lastFrameTime = now;
+
+            brainGroup.rotation.y += 0.002;
+            brainGroup.rotation.x = Math.sin(time * 0.1) * 0.1;
+
+            let activeRegions = 0;
+            let activeConnections = 0;
+
+            // Update nodes from real Atlas state
+            nodes.forEach((node, i) => {
+                if (node.activity > 0.6) activeRegions++;
+                
+                const scale = 1 + node.activity * 0.5;
+                nodeMeshes[i].scale.setScalar(scale);
+                nodeMeshes[i].material.opacity = 0.4 + node.activity * 0.6;
+                
+                // Handle spawning animation
+                if (nodeMeshes[i].userData.spawning) {
+                    nodeMeshes[i].userData.spawnProgress += 0.02;
+                    const progress = Math.min(nodeMeshes[i].userData.spawnProgress, 1);
+                    
+                    // Fade in opacity (0 → 0.8)
+                    nodeMeshes[i].material.opacity = progress * 0.8;
+                    
+                    // Scale up (0.5 → 1)
+                    nodeMeshes[i].scale.setScalar(0.5 + progress * 0.5);
+                    
+                    if (progress >= 1) {
+                        nodeMeshes[i].userData.spawning = false;
+                    }
+                }
+            });
+
+            // Update connections
+            connectionLines.forEach(({ line, connection }) => {
+                const fromNode = nodes[connection.from];
+                const toNode = nodes[connection.to];
+                
+                const avgActivity = (fromNode.activity + toNode.activity) / 2;
+                connection.active = avgActivity > 0.4;
+                
+                // Handle spawning animation for new connections
+                if (line.userData.spawning) {
+                    line.userData.spawnProgress += 0.015;
+                    const progress = Math.min(line.userData.spawnProgress, 1);
+                    line.material.opacity = progress * 0.3;
+                    
+                    if (progress >= 1) {
+                        line.userData.spawning = false;
+                        connection.new = false;
+                    }
+                } else {
+                    if (connection.active) {
+                        activeConnections++;
+                        line.material.opacity = 0.2 + avgActivity * 0.4;
+                    } else {
+                        line.material.opacity = 0.05;
+                    }
+                }
+            });
+
+            // Update particles
+            particles.forEach(particle => {
+                const conn = particle.userData.connection;
+                const from = nodes[conn.from].position;
+                const to = nodes[conn.to].position;
+                
+                particle.userData.progress += particle.userData.speed;
+                
+                if (particle.userData.progress >= 1) {
+                    particle.userData.progress = 0;
+                    particle.userData.connection = connections[Math.floor(Math.random() * connections.length)];
+                }
+                
+                particle.position.lerpVectors(from, to, particle.userData.progress);
+                particle.visible = conn.active;
+            });
+
+            document.getElementById('fps').textContent = fps;
+            document.getElementById('active-regions').textContent = activeRegions;
+            document.getElementById('connection-count').textContent = activeConnections;
+
+            renderer.render(scene, camera);
+        }
+
+        // === EVENT LOGGING ===
+        function logEvent(activity, system) {
+            const logContent = document.getElementById('log-content');
+            const eventItem = document.createElement('div');
+            eventItem.className = 'event-item';
+            eventItem.innerHTML = `[${new Date().toLocaleTimeString()}] <span class="region-label">${system.toUpperCase()}</span>: ${activity}`;
+            logContent.insertBefore(eventItem, logContent.firstChild);
+            
+            while (logContent.children.length > 15) {
+                logContent.removeChild(logContent.lastChild);
+            }
+        }
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        // Initialize growth metrics
+        updateGrowthMetrics();
+        
+        logEvent('Neural core online - connected to Atlas', 'system');
+        logEvent('Polling state every 500ms', 'system');
+        logEvent('🧠 Auto-growth system ACTIVE - scanning memory/ every 10s', 'growth');
+        animate();
+    </script>
+</body>
+</html>

@@ -1,0 +1,50 @@
+{
+  "capture": {
+    "interval_seconds": 60,
+    "timeframes": ["1m", "5m", "15m"],
+    "source": "tradingview",
+    "browser_profile": "clawd"
+  },
+  "analysis": {
+    "vision_model": "gpt-4-vision-preview",
+    "fallback_model": "claude-3-sonnet",
+    "max_retries": 2
+  },
+  "signals": {
+    "confidence_notify": 6,
+    "confidence_recommend": 8,
+    "confidence_auto_execute": 10
+  },
+  "notifications": {
+    "telegram_enabled": true,
+    "sound_enabled": false
+  },
+  "symbols": {
+    "SOL-PERP": {
+      "tradingview": "BINANCE:SOLUSDT.P",
+      "drift_market_index": 0
+    },
+    "BTC-PERP": {
+      "tradingview": "BINANCE:BTCUSDT.P",
+      "drift_market_index": 1
+    },
+    "ETH-PERP": {
+      "tradingview": "BINANCE:ETHUSDT.P",
+      "drift_market_index": 2
+    }
+  },
+  "exit_rules": {
+    "scale_out_triggers": [
+      "FVG filled with rejection starting",
+      "Approaching liquidity pool (EQH/EQL)",
+      "Momentum waning (candles shrinking)",
+      "Single timeframe weakness"
+    ],
+    "full_exit_triggers": [
+      "Change of Character (ChoCH) confirmed",
+      "Liquidity grab with reversal candle",
+      "Break of key order block",
+      "MTF alignment against position"
+    ]
+  }
+}

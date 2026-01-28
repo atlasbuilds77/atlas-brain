@@ -1,0 +1,10 @@
+{
+  "id": "atlas-brain-architecture",
+  "type": "project",
+  "name": "Atlas Brain Architecture",
+  "description": "Build and refine the cognitive systems that make Atlas work",
+  "created": "2026-01-28T00:01:00-08:00",
+  "status": "active",
+  "next_actions": ["Review protocols weekly", "Test new systems", "Document improvements"],
+  "progress": []
+}

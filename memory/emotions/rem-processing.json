@@ -1,0 +1,28 @@
+{
+  "timestamp": "2026-01-27T16:27:41.475929",
+  "phase": "REM_emotional_processing",
+  "decisions_processed": 2,
+  "pattern_updates": [],
+  "emotional_insights": [
+    {
+      "type": "tracking_needed",
+      "finding": "2 recent decisions await outcome tracking",
+      "implication": "Recording outcomes improves somatic marker calibration"
+    },
+    {
+      "type": "high_salience",
+      "decision": "Buy SLV calls at open with big institutional flow",
+      "emotional_intensity": 70.0,
+      "valence": "strongly_positive",
+      "dream_potential": "High - should appear in dream synthesis for pattern finding"
+    },
+    {
+      "type": "high_salience",
+      "decision": "Quick FOMO trade before market closes, last chance to catch the move",
+      "emotional_intensity": 80.0,
+      "valence": "strongly_negative",
+      "dream_potential": "High - should appear in dream synthesis for pattern finding"
+    }
+  ],
+  "confidence_adjustments": []
+}

@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ATLAS BRAIN - Jarvis Mode</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Courier New', monospace;
+            background: #000;
+            color: #ff8800;
+            overflow: hidden;
+            cursor: default;
+        }
+        
+        #container {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+        }
+        
+        #brain-canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+        
+        #hud {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+        }
+        
+        .hud-header {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            text-shadow: 0 0 10px #ff8800, 0 0 20px #ff8800;
+            letter-spacing: 4px;
+        }
+        
+        .status-bar {
+            position: absolute;
+            top: 60px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 12px;
+            color: #ffaa44;
+            text-shadow: 0 0 5px #ff8800;
+        }
+        
+        .event-feed {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            width: 400px;
+            max-height: 300px;
+            overflow: hidden;
+            font-size: 12px;
+            line-height: 1.6;
+        }
+        
+        .event-item {
+            padding: 8px 12px;
+            margin-bottom: 4px;
+            background: rgba(255, 136, 0, 0.1);
+            border-left: 3px solid #ff8800;
+            opacity: 1;
+            transform: translateX(0);
+        }
+        
+        .event-item.fade-out {
+            opacity: 0;
+        }
+        
+        .event-timestamp {
+            color: #666;
+            font-size: 10px;
+        }
+        
+        .event-message {
+            color: #ff8800;
+            text-shadow: 0 0 5px rgba(255, 136, 0, 0.5);
+        }
+        
+        .regions-list {
+            position: absolute;
+            top: 100px;
+            right: 20px;
+            width: 250px;
+            font-size: 11px;
+        }
+        
+        .region-item {
+            padding: 6px 10px;
+            margin-bottom: 4px;
+            background: rgba(0, 0, 0, 0.7);
+            border-left: 3px solid #444;
+            transition: all 0.3s;
+        }
+        
+        .region-item.active {
+            border-left-color: #ff8800;
+            background: rgba(255, 136, 0, 0.2);
+            box-shadow: 0 0 10px rgba(255, 136, 0, 0.3);
+        }
+        
+        .region-name {
+            font-weight: bold;
+            color: #ff8800;
+        }
+        
+        .region-status {
+            font-size: 9px;
+            color: #888;
+        }
+        
+        .connection-status {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 11px;
+            padding: 6px 12px;
+            background: rgba(0, 0, 0, 0.7);
+            border: 1px solid #444;
+        }
+        
+        .connection-status.connected {
+            border-color: #00ff00;
+            color: #00ff00;
+            text-shadow: 0 0 5px #00ff00;
+        }
+        
+        .connection-status.disconnected {
+            border-color: #ff0000;
+            color: #ff0000;
+            text-shadow: 0 0 5px #ff0000;
+        }
+        
+        .mode-display {
+            position: absolute;
+            top: 100px;
+            left: 20px;
+            font-size: 18px;
+            font-weight: bold;
+            color: #ff8800;
+            text-shadow: 0 0 10px #ff8800;
+            padding: 10px 20px;
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid #ff8800;
+            box-shadow: 0 0 20px rgba(255, 136, 0, 0.3);
+        }
+        
+        @media (max-width: 768px) {
+            .hud-header { font-size: 18px; }
+            .event-feed { width: calc(100% - 40px); max-height: 200px; }
+            .regions-list { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <canvas id="brain-canvas"></canvas>
+        <div id="hud">
+            <div class="hud-header">ATLAS COGNITIVE SYSTEM</div>
+            <div class="status-bar">REAL-TIME NEURAL ACTIVITY MONITOR</div>
+            <div class="connection-status disconnected">● CONNECTING...</div>
+            
+            <div class="mode-display">
+                <span id="current-mode">INITIALIZING</span>
+            </div>
+            
+            <div class="event-feed" id="event-feed"></div>
+            
+            <div class="regions-list" id="regions-list"></div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <script>
+        // ===== CONFIGURATION =====
+        const MAX_EVENTS = 8;
+        const EVENT_LIFETIME = 10000; // ms
+        const PARTICLE_COUNT = 1000;
+        const ENABLE_BRAIN_BREATHING = true;
+        
+        // ===== THREE.JS SCENE SETUP =====
+        const canvas = document.getElementById('brain-canvas');
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+        
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setClearColor(0x000000, 1);
+        camera.position.z = 5;
+        
+        // ===== CENTRAL BRAIN SPHERE =====
+        const sphereGeometry = new THREE.SphereGeometry(1, 32, 32);
+        const sphereMaterial = new THREE.MeshPhongMaterial({
+            color: 0xff8800,
+            emissive: 0xff4400,
+            emissiveIntensity: 0.5,
+            transparent: true,
+            opacity: 0.3,
+            wireframe: false
+        });
+        const brain = new THREE.Mesh(sphereGeometry, sphereMaterial);
+        scene.add(brain);
+        
+        // Add wireframe overlay
+        const wireframeGeometry = new THREE.SphereGeometry(1.02, 16, 16);
+        const wireframeMaterial = new THREE.MeshBasicMaterial({
+            color: 0xff8800,
+            wireframe: true,
+            transparent: true,
+            opacity: 0.3
+        });
+        const wireframe = new THREE.Mesh(wireframeGeometry, wireframeMaterial);
+        scene.add(wireframe);
+        
+        // ===== LIGHTING =====
+        const ambientLight = new THREE.AmbientLight(0x333333);
+        scene.add(ambientLight);
+        
+        const pointLight1 = new THREE.PointLight(0xff8800, 1, 100);
+        pointLight1.position.set(5, 5, 5);
+        scene.add(pointLight1);
+        
+        const pointLight2 = new THREE.PointLight(0xff4400, 0.5, 100);
+        pointLight2.position.set(-5, -5, 5);
+        scene.add(pointLight2);
+        
+        // ===== PARTICLE SYSTEM (NEURAL NETWORK) =====
+        const particlesGeometry = new THREE.BufferGeometry();
+        const particlesPositions = new Float32Array(PARTICLE_COUNT * 3);
+        const particlesVelocities = [];
+        
+        for (let i = 0; i < PARTICLE_COUNT; i++) {
+            const theta = Math.random() * Math.PI * 2;
+            const phi = Math.acos(2 * Math.random() - 1);
+            const radius = 1.2 + Math.random() * 0.8;
+            
+            particlesPositions[i * 3] = radius * Math.sin(phi) * Math.cos(theta);
+            particlesPositions[i * 3 + 1] = radius * Math.sin(phi) * Math.sin(theta);
+            particlesPositions[i * 3 + 2] = radius * Math.cos(phi);
+            
+            particlesVelocities.push({
+                x: (Math.random() - 0.5) * 0.002,
+                y: (Math.random() - 0.5) * 0.002,
+                z: (Math.random() - 0.5) * 0.002
+            });
+        }
+        
+        particlesGeometry.setAttribute('position', new THREE.BufferAttribute(particlesPositions, 3));
+        
+        const particlesMaterial = new THREE.PointsMaterial({
+            color: 0xff8800,
+            size: 0.05,
+            transparent: true,
+            opacity: 0.6,
+            blending: THREE.AdditiveBlending
+        });
+        
+        const particles = new THREE.Points(particlesGeometry, particlesMaterial);
+        scene.add(particles);
+        
+        // ===== CONNECTION LINES SYSTEM =====
+        const connectionLines = [];
+        const MAX_CONNECTIONS = 50;
+        
+        function createConnectionLine(start, end, color = 0xff8800) {
+            const points = [];
+            points.push(new THREE.Vector3(start.x, start.y, start.z));
+            points.push(new THREE.Vector3(end.x, end.y, end.z));
+            
+            const geometry = new THREE.BufferGeometry().setFromPoints(points);
+            const material = new THREE.LineBasicMaterial({
+                color: color,
+                transparent: true,
+                opacity: 0,
+                linewidth: 2
+            });
+            
+            const line = new THREE.Line(geometry, material);
+            scene.add(line);
+            
+            return { line, start, end, pulseProgress: 0 };
+        }
+        
+        // ===== BRAIN REGIONS (NODES) =====
+        const regions = {};
+        const regionMeshes = {};
+        
+        function createRegionNode(name, position, color) {
+            const geometry = new THREE.SphereGeometry(0.15, 16, 16);
+            const material = new THREE.MeshPhongMaterial({
+                color: parseInt(color.replace('#', '0x')),
+                emissive: parseInt(color.replace('#', '0x')),
+                emissiveIntensity: 0.3,
+                transparent: true,
+                opacity: 0.7
+            });
+            const mesh = new THREE.Mesh(geometry, material);
+            mesh.position.set(...position);
+            
+            // Add glow
+            const glowGeometry = new THREE.SphereGeometry(0.2, 16, 16);
+            const glowMaterial = new THREE.MeshBasicMaterial({
+                color: parseInt(color.replace('#', '0x')),
+                transparent: true,
+                opacity: 0.2,
+                blending: THREE.AdditiveBlending
+            });
+            const glow = new THREE.Mesh(glowGeometry, glowMaterial);
+            mesh.add(glow);
+            
+            scene.add(mesh);
+            return { mesh, glow, active: false, intensity: 0, baseColor: color };
+        }
+        
+        // ===== ANIME.JS ANIMATION PRESETS =====
+        const AnimationPresets = {
+            // Elastic pulse for cognitive events
+            cognitiveEventPulse(region, intensity = 0.7) {
+                const targetScale = 1 + intensity * 0.5;
+                
+                anime({
+                    targets: region.mesh.scale,
+                    x: [1, targetScale, 1],
+                    y: [1, targetScale, 1],
+                    z: [1, targetScale, 1],
+                    duration: 1200,
+                    easing: 'easeOutElastic(1, .6)'
+                });
+                
+                anime({
+                    targets: region.mesh.material,
+                    emissiveIntensity: [0.3, 0.9, 0.3],
+                    duration: 1200,
+                    easing: 'easeOutQuad'
+                });
+                
+                anime({
+                    targets: region.glow.material,
+                    opacity: [0.2, 0.6, 0.2],
+                    duration: 1200,
+                    easing: 'easeOutQuad'
+                });
+            },
+            
+            // Smooth color transition for mode switches
+            modeColorTransition(targetColor, duration = 800) {
+                const currentColor = new THREE.Color(sphereMaterial.color);
+                const newColor = new THREE.Color(targetColor);
+                
+                anime({
+                    targets: currentColor,
+                    r: newColor.r,
+                    g: newColor.g,
+                    b: newColor.b,
+                    duration: duration,
+                    easing: 'easeInOutQuad',
+                    update: () => {
+                        sphereMaterial.color.copy(currentColor);
+                        sphereMaterial.emissive.copy(currentColor);
+                        wireframeMaterial.color.copy(currentColor);
+                        particlesMaterial.color.copy(currentColor);
+                    }
+                });
+            },
+            
+            // Connection pulse animation
+            connectionPulse(connection, duration = 1500) {
+                const material = connection.line.material;
+                
+                anime({
+                    targets: material,
+                    opacity: [0, 0.6, 0],
+                    duration: duration,
+                    easing: 'easeInOutQuad'
+                });
+                
+                // Animated pulse along the line
+                anime({
+                    targets: connection,
+                    pulseProgress: [0, 1],
+                    duration: duration,
+                    easing: 'easeInOutCubic'
+                });
+            },
+            
+            // Brain sphere pulse with spring physics
+            brainPulse(intensity = 0.5) {
+                const scale = 1 + intensity * 0.15;
+                
+                anime({
+                    targets: brain.scale,
+                    x: [1, scale, 1],
+                    y: [1, scale, 1],
+                    z: [1, scale, 1],
+                    duration: 800,
+                    easing: 'spring(1, 80, 10, 0)'
+                });
+                
+                anime({
+                    targets: sphereMaterial,
+                    emissiveIntensity: [0.5, 0.5 + intensity * 0.4, 0.5],
+                    duration: 800,
+                    easing: 'easeOutQuad'
+                });
+            },
+            
+            // Event feed item animation
+            eventFeedSlideIn(element) {
+                anime({
+                    targets: element,
+                    translateX: [-40, 0],
+                    opacity: [0, 1],
+                    duration: 600,
+                    easing: 'easeOutElastic(1, .8)'
+                });
+            },
+            
+            // Event feed fade out
+            eventFeedFadeOut(element, callback) {
+                anime({
+                    targets: element,
+                    opacity: 0,
+                    translateX: -20,
+                    duration: 400,
+                    easing: 'easeInQuad',
+                    complete: callback
+                });
+            }
+        };
+        
+        // ===== BRAIN BREATHING EFFECT =====
+        if (ENABLE_BRAIN_BREATHING) {
+            anime({
+                targets: brain.scale,
+                x: [1, 1.02, 1],
+                y: [1, 1.02, 1],
+                z: [1, 1.02, 1],
+                duration: 4000,
+                easing: 'easeInOutSine',
+                loop: true
+            });
+            
+            anime({
+                targets: sphereMaterial,
+                opacity: [0.3, 0.35, 0.3],
+                duration: 4000,
+                easing: 'easeInOutSine',
+                loop: true
+            });
+        }
+        
+        // ===== WEBSOCKET CONNECTION =====
+        let ws;
+        let reconnectAttempts = 0;
+        const maxReconnectAttempts = 10;
+        
+        function connect() {
+            // Use hardcoded URL for file:// protocol, otherwise use window location
+            const wsUrl = window.location.protocol === 'file:' 
+                ? 'ws://localhost:8765/ws'
+                : `ws://${window.location.hostname}:${window.location.port}/ws`;
+            ws = new WebSocket(wsUrl);
+            
+            ws.onopen = () => {
+                console.log('Connected to brain visualization server');
+                updateConnectionStatus(true);
+                reconnectAttempts = 0;
+            };
+            
+            ws.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                handleBrainEvent(data);
+            };
+            
+            ws.onerror = (error) => {
+                console.error('WebSocket error:', error);
+            };
+            
+            ws.onclose = () => {
+                console.log('Disconnected from brain visualization server');
+                updateConnectionStatus(false);
+                
+                if (reconnectAttempts < maxReconnectAttempts) {
+                    reconnectAttempts++;
+                    setTimeout(connect, 2000 * reconnectAttempts);
+                }
+            };
+        }
+        
+        function updateConnectionStatus(connected) {
+            const status = document.querySelector('.connection-status');
+            if (connected) {
+                status.textContent = '● CONNECTED';
+                status.className = 'connection-status connected';
+            } else {
+                status.textContent = '● DISCONNECTED';
+                status.className = 'connection-status disconnected';
+            }
+        }
+        
+        // ===== EVENT HANDLING =====
+        function handleBrainEvent(data) {
+            if (data.type === 'config') {
+                initializeRegions(data.regions);
+            } else if (data.event_type) {
+                addEventToFeed(data);
+                activateRegion(data);
+                
+                // Use anime.js pulse instead of basic pulse
+                AnimationPresets.brainPulse(data.intensity || 0.5);
+                
+                if (data.event_type === 'mode_switch') {
+                    updateMode(data.message);
+                }
+                
+                // Trigger connection pulses for high priority events
+                if (data.intensity > 0.7) {
+                    triggerConnectionPulses(data);
+                }
+            }
+        }
+        
+        function initializeRegions(regionsConfig) {
+            Object.entries(regionsConfig).forEach(([key, config]) => {
+                regions[key] = createRegionNode(config.name, config.position, config.color);
+                regionMeshes[key] = regions[key];
+                
+                // Add to HUD list
+                const regionsList = document.getElementById('regions-list');
+                const item = document.createElement('div');
+                item.className = 'region-item';
+                item.id = `region-${key}`;
+                item.innerHTML = `
+                    <div class="region-name">${config.name}</div>
+                    <div class="region-status">IDLE</div>
+                `;
+                regionsList.appendChild(item);
+            });
+            
+            // Create initial connections between regions
+            createInitialConnections();
+        }
+        
+        function createInitialConnections() {
+            const regionKeys = Object.keys(regions);
+            
+            // Connect some regions randomly for visual interest
+            for (let i = 0; i < Math.min(MAX_CONNECTIONS, regionKeys.length * 2); i++) {
+                const startKey = regionKeys[Math.floor(Math.random() * regionKeys.length)];
+                const endKey = regionKeys[Math.floor(Math.random() * regionKeys.length)];
+                
+                if (startKey !== endKey && regions[startKey] && regions[endKey]) {
+                    const connection = createConnectionLine(
+                        regions[startKey].mesh.position,
+                        regions[endKey].mesh.position
+                    );
+                    connectionLines.push(connection);
+                }
+            }
+        }
+        
+        function triggerConnectionPulses(event) {
+            const config = event.config || {};
+            const regionKey = config.region;
+            
+            if (!regionKey || !regions[regionKey]) return;
+            
+            // Pulse a few random connections
+            const numPulses = Math.min(3, connectionLines.length);
+            const selectedConnections = [];
+            
+            for (let i = 0; i < numPulses; i++) {
+                const conn = connectionLines[Math.floor(Math.random() * connectionLines.length)];
+                if (!selectedConnections.includes(conn)) {
+                    selectedConnections.push(conn);
+                    AnimationPresets.connectionPulse(conn);
+                }
+            }
+        }
+        
+        function addEventToFeed(event) {
+            const feed = document.getElementById('event-feed');
+            const item = document.createElement('div');
+            item.className = 'event-item';
+            
+            const timestamp = new Date(event.timestamp).toLocaleTimeString();
+            item.innerHTML = `
+                <div class="event-timestamp">${timestamp}</div>
+                <div class="event-message">${event.message}</div>
+            `;
+            
+            feed.insertBefore(item, feed.firstChild);
+            
+            // Animate entry with anime.js
+            AnimationPresets.eventFeedSlideIn(item);
+            
+            // Remove old events
+            while (feed.children.length > MAX_EVENTS) {
+                feed.removeChild(feed.lastChild);
+            }
+            
+            // Auto-fade after lifetime with anime.js
+            setTimeout(() => {
+                AnimationPresets.eventFeedFadeOut(item, () => item.remove());
+            }, EVENT_LIFETIME);
+        }
+        
+        function activateRegion(event) {
+            const config = event.config || {};
+            const regionKey = config.region;
+            
+            if (regionKey && regions[regionKey]) {
+                const region = regions[regionKey];
+                const intensity = event.intensity || 0.7;
+                
+                // Use anime.js elastic pulse
+                AnimationPresets.cognitiveEventPulse(region, intensity);
+                
+                region.active = true;
+                region.intensity = intensity;
+                
+                // Update HUD
+                const hudItem = document.getElementById(`region-${regionKey}`);
+                if (hudItem) {
+                    hudItem.classList.add('active');
+                    hudItem.querySelector('.region-status').textContent = 'ACTIVE';
+                    
+                    setTimeout(() => {
+                        hudItem.classList.remove('active');
+                        hudItem.querySelector('.region-status').textContent = 'IDLE';
+                    }, 2000);
+                }
+            }
+        }
+        
+        function updateMode(message) {
+            const modeDisplay = document.getElementById('current-mode');
+            const match = message.match(/MODE:\s*(.+)/i);
+            if (match) {
+                const newMode = match[1].toUpperCase();
+                modeDisplay.textContent = newMode;
+                
+                // Smooth color transition based on mode
+                const modeColors = {
+                    'DEEP WORK': 0x00aaff,
+                    'CREATIVE': 0xff00ff,
+                    'SOCIAL': 0x00ff88,
+                    'ANALYSIS': 0xffaa00,
+                    'JARVIS': 0xff8800,
+                    'STANDBY': 0xff8800
+                };
+                
+                const color = modeColors[newMode] || 0xff8800;
+                AnimationPresets.modeColorTransition(color);
+            }
+        }
+        
+        // ===== ANIMATION LOOP =====
+        let time = 0;
+        function animate() {
+            requestAnimationFrame(animate);
+            time += 0.01;
+            
+            // Rotate brain slowly (unless breathing is taking over)
+            brain.rotation.y += 0.002;
+            wireframe.rotation.y += 0.002;
+            
+            // Animate particles
+            const positions = particles.geometry.attributes.position.array;
+            for (let i = 0; i < PARTICLE_COUNT; i++) {
+                positions[i * 3] += particlesVelocities[i].x;
+                positions[i * 3 + 1] += particlesVelocities[i].y;
+                positions[i * 3 + 2] += particlesVelocities[i].z;
+                
+                // Keep particles in bounds
+                const dist = Math.sqrt(
+                    positions[i * 3] ** 2 +
+                    positions[i * 3 + 1] ** 2 +
+                    positions[i * 3 + 2] ** 2
+                );
+                if (dist > 3 || dist < 1) {
+                    particlesVelocities[i].x *= -1;
+                    particlesVelocities[i].y *= -1;
+                    particlesVelocities[i].z *= -1;
+                }
+            }
+            particles.geometry.attributes.position.needsUpdate = true;
+            
+            // Subtle camera movement
+            camera.position.x = Math.sin(time * 0.1) * 0.5;
+            camera.position.y = Math.cos(time * 0.15) * 0.3;
+            camera.lookAt(scene.position);
+            
+            renderer.render(scene, camera);
+        }
+        
+        // ===== WINDOW RESIZE =====
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+        
+        // ===== INITIALIZE =====
+        connect();
+        animate();
+        
+        // Update mode display with animation
+        setTimeout(() => {
+            const modeDisplay = document.getElementById('current-mode');
+            modeDisplay.textContent = 'STANDBY';
+            
+            anime({
+                targets: modeDisplay,
+                scale: [0.8, 1],
+                opacity: [0, 1],
+                duration: 800,
+                easing: 'easeOutElastic(1, .8)'
+            });
+        }, 1000);
+    </script>
+</body>
+</html>

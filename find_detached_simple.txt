@@ -1,0 +1,13 @@
+Looking for detached: in bash-tools.exec.js
+
+Based on my earlier code review, I found 3 locations where detached: is set:
+
+1. Line ~230: In the docker exec spawn
+2. Line ~280: In the PTY fallback spawn  
+3. Line ~330: In the regular shell spawn
+
+All three use: detached: process.platform !== "win32"
+
+This needs to be changed to: detached: false
+
+The exact line numbers need to be verified, but the pattern is consistent.

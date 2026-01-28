@@ -1,0 +1,60 @@
+{
+  "meta": {
+    "version": "1.0.0",
+    "created": "2026-01-27",
+    "description": "Tracks predicted confidence vs actual outcomes for calibration",
+    "goal": "Build realistic intuition that knows its limits"
+  },
+  "calibration_bins": {
+    "0-20": {
+      "predictions": 0,
+      "correct": 0,
+      "accuracy": null
+    },
+    "20-40": {
+      "predictions": 0,
+      "correct": 0,
+      "accuracy": null
+    },
+    "40-60": {
+      "predictions": 0,
+      "correct": 0,
+      "accuracy": null
+    },
+    "60-80": {
+      "predictions": 0,
+      "correct": 0,
+      "accuracy": null
+    },
+    "80-100": {
+      "predictions": 0,
+      "correct": 0,
+      "accuracy": null
+    }
+  },
+  "overall_calibration": {
+    "total_predictions": 0,
+    "correct_predictions": 0,
+    "mean_confidence": null,
+    "mean_accuracy": null,
+    "calibration_error": null,
+    "is_overconfident": null
+  },
+  "predictions": [
+    {
+      "id": "pred-20260127162741-c4ef",
+      "description": "ETH will hold above 2900 through the day",
+      "confidence": 0.65,
+      "domain": "trading",
+      "timestamp": "2026-01-27T16:27:41.454301",
+      "outcome": null,
+      "resolved": false
+    }
+  ],
+  "domain_calibration": {},
+  "transfer_learning": {
+    "cross_domain_attempts": 0,
+    "successful_transfers": 0,
+    "domain_similarity_scores": {}
+  }
+}

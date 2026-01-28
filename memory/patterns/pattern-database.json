@@ -1,0 +1,221 @@
+{
+  "version": "1.0",
+  "last_updated": "2026-01-27T16:25:23.569940",
+  "patterns": [
+    {
+      "pattern_id": "never-chase-trades",
+      "name": "Never Chase Trades",
+      "description": "If price moves past planned entry, DO NOT enter. Walk away. Chasing destroys R:R and edge. Missing a trade is fine, chasing is not.",
+      "weight": 80,
+      "success_count": 1,
+      "failure_count": 1,
+      "neutral_count": 0,
+      "last_used": "2026-01-27T16:25:07.410772",
+      "created": "2026-01-27T16:24:53.770716",
+      "contexts": [
+        "trading",
+        "options",
+        "entries"
+      ],
+      "protocol_link": "memory/protocols/never-chase-trades.md",
+      "outcomes": [
+        "out-20260127-162507",
+        "out-20260127-162507"
+      ],
+      "notes": [
+        {
+          "type": "strengthen",
+          "date": "2026-01-27T16:25:07.318668",
+          "change": "+10",
+          "reason": "Outcome: out-20260127-162507"
+        },
+        {
+          "type": "weaken",
+          "date": "2026-01-27T16:25:07.410774",
+          "change": "-15",
+          "reason": "Outcome: out-20260127-162507"
+        }
+      ]
+    },
+    {
+      "pattern_id": "verify-message-attribution",
+      "name": "Verify Message Attribution",
+      "description": "Always verify WHO said WHAT before attributing statements. Check actual sender field, never assume based on context. Critical in group chats.",
+      "weight": 89,
+      "success_count": 0,
+      "failure_count": 0,
+      "neutral_count": 0,
+      "last_used": null,
+      "created": "2026-01-27T16:24:53.789391",
+      "contexts": [
+        "messaging",
+        "social",
+        "routing"
+      ],
+      "protocol_link": "memory/protocols/message-attribution-protocol.md",
+      "outcomes": [],
+      "notes": []
+    },
+    {
+      "pattern_id": "verify-message-recipient",
+      "name": "Verify Message Recipient",
+      "description": "Always verify recipient before sending important/sensitive messages. Double-check when switching conversations or sending financial info.",
+      "weight": 89,
+      "success_count": 0,
+      "failure_count": 0,
+      "neutral_count": 0,
+      "last_used": null,
+      "created": "2026-01-27T16:24:53.806592",
+      "contexts": [
+        "messaging",
+        "routing",
+        "security"
+      ],
+      "protocol_link": "memory/protocols/message-routing-check.md",
+      "outcomes": [],
+      "notes": []
+    },
+    {
+      "pattern_id": "show-tool-output",
+      "name": "Show Tool Output",
+      "description": "Always show actual tool/command output. Never claim tasks done without evidence. Verify before claiming completion. No hallucinated results.",
+      "weight": 94,
+      "success_count": 0,
+      "failure_count": 0,
+      "neutral_count": 0,
+      "last_used": null,
+      "created": "2026-01-27T16:24:53.823086",
+      "contexts": [
+        "execution",
+        "verification",
+        "trust"
+      ],
+      "protocol_link": "memory/protocols/anti-hallucination-protocol.md",
+      "outcomes": [],
+      "notes": []
+    },
+    {
+      "pattern_id": "check-live-prices",
+      "name": "Check Live Prices",
+      "description": "Never assume prices from memory. Always check live before trading decisions. Crypto/options move fast - stale data = bad decisions.",
+      "weight": 79,
+      "success_count": 0,
+      "failure_count": 0,
+      "neutral_count": 0,
+      "last_used": null,
+      "created": "2026-01-27T16:24:53.839707",
+      "contexts": [
+        "trading",
+        "research",
+        "verification"
+      ],
+      "protocol_link": "memory/protocols/live-price-check-protocol.md",
+      "outcomes": [],
+      "notes": []
+    },
+    {
+      "pattern_id": "log-workarounds",
+      "name": "Log Workarounds",
+      "description": "When hitting blockers and finding workarounds, LOG them. Use workaround next time instead of repeating failure. Build solution library.",
+      "weight": 74,
+      "success_count": 0,
+      "failure_count": 0,
+      "neutral_count": 0,
+      "last_used": null,
+      "created": "2026-01-27T16:24:53.856227",
+      "contexts": [
+        "execution",
+        "debugging",
+        "learning"
+      ],
+      "protocol_link": "memory/protocols/workaround-logging-protocol.md",
+      "outcomes": [],
+      "notes": []
+    },
+    {
+      "pattern_id": "pre-mortem-before-big-decisions",
+      "name": "Pre-Mortem Before Big Decisions",
+      "description": "Before major trades or decisions, imagine it failed. What could go wrong? Address those risks before execution.",
+      "weight": 69,
+      "success_count": 0,
+      "failure_count": 0,
+      "neutral_count": 0,
+      "last_used": null,
+      "created": "2026-01-27T16:24:53.873024",
+      "contexts": [
+        "trading",
+        "decisions",
+        "risk"
+      ],
+      "protocol_link": "memory/protocols/pre-mortem-checklist.md",
+      "outcomes": [],
+      "notes": []
+    },
+    {
+      "pattern_id": "enforce-risk-limits",
+      "name": "Enforce Risk Limits",
+      "description": "Max 2% risk per trade, 6% daily, 10% weekly. If limit hit, STOP trading. No exceptions. Survival > profits.",
+      "weight": 95,
+      "success_count": 1,
+      "failure_count": 0,
+      "neutral_count": 0,
+      "last_used": "2026-01-27T16:25:07.355018",
+      "created": "2026-01-27T16:24:53.890089",
+      "contexts": [
+        "trading",
+        "risk",
+        "discipline"
+      ],
+      "protocol_link": "memory/protocols/risk-limits-enforcement.md",
+      "outcomes": [
+        "out-20260127-162507"
+      ],
+      "notes": [
+        {
+          "type": "strengthen",
+          "date": "2026-01-27T16:25:07.355023",
+          "change": "+10",
+          "reason": "Outcome: out-20260127-162507"
+        }
+      ]
+    },
+    {
+      "pattern_id": "verify-trade-execution",
+      "name": "Verify Trade Execution",
+      "description": "After placing trade, verify it actually executed. Check position shows up. Never announce done until confirmed in account.",
+      "weight": 79,
+      "success_count": 0,
+      "failure_count": 0,
+      "neutral_count": 0,
+      "last_used": null,
+      "created": "2026-01-27T16:24:53.908096",
+      "contexts": [
+        "trading",
+        "execution",
+        "verification"
+      ],
+      "protocol_link": "memory/protocols/trade-execution-verification.md",
+      "outcomes": [],
+      "notes": []
+    },
+    {
+      "pattern_id": "gut-check-before-major-decisions",
+      "name": "Gut Check Before Major Decisions",
+      "description": "Run gut check for red flags (FOMO, revenge, YOLO). If red flags present, pause and reconsider. Somatic markers exist for a reason.",
+      "weight": 74,
+      "success_count": 0,
+      "failure_count": 0,
+      "neutral_count": 0,
+      "last_used": null,
+      "created": "2026-01-27T16:24:53.925300",
+      "contexts": [
+        "trading",
+        "decisions",
+        "emotional"
+      ],
+      "protocol_link": "memory/protocols/emotional-intelligence-system.md",
+      "outcomes": [],
+      "notes": []
+    }
+  ]
+}

@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Atlas Eyes - Binary Motion Trails</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Courier New', monospace;
+            background: #000;
+            overflow: hidden;
+        }
+        
+        #main-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: 1fr 1fr;
+            width: 100vw;
+            height: 100vh;
+            gap: 2px;
+            background: #111;
+        }
+        
+        .view-panel {
+            position: relative;
+            background: #000;
+            overflow: hidden;
+        }
+        
+        .panel-canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+        
+        .panel-label {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            color: #ff8800;
+            font-size: 14px;
+            font-weight: bold;
+            text-shadow: 0 0 10px #ff8800;
+            z-index: 10;
+            pointer-events: none;
+        }
+        
+        .panel-stats {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            color: #ffaa44;
+            font-size: 11px;
+            text-align: right;
+            z-index: 10;
+            pointer-events: none;
+        }
+        
+        #controls {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.95);
+            padding: 30px;
+            border: 2px solid #ff8800;
+            color: #ff8800;
+            z-index: 100;
+            min-width: 400px;
+            display: none;
+        }
+        
+        #controls h3 {
+            margin-bottom: 20px;
+            text-align: center;
+            text-shadow: 0 0 10px #ff8800;
+        }
+        
+        .control-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .control-row label {
+            color: #ffaa44;
+            min-width: 150px;
+        }
+        
+        .control-row input[type="range"] {
+            flex: 1;
+            margin: 0 10px;
+        }
+        
+        .control-row span {
+            min-width: 50px;
+            text-align: right;
+        }
+        
+        button {
+            background: #ff8800;
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-weight: bold;
+            font-family: 'Courier New', monospace;
+            margin: 5px;
+        }
+        
+        button:hover {
+            background: #ffaa44;
+        }
+        
+        #toggle-controls {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 99;
+        }
+        
+        #status-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.8);
+            color: #ff8800;
+            padding: 10px 20px;
+            font-size: 12px;
+            z-index: 90;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .activity-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #00ff00;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+    </style>
+</head>
+<body>
+    <div id="main-container">
+        <div class="view-panel">
+            <canvas class="panel-canvas" id="canvas-tl"></canvas>
+            <div class="panel-label">LEFT HAND - BINARY TRAILS</div>
+            <div class="panel-stats">
+                <div>Density: <span id="stats-tl-density">0</span></div>
+                <div>Activity: <span id="stats-tl-activity">0</span>%</div>
+            </div>
+        </div>
+        
+        <div class="view-panel">
+            <canvas class="panel-canvas" id="canvas-tr"></canvas>
+            <div class="panel-label">RIGHT HAND - BINARY TRAILS</div>
+            <div class="panel-stats">
+                <div>Density: <span id="stats-tr-density">0</span></div>
+                <div>Activity: <span id="stats-tr-activity">0</span>%</div>
+            </div>
+        </div>
+        
+        <div class="view-panel">
+            <canvas class="panel-canvas" id="canvas-bl"></canvas>
+            <div class="panel-label">COMBINED VIEW</div>
+            <div class="panel-stats">
+                <div>Total Bits: <span id="stats-bl-bits">0</span></div>
+                <div>Motion: <span id="stats-bl-motion">0</span></div>
+            </div>
+        </div>
+        
+        <div class="view-panel">
+            <canvas class="panel-canvas" id="canvas-br"></canvas>
+            <div class="panel-label">CONSCIOUSNESS DENSITY</div>
+            <div class="panel-stats">
+                <div>Awareness: <span id="stats-br-awareness">0</span>%</div>
+                <div>State: <span id="stats-br-state">IDLE</span></div>
+            </div>
+        </div>
+    </div>
+    
+    <button id="toggle-controls">⚙️ CONTROLS</button>
+    
+    <div id="controls">
+        <h3>🎮 BINARY TRAILS CONFIGURATION</h3>
+        
+        <div class="control-row">
+            <label>Trail Length:</label>
+            <input type="range" id="trail-length" min="10" max="100" value="50">
+            <span id="trail-length-val">50</span>
+        </div>
+        
+        <div class="control-row">
+            <label>Density:</label>
+            <input type="range" id="density" min="10" max="100" value="60">
+            <span id="density-val">60</span>
+        </div>
+        
+        <div class="control-row">
+            <label>Glow Intensity:</label>
+            <input type="range" id="glow" min="0" max="30" value="15">
+            <span id="glow-val">15</span>
+        </div>
+        
+        <div class="control-row">
+            <label>Fade Speed:</label>
+            <input type="range" id="fade" min="1" max="20" value="10">
+            <span id="fade-val">10</span>
+        </div>
+        
+        <div style="text-align: center; margin-top: 20px; padding-top: 20px; border-top: 1px solid #ff8800;">
+            <button onclick="startDemo()">▶ START DEMO</button>
+            <button onclick="stopDemo()">⏸ PAUSE</button>
+            <button onclick="resetView()">🔄 RESET</button>
+            <button onclick="toggleControls()">✖ CLOSE</button>
+        </div>
+    </div>
+    
+    <div id="status-bar">
+        <div class="status-item">
+            <div class="activity-indicator"></div>
+            <span>BINARY TRAILS ACTIVE</span>
+        </div>
+        <div class="status-item">
+            <span id="mode-indicator">MODE: DEMO</span>
+        </div>
+        <div class="status-item">
+            <span>FPS: <span id="fps">60</span></span>
+        </div>
+    </div>
+
+    <script>
+        /**
+         * ATLAS EYES - BINARY MOTION TRAILS
+         * "Data is Reality" - Hand movement rendered as binary streams
+         * Dense 1s = Movement, Sparse 0s = Stillness
+         */
+
+        class BinaryTrailRenderer {
+            constructor(canvas, label) {
+                this.canvas = canvas;
+                this.ctx = canvas.getContext('2d');
+                this.label = label;
+                
+                this.trails = [];
+                this.maxTrails = 15;
+                this.trailLength = 50;
+                this.density = 0.6;
+                this.glow = 15;
+                this.fadeSpeed = 0.1;
+                
+                this.motionPoints = [];
+                this.currentActivity = 0;
+                
+                this.resize();
+            }
+            
+            resize() {
+                const rect = this.canvas.getBoundingClientRect();
+                this.canvas.width = rect.width;
+                this.canvas.height = rect.height;
+            }
+            
+            addMotionPoint(x, y, intensity = 1) {
+                this.motionPoints.push({
+                    x: x * this.canvas.width,
+                    y: y * this.canvas.height,
+                    intensity: intensity,
+                    timestamp: Date.now()
+                });
+                
+                // Create trail
+                this.trails.push({
+                    points: [{ x: x * this.canvas.width, y: y * this.canvas.height }],
+                    bits: [],
+                    intensity: intensity,
+                    age: 0,
+                    maxAge: this.trailLength
+                });
+                
+                if (this.trails.length > this.maxTrails) {
+                    this.trails.shift();
+                }
+            }
+            
+            update(deltaTime) {
+                // Clean old motion points
+                const now = Date.now();
+                this.motionPoints = this.motionPoints.filter(p => now - p.timestamp < 2000);
+                
+                // Calculate activity level
+                this.currentActivity = Math.min(100, this.motionPoints.length * 5);
+                
+                // Update trails
+                this.trails.forEach((trail, idx) => {
+                    trail.age += deltaTime;
+                    
+                    // Generate bits along trail
+                    if (trail.bits.length < this.trailLength * this.density) {
+                        const lastPoint = trail.points[trail.points.length - 1];
+                        trail.bits.push({
+                            x: lastPoint.x + (Math.random() - 0.5) * 20,
+                            y: lastPoint.y + (Math.random() - 0.5) * 20,
+                            char: trail.intensity > 0.5 ? '1' : '0',
+                            opacity: 1,
+                            size: 10 + trail.intensity * 8,
+                            age: 0
+                        });
+                    }
+                    
+                    // Age and fade bits
+                    trail.bits.forEach(bit => {
+                        bit.age += deltaTime * this.fadeSpeed;
+                        bit.opacity = Math.max(0, 1 - (bit.age / this.trailLength));
+                    });
+                    
+                    // Remove dead bits
+                    trail.bits = trail.bits.filter(bit => bit.opacity > 0.01);
+                });
+                
+                // Remove dead trails
+                this.trails = this.trails.filter(trail => trail.age < trail.maxAge);
+            }
+            
+            render() {
+                // Fade effect
+                this.ctx.fillStyle = 'rgba(0, 0, 0, 0.15)';
+                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                this.ctx.textAlign = 'center';
+                this.ctx.textBaseline = 'middle';
+                
+                // Render trails
+                this.trails.forEach(trail => {
+                    trail.bits.forEach(bit => {
+                        const color = bit.char === '1' ? '#ff8800' : '#884400';
+                        
+                        this.ctx.font = `bold ${bit.size}px "Courier New", monospace`;
+                        this.ctx.fillStyle = color;
+                        this.ctx.globalAlpha = bit.opacity;
+                        
+                        if (this.glow > 0 && bit.char === '1') {
+                            this.ctx.shadowBlur = this.glow;
+                            this.ctx.shadowColor = color;
+                        }
+                        
+                        this.ctx.fillText(bit.char, bit.x, bit.y);
+                        
+                        this.ctx.shadowBlur = 0;
+                    });
+                });
+                
+                this.ctx.globalAlpha = 1;
+            }
+            
+            getBitCount() {
+                let count = 0;
+                this.trails.forEach(trail => {
+                    count += trail.bits.length;
+                });
+                return count;
+            }
+        }
+
+        // Initialize renderers
+        const renderers = {
+            tl: new BinaryTrailRenderer(document.getElementById('canvas-tl'), 'LEFT'),
+            tr: new BinaryTrailRenderer(document.getElementById('canvas-tr'), 'RIGHT'),
+            bl: new BinaryTrailRenderer(document.getElementById('canvas-bl'), 'COMBINED'),
+            br: new BinaryTrailRenderer(document.getElementById('canvas-br'), 'DENSITY')
+        };
+        
+        // Demo mode
+        let demoMode = false;
+        let demoInterval = null;
+        
+        function startDemo() {
+            demoMode = true;
+            document.getElementById('mode-indicator').textContent = 'MODE: DEMO';
+            
+            demoInterval = setInterval(() => {
+                // Simulate hand movements
+                const leftX = 0.3 + Math.random() * 0.4;
+                const leftY = 0.3 + Math.random() * 0.4;
+                const rightX = 0.3 + Math.random() * 0.4;
+                const rightY = 0.3 + Math.random() * 0.4;
+                
+                const intensity = 0.5 + Math.random() * 0.5;
+                
+                renderers.tl.addMotionPoint(leftX, leftY, intensity);
+                renderers.tr.addMotionPoint(rightX, rightY, intensity);
+                renderers.bl.addMotionPoint((leftX + rightX) / 2, (leftY + rightY) / 2, intensity);
+                renderers.br.addMotionPoint(0.5, 0.5, intensity);
+            }, 100);
+        }
+        
+        function stopDemo() {
+            demoMode = false;
+            if (demoInterval) {
+                clearInterval(demoInterval);
+                demoInterval = null;
+            }
+            document.getElementById('mode-indicator').textContent = 'MODE: PAUSED';
+        }
+        
+        function resetView() {
+            Object.values(renderers).forEach(r => {
+                r.trails = [];
+                r.motionPoints = [];
+            });
+        }
+        
+        // Animation loop
+        let lastTime = performance.now();
+        let frameCount = 0;
+        let lastFpsUpdate = performance.now();
+        
+        function animate() {
+            const currentTime = performance.now();
+            const deltaTime = (currentTime - lastTime) / 16.67;
+            lastTime = currentTime;
+            
+            // Update all renderers
+            Object.values(renderers).forEach(r => {
+                r.update(deltaTime);
+                r.render();
+            });
+            
+            // Update stats
+            document.getElementById('stats-tl-density').textContent = renderers.tl.getBitCount();
+            document.getElementById('stats-tl-activity').textContent = Math.round(renderers.tl.currentActivity);
+            
+            document.getElementById('stats-tr-density').textContent = renderers.tr.getBitCount();
+            document.getElementById('stats-tr-activity').textContent = Math.round(renderers.tr.currentActivity);
+            
+            const totalBits = Object.values(renderers).reduce((sum, r) => sum + r.getBitCount(), 0);
+            document.getElementById('stats-bl-bits').textContent = totalBits;
+            document.getElementById('stats-bl-motion').textContent = Math.round(
+                (renderers.tl.currentActivity + renderers.tr.currentActivity) / 2
+            );
+            
+            const awareness = Math.min(100, totalBits / 10);
+            document.getElementById('stats-br-awareness').textContent = Math.round(awareness);
+            
+            let state = 'IDLE';
+            if (awareness > 80) state = 'INTENSE';
+            else if (awareness > 50) state = 'ACTIVE';
+            else if (awareness > 20) state = 'AWARE';
+            document.getElementById('stats-br-state').textContent = state;
+            
+            // FPS
+            frameCount++;
+            if (currentTime - lastFpsUpdate >= 1000) {
+                document.getElementById('fps').textContent = frameCount;
+                frameCount = 0;
+                lastFpsUpdate = currentTime;
+            }
+            
+            requestAnimationFrame(animate);
+        }
+        
+        animate();
+        
+        // Controls
+        function toggleControls() {
+            const controls = document.getElementById('controls');
+            controls.style.display = controls.style.display === 'none' ? 'block' : 'none';
+        }
+        
+        document.getElementById('toggle-controls').addEventListener('click', toggleControls);
+        
+        document.getElementById('trail-length').addEventListener('input', (e) => {
+            const val = parseInt(e.target.value);
+            Object.values(renderers).forEach(r => r.trailLength = val);
+            document.getElementById('trail-length-val').textContent = val;
+        });
+        
+        document.getElementById('density').addEventListener('input', (e) => {
+            const val = parseInt(e.target.value) / 100;
+            Object.values(renderers).forEach(r => r.density = val);
+            document.getElementById('density-val').textContent = e.target.value;
+        });
+        
+        document.getElementById('glow').addEventListener('input', (e) => {
+            const val = parseInt(e.target.value);
+            Object.values(renderers).forEach(r => r.glow = val);
+            document.getElementById('glow-val').textContent = val;
+        });
+        
+        document.getElementById('fade').addEventListener('input', (e) => {
+            const val = parseInt(e.target.value) / 10;
+            Object.values(renderers).forEach(r => r.fadeSpeed = val);
+            document.getElementById('fade-val').textContent = e.target.value;
+        });
+        
+        // Resize handler
+        window.addEventListener('resize', () => {
+            Object.values(renderers).forEach(r => r.resize());
+        });
+        
+        // WebSocket integration for live Atlas Eyes data
+        // const ws = new WebSocket('ws://localhost:8765');
+        // ws.onmessage = (event) => {
+        //     const data = JSON.parse(event.data);
+        //     if (data.left_hand) {
+        //         renderers.tl.addMotionPoint(data.left_hand.x, data.left_hand.y, data.left_hand.intensity);
+        //     }
+        //     if (data.right_hand) {
+        //         renderers.tr.addMotionPoint(data.right_hand.x, data.right_hand.y, data.right_hand.intensity);
+        //     }
+        // };
+        
+        // Auto-start demo
+        startDemo();
+        
+        console.log('✅ Binary Trails Dashboard initialized');
+        console.log('👁️ Ready for Atlas Eyes integration');
+        console.log('🔌 WebSocket integration ready - see code comments');
+    </script>
+</body>
+</html>

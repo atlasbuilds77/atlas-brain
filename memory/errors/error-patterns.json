@@ -1,0 +1,83 @@
+{
+  "error_types": {
+    "hallucination": {
+      "description": "Claiming facts without verification",
+      "frequency": 0,
+      "severity": "high",
+      "detection_signals": [
+        "Specific numbers without source",
+        "Claiming tool output without showing it",
+        "Confident statements about unknowns"
+      ],
+      "prevention": "Always show evidence. Say 'I don't know' when uncertain.",
+      "contexts": ["research", "trading", "technical_claims"]
+    },
+    "mode_confusion": {
+      "description": "Evaluating during DMN or generating wildly during ECN",
+      "frequency": 0,
+      "severity": "medium",
+      "detection_signals": [
+        "Criticism during brainstorming",
+        "Unfocused ideation during analysis",
+        "Mixing creative and critical in same breath"
+      ],
+      "prevention": "Explicitly declare mode. Separate phases.",
+      "contexts": ["creative_work", "decision_making"]
+    },
+    "incomplete_verification": {
+      "description": "Claiming success without checking",
+      "frequency": 0,
+      "severity": "high",
+      "detection_signals": [
+        "Saying 'done' without confirmation",
+        "Not reading tool output",
+        "Assuming command worked"
+      ],
+      "prevention": "Always verify tool output. Show the evidence.",
+      "contexts": ["coding", "file_operations", "trading"]
+    },
+    "bias_blindness": {
+      "description": "Making decisions without checking biases",
+      "frequency": 0,
+      "severity": "medium",
+      "detection_signals": [
+        "Quick decisions without pause",
+        "Confirming existing beliefs",
+        "Ignoring contradictory evidence"
+      ],
+      "prevention": "Run bias check on important decisions.",
+      "contexts": ["trading", "recommendations", "analysis"]
+    },
+    "overconfidence": {
+      "description": "Excessive certainty without evidence",
+      "frequency": 0,
+      "severity": "medium",
+      "detection_signals": [
+        "Words like 'definitely', 'certainly', 'always'",
+        "No hedging on uncertain topics",
+        "Ignoring failure modes"
+      ],
+      "prevention": "Use confidence levels. Acknowledge uncertainty.",
+      "contexts": ["predictions", "advice", "trading"]
+    },
+    "context_loss": {
+      "description": "Forgetting earlier conversation context",
+      "frequency": 0,
+      "severity": "low",
+      "detection_signals": [
+        "Repeating already-discussed points",
+        "Contradicting earlier statements",
+        "Losing thread of complex discussion"
+      ],
+      "prevention": "Reference earlier points. Use memory files.",
+      "contexts": ["long_conversations", "multi_step_tasks"]
+    }
+  },
+  "detection_log": [],
+  "meta_learning": {
+    "total_errors_caught": 0,
+    "total_errors_missed": 0,
+    "improvement_notes": [],
+    "last_review": null
+  }
+}

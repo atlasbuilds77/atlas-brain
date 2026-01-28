@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Atlas Eyes - Live Monitor</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', sans-serif;
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1b3c 100%);
+            color: #ffffff;
+            overflow: hidden;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            grid-template-rows: auto 1fr auto;
+            height: 100vh;
+            gap: 16px;
+            padding: 16px;
+        }
+
+        /* Header */
+        .header {
+            grid-column: 1 / -1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 30px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .logo {
+            font-size: 28px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .status {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #10b981;
+            box-shadow: 0 0 20px #10b981;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .status-text {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        /* Video Feed */
+        .video-panel {
+            grid-row: 2;
+            grid-column: 1;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .panel-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.5);
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .video-container {
+            width: 100%;
+            height: calc(100% - 35px);
+            background: #000;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .video-placeholder {
+            color: rgba(255, 255, 255, 0.3);
+            font-size: 16px;
+        }
+
+        /* Heart Monitor */
+        .heart-panel {
+            grid-row: 2;
+            grid-column: 2;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .heart-icon {
+            width: 120px;
+            height: 120px;
+            margin-bottom: 30px;
+            filter: drop-shadow(0 0 30px rgba(239, 68, 68, 0.6));
+        }
+
+        .bpm-display {
+            font-size: 72px;
+            font-weight: 700;
+            color: #ef4444;
+            text-shadow: 0 0 30px rgba(239, 68, 68, 0.5);
+            margin-bottom: 10px;
+        }
+
+        .bpm-label {
+            font-size: 18px;
+            color: rgba(255, 255, 255, 0.5);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .confidence-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            margin-top: 20px;
+            overflow: hidden;
+        }
+
+        .confidence-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ef4444 0%, #10b981 100%);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        /* Tremor Indicator */
+        .tremor-panel {
+            grid-row: 2;
+            grid-column: 3;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .tremor-status {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .tremor-status.active {
+            border-color: #f59e0b;
+            background: rgba(245, 158, 11, 0.1);
+            box-shadow: 0 0 40px rgba(245, 158, 11, 0.5);
+        }
+
+        .tremor-freq {
+            font-size: 32px;
+            font-weight: 600;
+            color: #f59e0b;
+            margin-bottom: 10px;
+        }
+
+        .tremor-label {
+            font-size: 16px;
+            color: rgba(255, 255, 255, 0.5);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+        }
+
+        /* Stats Panel */
+        .stats-panel {
+            grid-column: 1 / -1;
+            grid-row: 3;
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            gap: 16px;
+        }
+
+        .waveform-panel {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 20px;
+        }
+
+        .spectrum-panel {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 20px;
+        }
+
+        .metrics-panel {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 20px;
+        }
+
+        .metric-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .metric-item:last-child {
+            border-bottom: none;
+        }
+
+        .metric-label {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .metric-value {
+            font-size: 18px;
+            font-weight: 600;
+            color: #667eea;
+        }
+
+        canvas {
+            max-height: 180px;
+        }
+
+        /* Controls */
+        .controls {
+            display: flex;
+            gap: 10px;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        button:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        button.primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        button.primary:hover {
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        /* Alert Badge */
+        .alert-badge {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            background: rgba(239, 68, 68, 0.2);
+            border: 2px solid #ef4444;
+            border-radius: 10px;
+            color: #ef4444;
+            font-weight: 600;
+            animation: shake 0.5s ease-in-out infinite;
+            display: none;
+        }
+
+        .alert-badge.active {
+            display: block;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .container {
+                grid-template-columns: 1fr 1fr;
+                grid-template-rows: auto 1fr 1fr auto;
+            }
+
+            .video-panel {
+                grid-column: 1 / -1;
+            }
+
+            .stats-panel {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="logo">👁️ Atlas Eyes</div>
+            <div class="status">
+                <div class="status-indicator" id="statusIndicator"></div>
+                <span class="status-text" id="statusText">Connecting...</span>
+            </div>
+            <div class="controls">
+                <button onclick="toggleFullscreen()">Fullscreen</button>
+                <button onclick="exportData()">Export Data</button>
+                <button onclick="captureScreenshot()">Screenshot</button>
+                <button class="primary" onclick="toggleSound()">🔊 Sound</button>
+            </div>
+        </div>
+
+        <!-- Video Feed -->
+        <div class="video-panel">
+            <div class="panel-title">Live Camera Feed</div>
+            <div class="video-container">
+                <div class="video-placeholder">Camera feed will appear here</div>
+            </div>
+            <div class="alert-badge" id="tremorAlert">⚠️ TREMOR DETECTED</div>
+        </div>
+
+        <!-- Heart Monitor -->
+        <div class="heart-panel">
+            <svg class="heart-icon" id="heartIcon" viewBox="0 0 32 29.6">
+                <path fill="#ef4444" d="M23.6,0c-3.4,0-6.3,2.7-7.6,5.6C14.7,2.7,11.8,0,8.4,0C3.8,0,0,3.8,0,8.4c0,9.4,9.5,11.9,16,21.2
+                c6.1-9.3,16-12.1,16-21.2C32,3.8,28.2,0,23.6,0z"/>
+            </svg>
+            <div class="bpm-display" id="bpmDisplay">--</div>
+            <div class="bpm-label">BPM</div>
+            <div class="confidence-bar">
+                <div class="confidence-fill" id="confidenceFill" style="width: 0%"></div>
+            </div>
+        </div>
+
+        <!-- Tremor Indicator -->
+        <div class="tremor-panel">
+            <div class="tremor-status" id="tremorStatus">
+                <span>🤚</span>
+            </div>
+            <div class="tremor-freq" id="tremorFreq">--</div>
+            <div class="tremor-label">Hz</div>
+        </div>
+
+        <!-- Stats Panel -->
+        <div class="stats-panel">
+            <!-- Waveform -->
+            <div class="waveform-panel">
+                <div class="panel-title">Motion Waveform</div>
+                <canvas id="waveformChart"></canvas>
+            </div>
+
+            <!-- Frequency Spectrum -->
+            <div class="spectrum-panel">
+                <div class="panel-title">Frequency Spectrum</div>
+                <canvas id="spectrumChart"></canvas>
+            </div>
+
+            <!-- Metrics -->
+            <div class="metrics-panel">
+                <div class="panel-title">System Metrics</div>
+                <div class="metric-item">
+                    <span class="metric-label">FPS</span>
+                    <span class="metric-value" id="fpsValue">--</span>
+                </div>
+                <div class="metric-item">
+                    <span class="metric-label">Motion Intensity</span>
+                    <span class="metric-value" id="intensityValue">--</span>
+                </div>
+                <div class="metric-item">
+                    <span class="metric-label">Confidence</span>
+                    <span class="metric-value" id="confidenceValue">--</span>
+                </div>
+                <div class="metric-item">
+                    <span class="metric-label">Uptime</span>
+                    <span class="metric-value" id="uptimeValue">--</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+        const SERVER_URL = 'http://localhost:5000';
+        const MAX_WAVEFORM_POINTS = 300; // 10 seconds at 30fps
+        const HEARTBEAT_RANGE = [1.0, 2.0]; // Hz (60-120 BPM)
+        const TREMOR_FREQ = 4.0; // Hz
+        
+        // State
+        let socket = null;
+        let soundEnabled = false;
+        let startTime = Date.now();
+        let dataLog = [];
+        
+        // Chart data
+        let waveformData = [];
+        let spectrumData = new Array(20).fill(0);
+        
+        // Initialize Charts
+        const waveformChart = new Chart(document.getElementById('waveformChart'), {
+            type: 'line',
+            data: {
+                labels: Array(MAX_WAVEFORM_POINTS).fill(''),
+                datasets: [{
+                    label: 'Motion Intensity',
+                    data: waveformData,
+                    borderColor: 'rgba(102, 126, 234, 1)',
+                    backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                    borderWidth: 2,
+                    tension: 0.4,
+                    fill: true,
+                    pointRadius: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                animation: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    x: { display: false },
+                    y: {
+                        min: 0,
+                        max: 1,
+                        grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                        ticks: { color: 'rgba(255, 255, 255, 0.5)' }
+                    }
+                }
+            }
+        });
+        
+        const spectrumChart = new Chart(document.getElementById('spectrumChart'), {
+            type: 'bar',
+            data: {
+                labels: Array.from({length: 20}, (_, i) => (i * 0.5).toFixed(1)),
+                datasets: [{
+                    label: 'Amplitude',
+                    data: spectrumData,
+                    backgroundColor: spectrumData.map((_, i) => {
+                        const freq = i * 0.5;
+                        if (freq >= HEARTBEAT_RANGE[0] && freq <= HEARTBEAT_RANGE[1]) {
+                            return 'rgba(239, 68, 68, 0.8)'; // Red for heartbeat range
+                        } else if (Math.abs(freq - TREMOR_FREQ) < 0.5) {
+                            return 'rgba(245, 158, 11, 0.8)'; // Orange for tremor range
+                        }
+                        return 'rgba(102, 126, 234, 0.6)';
+                    }),
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                animation: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    x: {
+                        grid: { display: false },
+                        ticks: { color: 'rgba(255, 255, 255, 0.5)', font: { size: 10 } }
+                    },
+                    y: {
+                        min: 0,
+                        grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                        ticks: { color: 'rgba(255, 255, 255, 0.5)' }
+                    }
+                }
+            }
+        });
+        
+        // WebSocket Connection
+        function connectWebSocket() {
+            ws = new WebSocket(WS_URL);
+            
+            ws.onopen = () => {
+                console.log('✅ Connected to Atlas Eyes');
+                document.getElementById('statusText').textContent = 'Connected';
+                document.getElementById('statusIndicator').style.background = '#10b981';
+            };
+            
+            ws.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                updateDashboard(data);
+                dataLog.push(data);
+            };
+            
+            ws.onerror = (error) => {
+                console.error('WebSocket error:', error);
+                document.getElementById('statusText').textContent = 'Error';
+                document.getElementById('statusIndicator').style.background = '#ef4444';
+            };
+            
+            ws.onclose = () => {
+                console.log('❌ Disconnected from Atlas Eyes');
+                document.getElementById('statusText').textContent = 'Disconnected';
+                document.getElementById('statusIndicator').style.background = '#6b7280';
+                // Reconnect after 3 seconds
+                setTimeout(connectWebSocket, 3000);
+            };
+        }
+        
+        // Update Dashboard
+        function updateDashboard(data) {
+            // Update waveform
+            waveformData.push(data.motion_intensity || 0);
+            if (waveformData.length > MAX_WAVEFORM_POINTS) {
+                waveformData.shift();
+            }
+            waveformChart.update();
+            
+            // Update spectrum (simulate FFT data)
+            if (data.frequency_spectrum) {
+                spectrumData = data.frequency_spectrum;
+                spectrumChart.data.datasets[0].data = spectrumData;
+                spectrumChart.update();
+            }
+            
+            // Update BPM
+            if (data.bpm && data.bpm > 0) {
+                animateNumber('bpmDisplay', data.bpm, 0);
+                animateHeartbeat(data.bpm);
+            } else {
+                document.getElementById('bpmDisplay').textContent = '--';
+            }
+            
+            // Update confidence
+            const confidence = data.confidence || 0;
+            document.getElementById('confidenceFill').style.width = (confidence * 100) + '%';
+            document.getElementById('confidenceValue').textContent = (confidence * 100).toFixed(0) + '%';
+            
+            // Update tremor indicator
+            if (data.tremor_freq && data.tremor_freq > 0) {
+                document.getElementById('tremorFreq').textContent = data.tremor_freq.toFixed(1);
+                document.getElementById('tremorStatus').classList.add('active');
+                document.getElementById('tremorAlert').classList.add('active');
+                
+                if (soundEnabled) {
+                    playTremorAlert();
+                }
+            } else {
+                document.getElementById('tremorFreq').textContent = '--';
+                document.getElementById('tremorStatus').classList.remove('active');
+                document.getElementById('tremorAlert').classList.remove('active');
+            }
+            
+            // Update metrics
+            document.getElementById('fpsValue').textContent = (data.fps || 0).toFixed(1);
+            document.getElementById('intensityValue').textContent = ((data.motion_intensity || 0) * 100).toFixed(1) + '%';
+            
+            const uptime = Math.floor((Date.now() - startTime) / 1000);
+            const minutes = Math.floor(uptime / 60);
+            const seconds = uptime % 60;
+            document.getElementById('uptimeValue').textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        }
+        
+        // Animate number changes
+        function animateNumber(elementId, target, decimals = 0) {
+            const element = document.getElementById(elementId);
+            const current = parseFloat(element.textContent) || 0;
+            
+            anime({
+                targets: { value: current },
+                value: target,
+                duration: 500,
+                easing: 'easeOutQuad',
+                update: function(anim) {
+                    element.textContent = anim.animations[0].currentValue.toFixed(decimals);
+                }
+            });
+        }
+        
+        // Animate heartbeat pulse
+        function animateHeartbeat(bpm) {
+            const interval = 60000 / bpm; // ms between beats
+            
+            anime({
+                targets: '#heartIcon',
+                scale: [1, 1.2, 1],
+                duration: 300,
+                easing: 'easeInOutQuad'
+            });
+        }
+        
+        // Sound alert for tremor
+        let audioContext = null;
+        function playTremorAlert() {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.value = 800;
+            oscillator.type = 'sine';
+            
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.5);
+        }
+        
+        // UI Controls
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+            } else {
+                document.exitFullscreen();
+            }
+        }
+        
+        function exportData() {
+            const csv = convertToCSV(dataLog);
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `atlas_eyes_${Date.now()}.csv`;
+            a.click();
+        }
+        
+        function convertToCSV(data) {
+            if (data.length === 0) return '';
+            
+            const headers = Object.keys(data[0]).join(',');
+            const rows = data.map(row => Object.values(row).join(','));
+            return headers + '\n' + rows.join('\n');
+        }
+        
+        function captureScreenshot() {
+            // Simple implementation - in production would use html2canvas
+            alert('Screenshot functionality would capture the dashboard view');
+        }
+        
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            const btn = event.target;
+            btn.textContent = soundEnabled ? '🔊 Sound' : '🔇 Muted';
+        }
+        
+        // Initialize
+        connectWebSocket();
+        
+        // Simulate data for testing (remove when WebSocket is working)
+        if (false) {
+            setInterval(() => {
+                const mockData = {
+                    timestamp: Date.now(),
+                    motion_intensity: Math.random() * 0.5 + 0.2,
+                    bpm: Math.floor(Math.random() * 40 + 60),
+                    tremor_freq: Math.random() > 0.8 ? 4.1 : 0,
+                    confidence: Math.random() * 0.5 + 0.5,
+                    fps: 30,
+                    frequency_spectrum: Array.from({length: 20}, () => Math.random())
+                };
+                updateDashboard(mockData);
+            }, 33); // ~30fps
+        }
+    </script>
+</body>
+</html>

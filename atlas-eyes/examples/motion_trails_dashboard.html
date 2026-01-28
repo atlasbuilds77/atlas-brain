@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Atlas Eyes - Motion Extractor</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #000;
+            color: #0ff;
+            font-family: 'Consolas', 'Courier New', monospace;
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        #container {
+            display: flex;
+            height: 100vh;
+            width: 100vw;
+        }
+
+        .panel {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid #222;
+        }
+
+        #left-panel {
+            width: 60%;
+            border-right: 2px solid #0ff;
+        }
+
+        #right-panel {
+            width: 40%;
+            background: #000;
+        }
+
+        .label {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 5px 15px;
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid #0ff;
+            font-size: 14px;
+            letter-spacing: 2px;
+            z-index: 100;
+            color: #0ff;
+        }
+
+        #video-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #000;
+        }
+
+        #video-feed {
+            max-width: 100%;
+            max-height: 100%;
+            display: block;
+        }
+
+        #roi-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+        }
+
+        #motion-canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+            background: #000;
+        }
+
+        .status {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            font-size: 11px;
+            color: #0ff;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 5px 10px;
+            border: 1px solid #0ff;
+            z-index: 100;
+        }
+
+        .status.disconnected {
+            color: #f00;
+            border-color: #f00;
+        }
+
+        #metrics {
+            position: absolute;
+            top: 50px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.9);
+            border: 1px solid #0ff;
+            padding: 10px;
+            font-size: 11px;
+            line-height: 1.6;
+            z-index: 100;
+        }
+
+        .metric-line {
+            display: flex;
+            justify-content: space-between;
+            gap: 15px;
+        }
+
+        .metric-label {
+            color: #888;
+        }
+
+        .metric-value {
+            color: #0ff;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <!-- Left Panel: Camera Feed -->
+        <div id="left-panel" class="panel">
+            <div class="label">[ CAMERA FEED ]</div>
+            <div id="video-container">
+                <img id="video-feed" src="http://localhost:5001/video_feed" alt="Video Feed">
+                <canvas id="roi-overlay"></canvas>
+            </div>
+            <div id="feed-status" class="status">Connecting...</div>
+        </div>
+
+        <!-- Right Panel: Motion Extraction -->
+        <div id="right-panel" class="panel">
+            <div class="label" style="color: #0f0;">[ MOTION EXTRACTION ]</div>
+            <canvas id="motion-canvas"></canvas>
+            <div id="ws-status" class="status">WebSocket: Connecting...</div>
+            <div id="metrics">
+                <div class="metric-line">
+                    <span class="metric-label">BPM:</span>
+                    <span class="metric-value" id="bpm-value">--</span>
+                </div>
+                <div class="metric-line">
+                    <span class="metric-label">TREMOR:</span>
+                    <span class="metric-value" id="tremor-value">--</span>
+                </div>
+                <div class="metric-line">
+                    <span class="metric-label">FPS:</span>
+                    <span class="metric-value" id="fps-value">--</span>
+                </div>
+                <div class="metric-line">
+                    <span class="metric-label">MOTION:</span>
+                    <span class="metric-value" id="motion-value">--</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+        const CONFIG = {
+            videoFeedUrl: 'http://localhost:5001/video_feed',
+            wsUrl: 'ws://localhost:5001/ws',
+            frameBufferSize: 8,
+            motionThreshold: 25,
+            trailFadeDuration: 5000, // 5 seconds
+            glowLayers: [
+                { blur: 15, alpha: 0.3 },
+                { blur: 8, alpha: 0.5 },
+                { blur: 2, alpha: 0.8 }
+            ],
+            roiColors: {
+                hands: '#00FFFF',      // cyan
+                face: '#00FF00',       // green
+                chest: '#88FFFF'       // light cyan
+            }
+        };
+
+        // State
+        let ws = null;
+        let roiData = null;
+        let frameBuffer = [];
+        let motionTrails = [];
+        let lastFrameTime = Date.now();
+        let fps = 0;
+        let frameCount = 0;
+
+        // Canvas setup
+        const videoFeed = document.getElementById('video-feed');
+        const roiCanvas = document.getElementById('roi-overlay');
+        const roiCtx = roiCanvas.getContext('2d');
+        const motionCanvas = document.getElementById('motion-canvas');
+        const motionCtx = motionCanvas.getContext('2d');
+
+        // Hidden canvas for frame capture and processing
+        const captureCanvas = document.createElement('canvas');
+        const captureCtx = captureCanvas.getContext('2d');
+
+        // Initialize
+        function init() {
+            resizeCanvases();
+            window.addEventListener('resize', resizeCanvases);
+            connectWebSocket();
+            startMotionDetection();
+            updateFPS();
+        }
+
+        function resizeCanvases() {
+            const videoContainer = document.getElementById('video-container');
+            const rightPanel = document.getElementById('right-panel');
+
+            // ROI overlay matches video container
+            roiCanvas.width = videoContainer.clientWidth;
+            roiCanvas.height = videoContainer.clientHeight;
+
+            // Motion canvas matches right panel
+            motionCanvas.width = rightPanel.clientWidth;
+            motionCanvas.height = rightPanel.clientHeight;
+
+            // Capture canvas for processing
+            captureCanvas.width = 320; // Lower res for performance
+            captureCanvas.height = 240;
+        }
+
+        // WebSocket connection
+        function connectWebSocket() {
+            ws = new WebSocket(CONFIG.wsUrl);
+            
+            ws.onopen = () => {
+                updateStatus('ws-status', 'WebSocket: Connected', false);
+            };
+
+            ws.onmessage = (event) => {
+                try {
+                    roiData = JSON.parse(event.data);
+                    updateMetrics();
+                    drawROI();
+                } catch (e) {
+                    console.error('WebSocket parse error:', e);
+                }
+            };
+
+            ws.onerror = (error) => {
+                updateStatus('ws-status', 'WebSocket: Error', true);
+            };
+
+            ws.onclose = () => {
+                updateStatus('ws-status', 'WebSocket: Disconnected', true);
+                setTimeout(connectWebSocket, 3000);
+            };
+        }
+
+        // Draw ROI boxes on video feed
+        function drawROI() {
+            if (!roiData) return;
+
+            roiCtx.clearRect(0, 0, roiCanvas.width, roiCanvas.height);
+
+            const videoRect = videoFeed.getBoundingClientRect();
+            const containerRect = roiCanvas.getBoundingClientRect();
+            
+            // Calculate video position within container
+            const videoX = (containerRect.width - videoRect.width) / 2;
+            const videoY = (containerRect.height - videoRect.height) / 2;
+            const scaleX = videoRect.width / videoFeed.naturalWidth;
+            const scaleY = videoRect.height / videoFeed.naturalHeight;
+
+            ['hands', 'face', 'chest'].forEach(region => {
+                if (roiData[region]) {
+                    const roi = roiData[region];
+                    const color = CONFIG.roiColors[region];
+
+                    const x = videoX + roi.x * scaleX;
+                    const y = videoY + roi.y * scaleY;
+                    const w = roi.w * scaleX;
+                    const h = roi.h * scaleY;
+
+                    roiCtx.strokeStyle = color;
+                    roiCtx.lineWidth = 2;
+                    roiCtx.strokeRect(x, y, w, h);
+
+                    // Label
+                    roiCtx.fillStyle = color;
+                    roiCtx.font = '12px Consolas';
+                    roiCtx.fillText(region.toUpperCase(), x, y - 5);
+                }
+            });
+        }
+
+        // Motion detection
+        function startMotionDetection() {
+            requestAnimationFrame(detectAndRenderMotion);
+        }
+
+        function detectAndRenderMotion() {
+            // Capture current frame
+            captureCtx.drawImage(videoFeed, 0, 0, captureCanvas.width, captureCanvas.height);
+            const currentFrame = captureCtx.getImageData(0, 0, captureCanvas.width, captureCanvas.height);
+
+            // Detect motion if we have enough frames
+            if (frameBuffer.length >= 3) {
+                const motionPixels = detectMotion(currentFrame);
+                addMotionTrails(motionPixels);
+            }
+
+            // Update frame buffer
+            frameBuffer.push(currentFrame);
+            if (frameBuffer.length > CONFIG.frameBufferSize) {
+                frameBuffer.shift();
+            }
+
+            // Render motion trails
+            renderMotionCanvas();
+
+            // Continue loop
+            frameCount++;
+            requestAnimationFrame(detectAndRenderMotion);
+        }
+
+        function detectMotion(currentFrame) {
+            const motionPixels = [];
+            const data = currentFrame.data;
+            const width = currentFrame.width;
+            const height = currentFrame.height;
+
+            // Compare with multiple previous frames for temporal analysis
+            const compareFrames = [frameBuffer[frameBuffer.length - 1], frameBuffer[frameBuffer.length - 3]];
+
+            for (let y = 0; y < height; y += 2) { // Skip pixels for performance
+                for (let x = 0; x < width; x += 2) {
+                    const idx = (y * width + x) * 4;
+                    
+                    let maxDiff = 0;
+                    
+                    // Compare with previous frames
+                    compareFrames.forEach(prevFrame => {
+                        if (prevFrame) {
+                            const prevData = prevFrame.data;
+                            const rDiff = Math.abs(data[idx] - prevData[idx]);
+                            const gDiff = Math.abs(data[idx + 1] - prevData[idx + 1]);
+                            const bDiff = Math.abs(data[idx + 2] - prevData[idx + 2]);
+                            const diff = (rDiff + gDiff + bDiff) / 3;
+                            maxDiff = Math.max(maxDiff, diff);
+                        }
+                    });
+
+                    // If significant motion detected
+                    if (maxDiff > CONFIG.motionThreshold) {
+                        const region = getRegionForPixel(x, y);
+                        motionPixels.push({
+                            x: x,
+                            y: y,
+                            r: data[idx],
+                            g: data[idx + 1],
+                            b: data[idx + 2],
+                            intensity: maxDiff / 255,
+                            region: region
+                        });
+                    }
+                }
+            }
+
+            return motionPixels;
+        }
+
+        function getRegionForPixel(x, y) {
+            if (!roiData) return 'unknown';
+
+            const videoWidth = videoFeed.naturalWidth;
+            const videoHeight = videoFeed.naturalHeight;
+            const captureWidth = captureCanvas.width;
+            const captureHeight = captureCanvas.height;
+
+            // Scale pixel coords to video coords
+            const videoX = (x / captureWidth) * videoWidth;
+            const videoY = (y / captureHeight) * videoHeight;
+
+            // Check which ROI region contains this pixel
+            for (const [region, roi] of Object.entries(roiData)) {
+                if (roi && roi.x !== undefined) {
+                    if (videoX >= roi.x && videoX <= roi.x + roi.w &&
+                        videoY >= roi.y && videoY <= roi.y + roi.h) {
+                        return region;
+                    }
+                }
+            }
+
+            return 'unknown';
+        }
+
+        function addMotionTrails(motionPixels) {
+            const now = Date.now();
+            
+            motionPixels.forEach(pixel => {
+                motionTrails.push({
+                    x: pixel.x,
+                    y: pixel.y,
+                    r: pixel.r,
+                    g: pixel.g,
+                    b: pixel.b,
+                    intensity: pixel.intensity,
+                    region: pixel.region,
+                    timestamp: now,
+                    color: CONFIG.roiColors[pixel.region] || '#FFFFFF'
+                });
+            });
+
+            // Remove old trails
+            motionTrails = motionTrails.filter(trail => 
+                now - trail.timestamp < CONFIG.trailFadeDuration
+            );
+        }
+
+        function renderMotionCanvas() {
+            const canvas = motionCanvas;
+            const ctx = motionCtx;
+            const now = Date.now();
+
+            // Clear with pure black
+            ctx.fillStyle = '#000';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Draw subtle grid
+            ctx.strokeStyle = '#111';
+            ctx.lineWidth = 1;
+            const gridSize = 40;
+            for (let x = 0; x < canvas.width; x += gridSize) {
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, canvas.height);
+                ctx.stroke();
+            }
+            for (let y = 0; y < canvas.height; y += gridSize) {
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(canvas.width, y);
+                ctx.stroke();
+            }
+
+            // Scale factor from capture canvas to motion canvas
+            const scaleX = canvas.width / captureCanvas.width;
+            const scaleY = canvas.height / captureCanvas.height;
+
+            // Render trails with triple-layer glow
+            CONFIG.glowLayers.forEach(layer => {
+                motionTrails.forEach(trail => {
+                    const age = now - trail.timestamp;
+                    const fadeProgress = age / CONFIG.trailFadeDuration;
+                    const alpha = (1 - fadeProgress) * layer.alpha;
+
+                    if (alpha > 0.01) {
+                        const x = trail.x * scaleX;
+                        const y = trail.y * scaleY;
+
+                        ctx.shadowBlur = layer.blur;
+                        ctx.shadowColor = trail.color;
+                        ctx.fillStyle = trail.color;
+                        ctx.globalAlpha = alpha * trail.intensity;
+
+                        // Draw motion pixel
+                        const size = layer.blur > 10 ? 6 : (layer.blur > 5 ? 4 : 2);
+                        ctx.fillRect(x - size/2, y - size/2, size, size);
+                    }
+                });
+            });
+
+            // Reset shadow and alpha
+            ctx.shadowBlur = 0;
+            ctx.globalAlpha = 1;
+
+            // Draw data annotations
+            if (roiData) {
+                ctx.font = '11px Consolas';
+                let yOffset = 50;
+                
+                ['hands', 'face', 'chest'].forEach(region => {
+                    const trailCount = motionTrails.filter(t => t.region === region).length;
+                    if (trailCount > 0) {
+                        ctx.fillStyle = CONFIG.roiColors[region];
+                        ctx.fillText(`${region.toUpperCase()}: ${trailCount} points`, 10, yOffset);
+                        yOffset += 15;
+                    }
+                });
+            }
+
+            // Update motion metric
+            document.getElementById('motion-value').textContent = motionTrails.length;
+        }
+
+        // Update metrics display
+        function updateMetrics() {
+            if (!roiData) return;
+
+            if (roiData.bpm !== undefined) {
+                document.getElementById('bpm-value').textContent = roiData.bpm.toFixed(1);
+            }
+            if (roiData.tremor !== undefined) {
+                document.getElementById('tremor-value').textContent = roiData.tremor.toFixed(2) + ' Hz';
+            }
+        }
+
+        function updateFPS() {
+            const now = Date.now();
+            fps = frameCount / ((now - lastFrameTime) / 1000);
+            document.getElementById('fps-value').textContent = fps.toFixed(1);
+            frameCount = 0;
+            lastFrameTime = now;
+            setTimeout(updateFPS, 1000);
+        }
+
+        function updateStatus(elementId, message, isError) {
+            const el = document.getElementById(elementId);
+            el.textContent = message;
+            el.classList.toggle('disconnected', isError);
+        }
+
+        // Video feed status
+        videoFeed.onload = () => {
+            updateStatus('feed-status', 'Video: Connected', false);
+        };
+
+        videoFeed.onerror = () => {
+            updateStatus('feed-status', 'Video: Error', true);
+        };
+
+        // Start application
+        init();
+    </script>
+</body>
+</html>

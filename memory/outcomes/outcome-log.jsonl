@@ -1,0 +1,2 @@
+{"outcome_id": "out-20260127-162507", "timestamp": "2026-01-27T16:25:07.300067", "action": "Test trade", "context": "Testing pattern integration", "outcome": "success", "pattern_ids": ["never-chase-trades", "enforce-risk-limits"], "learning": "Patterns work!", "category": "trading", "details": {}}
+{"outcome_id": "out-20260127-162507", "timestamp": "2026-01-27T16:25:07.396197", "action": "Missed entry chased", "context": "FOMO situation", "outcome": "failure", "pattern_ids": ["never-chase-trades"], "learning": "Chasing still hurts", "category": "trading", "details": {}}

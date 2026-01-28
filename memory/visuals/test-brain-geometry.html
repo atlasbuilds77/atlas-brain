@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brain Geometry Test</title>
+    <style>
+        body { margin: 0; overflow: hidden; }
+        canvas { display: block; }
+        #info {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            color: white;
+            font-family: monospace;
+            background: rgba(0,0,0,0.5);
+            padding: 10px;
+            border-radius: 5px;
+            z-index: 100;
+        }
+        #controls {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            color: white;
+            font-family: monospace;
+            background: rgba(0,0,0,0.5);
+            padding: 10px;
+            border-radius: 5px;
+            z-index: 100;
+        }
+    </style>
+</head>
+<body>
+    <div id="info">
+        <div>Brain Geometry Test</div>
+        <div id="stats">Vertices: 0, Faces: 0</div>
+        <div id="region">Hover over brain to see region</div>
+    </div>
+    <div id="controls">
+        <button onclick="toggleWireframe()">Toggle Wireframe</button>
+        <button onclick="toggleRegions()">Toggle Regions</button>
+        <button onclick="changeDetail(16)">Low Detail</button>
+        <button onclick="changeDetail(32)">Medium Detail</button>
+        <button onclick="changeDetail(64)">High Detail</button>
+    </div>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script type="module">
+        import { createBrainScene, brainRegions } from './brain-geometry.js';
+        
+        let scene, camera, renderer, brainScene;
+        let raycaster, mouse;
+        let wireframe = false;
+        let showRegions = true;
+        let currentDetail = 32;
+        
+        init();
+        animate();
+        
+        function init() {
+            // Create Three.js scene
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x111122);
+            
+            // Camera
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.set(3, 2, 3);
+            
+            // Renderer
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            document.body.appendChild(renderer.domElement);
+            
+            // Lights
+            const ambientLight = new THREE.AmbientLight(0x404040, 0.6);
+            scene.add(ambientLight);
+            
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            directionalLight.position.set(5, 5, 5);
+            directionalLight.castShadow = true;
+            scene.add(directionalLight);
+            
+            // Create brain scene
+            createBrain();
+            
+            // Raycaster for mouse interaction
+            raycaster = new THREE.Raycaster();
+            mouse = new THREE.Vector2();
+            
+            // Event listeners
+            window.addEventListener('resize', onWindowResize);
+            window.addEventListener('mousemove', onMouseMove);
+            window.addEventListener('click', onClick);
+        }
+        
+        function createBrain() {
+            // Remove old brain if exists
+            if (brainScene) {
+                scene.remove(brainScene.scene);
+            }
+            
+            // Create new brain with current detail
+            brainScene = createBrainScene({ detail: currentDetail });
+            scene.add(brainScene.scene);
+            
+            // Update stats
+            const vertices = brainScene.brainGeometry.attributes.position.count;
+            const faces = brainScene.brainGeometry.index ? brainScene.brainGeometry.index.count / 3 : 0;
+            document.getElementById('stats').textContent = 
+                `Vertices: ${vertices}, Faces: ${faces}`;
+            
+            // Center and scale
+            brainScene.scene.position.set(0, 0, 0);
+            brainScene.scene.scale.set(2, 2, 2);
+            
+            // Add rotation animation
+            brainScene.scene.userData.rotationSpeed = 0.002;
+        }
+        
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+        
+        function onMouseMove(event) {
+            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+            
+            // Update raycaster
+            raycaster.setFromCamera(mouse, camera);
+            
+            // Check for intersection with brain
+            const intersects = raycaster.intersectObject(brainScene.brainMesh, true);
+            
+            if (intersects.length > 0) {
+                const point = intersects[0].point;
+                
+                // Simple region detection based on position
+                let region = 'Unknown';
+                const { x, y, z } = point;
+                
+                if (z > 0.5) region = 'Frontal Lobe';
+                else if (z > 0) region = 'Parietal Lobe';
+                else if (y < -0.2) region = 'Temporal Lobe';
+                else if (z < -0.3) region = 'Occipital Lobe';
+                else if (y < -0.4) region = 'Cerebellum';
+                else if (y < -0.6) region = 'Brainstem';
+                
+                document.getElementById('region').textContent = 
+                    `Region: ${region} (${x.toFixed(2)}, ${y.toFixed(2)}, ${z.toFixed(2)})`;
+            }
+        }
+        
+        function onClick(event) {
+            onMouseMove(event);
+            
+            // Highlight clicked region
+            const regionDiv = document.getElementById('region');
+            regionDiv.style.color = '#ff9900';
+            setTimeout(() => {
+                regionDiv.style.color = 'white';
+            }, 500);
+        }
+        
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            // Rotate brain
+            if (brainScene && brainScene.scene.userData.rotationSpeed) {
+                brainScene.scene.rotation.y += brainScene.scene.userData.rotationSpeed;
+            }
+            
+            renderer.render(scene, camera);
+        }
+        
+        // Control functions
+        window.toggleWireframe = function() {
+            wireframe = !wireframe;
+            brainScene.brainMesh.material.wireframe = wireframe;
+        };
+        
+        window.toggleRegions = function() {
+            showRegions = !showRegions;
+            Object.values(brainScene.regionMeshes).forEach(mesh => {
+                mesh.visible = showRegions;
+            });
+        };
+        
+        window.changeDetail = function(detail) {
+            currentDetail = detail;
+            createBrain();
+        };
+    </script>
+</body>
+</html>

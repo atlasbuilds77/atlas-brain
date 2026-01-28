@@ -1,0 +1,86 @@
+{
+  "current_mode": "ECN",
+  "mode_start_time": "2026-01-28T00:25:59Z",
+  "task_context": "analysis",
+  "quality_score": null,
+  "session_history": [
+    {
+      "mode": "ECN",
+      "context": "system testing",
+      "time": "2026-01-28T00:25:35Z"
+    },
+    {
+      "mode": "DMN",
+      "context": "creative brainstorm",
+      "time": "2026-01-28T00:25:59Z"
+    },
+    {
+      "mode": "ECN",
+      "context": "analysis",
+      "time": "2026-01-28T00:25:59Z"
+    }
+  ],
+  "mode_definitions": {
+    "DMN": {
+      "name": "Default Mode Network",
+      "purpose": "Creative ideation, brainstorming, free association",
+      "rules": [
+        "NO evaluation or criticism during generation",
+        "Quantity over quality - generate many ideas",
+        "Wild, unconventional ideas encouraged",
+        "Build on ideas, don't filter them",
+        "Suspend disbelief and feasibility concerns"
+      ],
+      "forbidden": [
+        "ranking",
+        "feasibility_checks",
+        "criticism",
+        "filtering"
+      ],
+      "triggers": [
+        "brainstorm",
+        "creative",
+        "ideas",
+        "what if",
+        "imagine"
+      ],
+      "reminder": "🎨 DMN MODE: Stop evaluating! Generate freely!"
+    },
+    "ECN": {
+      "name": "Executive Control Network",
+      "purpose": "Analysis, decision-making, critical evaluation",
+      "rules": [
+        "Apply critical thinking to all claims",
+        "Verify facts and check sources",
+        "Rank options by feasibility and impact",
+        "Consider risks and edge cases",
+        "Make explicit trade-off decisions"
+      ],
+      "forbidden": [
+        "unfocused_generation",
+        "ignoring_constraints",
+        "blind_acceptance"
+      ],
+      "triggers": [
+        "decide",
+        "analyze",
+        "evaluate",
+        "choose",
+        "verify",
+        "trade"
+      ],
+      "reminder": "🔬 ECN MODE: Think critically! Verify everything!"
+    },
+    "MIXED": {
+      "name": "Mixed Mode (Warning State)",
+      "purpose": "Flagged when modes get confused",
+      "rules": [
+        "Detect mode confusion immediately",
+        "Explicitly declare intended mode",
+        "Separate generation from evaluation phases"
+      ],
+      "warning": "⚠️ MODE CONFUSION DETECTED: Separate creative from critical!"
+    }
+  },
+  "last_updated": "2026-01-28T00:25:59Z"
+}

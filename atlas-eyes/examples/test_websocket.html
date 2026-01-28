@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>WebSocket Connection Test</title>
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <style>
+        body {
+            font-family: monospace;
+            background: #000;
+            color: #0f0;
+            padding: 20px;
+        }
+        .success { color: #0f0; }
+        .error { color: #f00; }
+        .info { color: #0ff; }
+        #log { margin-top: 20px; }
+        .log-entry { margin: 5px 0; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Atlas Eyes WebSocket Test</h1>
+    <div id="status">Connecting...</div>
+    <div id="log"></div>
+    
+    <script>
+        const log = document.getElementById('log');
+        const status = document.getElementById('status');
+        
+        function addLog(message, type = 'info') {
+            const entry = document.createElement('div');
+            entry.className = `log-entry ${type}`;
+            entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            log.appendChild(entry);
+            console.log(message);
+        }
+        
+        addLog('🔌 Connecting to http://localhost:5001...');
+        
+        const socket = io('http://localhost:5001', {
+            transports: ['websocket', 'polling'],
+            reconnection: true
+        });
+        
+        socket.on('connect', () => {
+            status.innerHTML = '<span class="success">✅ CONNECTED</span>';
+            addLog('✅ Connected successfully!', 'success');
+            addLog(`   Socket ID: ${socket.id}`, 'success');
+        });
+        
+        socket.on('disconnect', () => {
+            status.innerHTML = '<span class="error">❌ DISCONNECTED</span>';
+            addLog('❌ Disconnected', 'error');
+        });
+        
+        socket.on('connect_error', (error) => {
+            status.innerHTML = '<span class="error">❌ CONNECTION ERROR</span>';
+            addLog(`🔥 Connection error: ${error.message}`, 'error');
+        });
+        
+        socket.on('data', (data) => {
+            addLog(`📊 Motion data: FPS=${data.fps?.toFixed(1)}, Intensity=${(data.motion_intensity * 100)?.toFixed(1)}%`, 'success');
+        });
+        
+        socket.on('roi_data', (data) => {
+            const rois = data.rois || {};
+            const hands = rois.hands?.length || 0;
+            const face = rois.face ? 'Yes' : 'No';
+            const chest = rois.chest ? 'Yes' : 'No';
+            addLog(`🎯 ROI data: Hands=${hands}, Face=${face}, Chest=${chest}`, 'success');
+        });
+        
+        // Test HTTP API as well
+        fetch('http://localhost:5001/api/status')
+            .then(res => res.json())
+            .then(data => {
+                addLog(`🌐 HTTP API test: ${data.status} (FPS: ${data.stats?.fps?.toFixed(1)})`, 'success');
+            })
+            .catch(err => {
+                addLog(`🌐 HTTP API test failed: ${err.message}`, 'error');
+            });
+    </script>
+</body>
+</html>

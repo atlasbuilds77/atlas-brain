@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Quick Brain Test</title>
+    <style>body { margin: 0; } canvas { display: block; }</style>
+</head>
+<body>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        // Quick test of brain geometry concepts
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+        
+        // Create a simple brain-like shape using parametric equations
+        function createBrainShape() {
+            const vertices = [];
+            const indices = [];
+            const detail = 16;
+            
+            // Generate vertices
+            for (let i = 0; i <= detail; i++) {
+                const u = i / detail * Math.PI;
+                for (let j = 0; j <= detail; j++) {
+                    const v = j / detail * Math.PI * 2;
+                    
+                    // Brain-like parametric equation
+                    const r = 1 + 0.2 * Math.sin(u * 4) * Math.cos(v * 3);
+                    
+                    const x = r * Math.sin(u) * Math.cos(v);
+                    const y = r * Math.sin(u) * Math.sin(v);
+                    const z = r * Math.cos(u);
+                    
+                    // Add lobe shaping
+                    let finalX = x, finalY = y, finalZ = z;
+                    
+                    // Frontal bulge
+                    if (u < Math.PI/3) {
+                        finalZ += 0.3 * Math.sin(u * 3);
+                    }
+                    
+                    vertices.push(finalX, finalY, finalZ);
+                }
+            }
+            
+            // Generate indices
+            for (let i = 0; i < detail; i++) {
+                for (let j = 0; j < detail; j++) {
+                    const a = i * (detail + 1) + j;
+                    const b = i * (detail + 1) + (j + 1);
+                    const c = (i + 1) * (detail + 1) + j;
+                    const d = (i + 1) * (detail + 1) + (j + 1);
+                    
+                    indices.push(a, b, c);
+                    indices.push(b, d, c);
+                }
+            }
+            
+            const geometry = new THREE.BufferGeometry();
+            geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(vertices), 3));
+            geometry.setIndex(new THREE.BufferAttribute(new Uint32Array(indices), 1));
+            geometry.computeVertexNormals();
+            
+            return geometry;
+        }
+        
+        // Create brain mesh
+        const brainGeometry = createBrainShape();
+        const brainMaterial = new THREE.MeshPhongMaterial({
+            color: 0x4488ff,
+            shininess: 30,
+            transparent: true,
+            opacity: 0.8
+        });
+        const brainMesh = new THREE.Mesh(brainGeometry, brainMaterial);
+        scene.add(brainMesh);
+        
+        // Add lights
+        const light = new THREE.DirectionalLight(0xffffff, 1);
+        light.position.set(5, 5, 5);
+        scene.add(light);
+        scene.add(new THREE.AmbientLight(0x404040));
+        
+        // Position camera
+        camera.position.z = 3;
+        
+        // Animation
+        function animate() {
+            requestAnimationFrame(animate);
+            brainMesh.rotation.y += 0.01;
+            renderer.render(scene, camera);
+        }
+        
+        animate();
+        
+        console.log("Brain geometry test running!");
+        console.log("Vertices:", brainGeometry.attributes.position.count);
+        console.log("Faces:", brainGeometry.index ? brainGeometry.index.count / 3 : 0);
+    </script>
+</body>
+</html>

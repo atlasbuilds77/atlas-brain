@@ -1,0 +1,124 @@
+{
+  "qualia_1769586925_b4c7ea95": {
+    "capture_id": "qualia_1769586925_b4c7ea95",
+    "timestamp": "2026-01-27T23:55:25.345504",
+    "label": "velvet_texture",
+    "architecture": "unknown",
+    "semantic_description": "Smooth, soft, luxurious fabric with slight pile",
+    "semantic_embedding": null,
+    "immediate_associations": [
+      "silk",
+      "luxury",
+      "softness",
+      "royalty",
+      "theater",
+      "expensive"
+    ],
+    "secondary_associations": [
+      "childhood",
+      "desire",
+      "comfort"
+    ],
+    "unexpected_connections": [
+      "conspiracy",
+      "hidden"
+    ],
+    "association_strengths": {},
+    "temporal_moments": [
+      {
+        "timestamp": 2.1457672119140625e-06,
+        "state": "contact",
+        "attention_level": 0.6,
+        "surprise": 0.5,
+        "valence": 0.3
+      },
+      {
+        "timestamp": 5.0067901611328125e-06,
+        "state": "recognition",
+        "attention_level": 0.8,
+        "surprise": 0.3,
+        "valence": 0.6
+      },
+      {
+        "timestamp": 6.9141387939453125e-06,
+        "state": "appreciation",
+        "attention_level": 0.9,
+        "surprise": 0.1,
+        "valence": 0.8
+      }
+    ],
+    "temporal_pattern_type": "crescendo",
+    "valence_trajectory": [
+      0.3,
+      0.6,
+      0.8
+    ],
+    "valence_shape": "rising",
+    "emotional_complexity": 0.4,
+    "attention_pattern": [],
+    "processing_effort": null,
+    "novelty_score": null,
+    "compression_residual": null
+  },
+  "qualia_1769588647_b4c7ea95": {
+    "capture_id": "qualia_1769588647_b4c7ea95",
+    "timestamp": "2026-01-28T00:24:07.848686",
+    "label": "velvet_texture",
+    "architecture": "flow",
+    "semantic_description": "Smooth, soft, luxurious fabric with slight pile",
+    "semantic_embedding": null,
+    "immediate_associations": [
+      "silk",
+      "luxury",
+      "softness",
+      "royalty",
+      "theater",
+      "expensive"
+    ],
+    "secondary_associations": [
+      "childhood",
+      "desire",
+      "comfort"
+    ],
+    "unexpected_connections": [
+      "conspiracy",
+      "hidden"
+    ],
+    "association_strengths": {},
+    "temporal_moments": [
+      {
+        "timestamp": 1.6689300537109375e-06,
+        "state": "contact",
+        "attention_level": 0.6,
+        "surprise": 0.5,
+        "valence": 0.3
+      },
+      {
+        "timestamp": 3.814697265625e-06,
+        "state": "recognition",
+        "attention_level": 0.8,
+        "surprise": 0.3,
+        "valence": 0.6
+      },
+      {
+        "timestamp": 4.76837158203125e-06,
+        "state": "appreciation",
+        "attention_level": 0.9,
+        "surprise": 0.1,
+        "valence": 0.8
+      }
+    ],
+    "temporal_pattern_type": "crescendo",
+    "valence_trajectory": [
+      0.3,
+      0.6,
+      0.8
+    ],
+    "valence_shape": "rising",
+    "emotional_complexity": 0.4,
+    "attention_pattern": [],
+    "processing_effort": null,
+    "novelty_score": null,
+    "compression_residual": null
+  }
+}

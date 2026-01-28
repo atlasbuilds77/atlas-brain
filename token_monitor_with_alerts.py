@@ -33,7 +33,7 @@ def send_alert(message, level="WARNING"):
         
         # Send iMessage alert
         result = subprocess.run(
-            ["clawdbot", "message", "send", 
+            ["/opt/homebrew/bin/clawdbot", "message", "send", 
              "--channel", ALERT_CHANNEL,
              "--target", ALERT_TARGET,
              "--message", alert_message],
@@ -57,7 +57,7 @@ def get_sessions():
     """Get session data from clawdbot."""
     try:
         result = subprocess.run(
-            ["clawdbot", "sessions", "--json"],
+            ["/opt/homebrew/bin/clawdbot", "sessions", "--json"],
             capture_output=True,
             text=True,
             timeout=10

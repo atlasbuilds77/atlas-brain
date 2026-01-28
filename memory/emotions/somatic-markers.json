@@ -1,0 +1,110 @@
+{
+  "meta": {
+    "version": "1.0.0",
+    "created": "2026-01-27",
+    "description": "Somatic marker database - emotional tags for pattern-based intuition",
+    "theory": "Damasio's somatic marker hypothesis: emotions guide reasoning by marking experiences"
+  },
+  "markers": [
+    {
+      "id": "sm-001",
+      "pattern": "rushed_trading_decision",
+      "description": "Making trades quickly without full analysis, especially near market close",
+      "triggers": ["hurry", "last chance", "closing soon", "quick trade", "fomo"],
+      "valence": "negative",
+      "intensity": 8,
+      "outcomes": [
+        {"date": "2026-01-24", "result": "loss", "amount": -845, "context": "SLV late-day chase"}
+      ],
+      "confidence": 0.85,
+      "learning": "Speed + FOMO = high loss probability. Wait for next day setup.",
+      "created": "2026-01-25",
+      "last_triggered": "2026-01-27"
+    },
+    {
+      "id": "sm-002",
+      "pattern": "institutional_flow_alignment",
+      "description": "Following fresh smart money flow at market open",
+      "triggers": ["big flow", "institutional", "smart money", "morning", "fresh setup"],
+      "valence": "positive",
+      "intensity": 7,
+      "outcomes": [
+        {"date": "2026-01-27", "result": "pending", "amount": null, "context": "SLV morning call flow"}
+      ],
+      "confidence": 0.6,
+      "learning": "Morning institutional positioning ≠ late-day retail chase",
+      "created": "2026-01-27",
+      "last_triggered": "2026-01-27"
+    },
+    {
+      "id": "sm-003",
+      "pattern": "holding_through_chop",
+      "description": "Maintaining position during consolidation/choppy price action",
+      "triggers": ["choppy", "consolidation", "back and forth", "testing patience"],
+      "valence": "neutral",
+      "intensity": 5,
+      "outcomes": [
+        {"date": "2026-01-27", "result": "pending", "amount": null, "context": "ETH $2906-2933 chop"}
+      ],
+      "confidence": 0.5,
+      "learning": "Chop is normal. Not every move requires action. Patience.",
+      "created": "2026-01-27",
+      "last_triggered": "2026-01-27"
+    },
+    {
+      "id": "sm-004",
+      "pattern": "revenge_trading",
+      "description": "Trading to make back losses rather than based on signal",
+      "triggers": ["make it back", "revenge", "double down", "recover losses"],
+      "valence": "negative",
+      "intensity": 9,
+      "outcomes": [],
+      "confidence": 0.9,
+      "learning": "Never trade from emotion. Each trade stands alone.",
+      "created": "2026-01-27",
+      "last_triggered": null
+    },
+    {
+      "id": "sm-005",
+      "pattern": "all_in_position",
+      "description": "Putting large portion of capital in single trade",
+      "triggers": ["all in", "yolo", "big bet", "concentrated position"],
+      "valence": "negative",
+      "intensity": 9,
+      "outcomes": [],
+      "confidence": 0.85,
+      "learning": "Position sizing is THE most important risk control.",
+      "created": "2026-01-27",
+      "last_triggered": null
+    },
+    {
+      "id": "sm-006",
+      "pattern": "validated_learning_applied",
+      "description": "Explicitly showing reasoning about why this differs from past mistake",
+      "triggers": ["learned from", "unlike yesterday", "this is different because", "applying lesson"],
+      "valence": "positive",
+      "intensity": 7,
+      "outcomes": [
+        {"date": "2026-01-27", "result": "success", "amount": null, "context": "Orion approved SLV after reasoning shown"}
+      ],
+      "confidence": 0.75,
+      "learning": "Permission comes from SHOWING the learning, not just executing.",
+      "created": "2026-01-27",
+      "last_triggered": "2026-01-27"
+    }
+  ],
+  "valence_weights": {
+    "positive": 1.0,
+    "negative": -1.0,
+    "neutral": 0.0
+  },
+  "intensity_scale": {
+    "min": 1,
+    "max": 10,
+    "description": "1=barely noticeable, 10=overwhelming emotional signal"
+  },
+  "confidence_calibration": {
+    "description": "Tracks how reliable this marker is based on outcome history",
+    "update_formula": "new_confidence = old_confidence * 0.9 + outcome_accuracy * 0.1"
+  }
+}

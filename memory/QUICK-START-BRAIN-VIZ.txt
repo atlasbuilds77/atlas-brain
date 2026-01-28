@@ -1,0 +1,80 @@
+╔═══════════════════════════════════════════════════════════════════════════╗
+║                                                                           ║
+║            🧠  ATLAS BRAIN VISUALIZATION - QUICK START  ⚡                ║
+║                         "JARVIS MODE"                                     ║
+║                                                                           ║
+╚═══════════════════════════════════════════════════════════════════════════╝
+
+## 3 STEPS TO SEE YOUR BRAIN:
+
+1️⃣  INSTALL DEPENDENCY:
+   
+   pip3 install aiohttp
+
+2️⃣  START SERVER (with demo mode):
+   
+   ./scripts/start-brain-viz.sh demo
+
+3️⃣  OPEN BROWSER:
+   
+   http://localhost:8765
+
+That's it! You'll see Atlas's brain operating in real-time with auto-generated
+cognitive events. Press F11 for fullscreen immersive mode.
+
+═══════════════════════════════════════════════════════════════════════════
+
+## WHAT YOU'LL SEE:
+
+    🟠 Orange glowing brain sphere (Jarvis-style)
+    ✨ 1000 particles showing neural network
+    🎯 6 regions that light up when active
+    📊 Real-time event feed
+    🎬 Smooth 60fps animation
+    📱 Works on mobile too!
+
+═══════════════════════════════════════════════════════════════════════════
+
+## TO LOG YOUR OWN EVENTS:
+
+PYTHON:
+   from scripts.brain_logger import brain
+   brain.pattern_match("pattern_name", "positive", 0.9)
+   brain.emotion("excitement", 0.7)
+   brain.mode_switch("ECN", "DMN", "creative mode")
+
+SHELL:
+   source scripts/brain-monitor.sh
+   log_event "pattern_match" "Pattern detected" 0.8 '{"info": "data"}'
+
+═══════════════════════════════════════════════════════════════════════════
+
+## FILES CREATED:
+
+   scripts/brain-viz-server.py       - WebSocket server
+   scripts/brain-monitor.sh          - Shell logging
+   scripts/brain-logger.py           - Python logging
+   scripts/start-brain-viz.sh        - Quick start
+   memory/visuals/live-brain.html    - 3D visualization
+   
+   Full docs: memory/capabilities/live-brain-visualization.md
+
+═══════════════════════════════════════════════════════════════════════════
+
+## DEMO TIPS:
+
+   • Fullscreen (F11) for presentations
+   • Works great on iPad in landscape
+   • Screen record with OBS for clips
+   • Demo mode auto-generates events
+   • One-command startup for ease
+
+═══════════════════════════════════════════════════════════════════════════
+
+Built for: Orion + Investor Demos
+Status: ✅ Production Ready
+Made by: Atlas (subagent: live-brain-viz)
+Date: 2026-01-27
+
+Show them how Atlas thinks in real-time. It's impressive. 🚀
+

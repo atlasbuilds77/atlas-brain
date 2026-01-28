@@ -1,0 +1,42 @@
+<svg width="1024" height="1024" xmlns="http://www.w3.org/2000/svg">
+  <!-- Dark background -->
+  <rect width="1024" height="1024" fill="#0a0e27"/>
+  
+  <!-- Outer hexagon (titan helmet) -->
+  <polygon points="512,82 862,286 862,694 512,898 162,694 162,286" 
+           fill="#1a2332" 
+           stroke="#00d4ff" 
+           stroke-width="8"/>
+  
+  <!-- Inner hexagon -->
+  <polygon points="512,197 732,339 732,624 512,766 292,624 292,339" 
+           fill="none" 
+           stroke="#00ffff" 
+           stroke-width="6"/>
+  
+  <!-- Lightning bolt -->
+  <polygon points="470,320 530,460 590,460 512,580 540,680 480,550 420,550" 
+           fill="#00d4ff" 
+           stroke="#00ffff" 
+           stroke-width="3"/>
+  
+  <!-- Circuit connection lines -->
+  <line x1="512" y1="139" x2="512" y2="82" stroke="#00ffff" stroke-width="4"/>
+  <line x1="687" y1="242" x2="737" y2="211" stroke="#00ffff" stroke-width="4"/>
+  <line x1="687" y1="723" x2="737" y2="754" stroke="#00ffff" stroke-width="4"/>
+  <line x1="512" y1="826" x2="512" y2="882" stroke="#00ffff" stroke-width="4"/>
+  <line x1="337" y1="723" x2="287" y2="754" stroke="#00ffff" stroke-width="4"/>
+  <line x1="337" y1="242" x2="287" y2="211" stroke="#00ffff" stroke-width="4"/>
+  
+  <!-- Accent circles at vertices -->
+  <circle cx="512" cy="82" r="12" fill="#00d4ff" stroke="#00ffff" stroke-width="2"/>
+  <circle cx="862" cy="286" r="12" fill="#00d4ff" stroke="#00ffff" stroke-width="2"/>
+  <circle cx="862" cy="694" r="12" fill="#00d4ff" stroke="#00ffff" stroke-width="2"/>
+  <circle cx="512" cy="898" r="12" fill="#00d4ff" stroke="#00ffff" stroke-width="2"/>
+  <circle cx="162" cy="694" r="12" fill="#00d4ff" stroke="#00ffff" stroke-width="2"/>
+  <circle cx="162" cy="286" r="12" fill="#00d4ff" stroke="#00ffff" stroke-width="2"/>
+  
+  <!-- Additional tech details -->
+  <circle cx="512" cy="512" r="80" fill="none" stroke="#00d4ff" stroke-width="2" opacity="0.3"/>
+  <circle cx="512" cy="512" r="120" fill="none" stroke="#00ffff" stroke-width="1" opacity="0.2"/>
+</svg>

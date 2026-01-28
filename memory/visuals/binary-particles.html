@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Binary Particle System - Atlas Visualization</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Courier New', monospace;
+            background: #000;
+            overflow: hidden;
+        }
+        
+        #canvas {
+            display: block;
+            width: 100vw;
+            height: 100vh;
+        }
+        
+        #controls {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 20px;
+            border: 1px solid #ff8800;
+            color: #ff8800;
+            font-size: 12px;
+            z-index: 100;
+            min-width: 250px;
+        }
+        
+        #controls h3 {
+            margin-bottom: 15px;
+            text-shadow: 0 0 10px #ff8800;
+        }
+        
+        .control-group {
+            margin-bottom: 12px;
+        }
+        
+        .control-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #ffaa44;
+        }
+        
+        .control-group input[type="range"] {
+            width: 100%;
+        }
+        
+        .control-group select,
+        .control-group input[type="number"] {
+            width: 100%;
+            background: #111;
+            color: #ff8800;
+            border: 1px solid #ff8800;
+            padding: 5px;
+        }
+        
+        button {
+            background: #ff8800;
+            color: #000;
+            border: none;
+            padding: 8px 15px;
+            cursor: pointer;
+            margin: 5px 5px 5px 0;
+            font-weight: bold;
+        }
+        
+        button:hover {
+            background: #ffaa44;
+        }
+        
+        .preset-btn {
+            font-size: 11px;
+            padding: 5px 10px;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+    
+    <div id="controls">
+        <h3>⚙️ BINARY PARTICLE SYSTEM</h3>
+        
+        <div class="control-group">
+            <label>Density: <span id="density-value">50</span>%</label>
+            <input type="range" id="density" min="10" max="100" value="50">
+        </div>
+        
+        <div class="control-group">
+            <label>Speed: <span id="speed-value">1.0</span>x</label>
+            <input type="range" id="speed" min="0.1" max="5" step="0.1" value="1">
+        </div>
+        
+        <div class="control-group">
+            <label>Animation Mode:</label>
+            <select id="animation-mode">
+                <option value="falling">Falling (Matrix)</option>
+                <option value="flowing">Flowing (Waves)</option>
+                <option value="cascading">Cascading (Streams)</option>
+                <option value="static">Static (Noise)</option>
+                <option value="pulse">Pulse (Breathing)</option>
+            </select>
+        </div>
+        
+        <div class="control-group">
+            <label>Color Scheme:</label>
+            <select id="color-scheme">
+                <option value="orange">Orange (Default)</option>
+                <option value="green">Green (Matrix)</option>
+                <option value="cyan">Cyan (Digital)</option>
+                <option value="purple">Purple (Neural)</option>
+                <option value="rainbow">Rainbow (Spectrum)</option>
+            </select>
+        </div>
+        
+        <div class="control-group">
+            <label>Intensity: <span id="intensity-value">70</span>%</label>
+            <input type="range" id="intensity" min="0" max="100" value="70">
+        </div>
+        
+        <div class="control-group">
+            <label>Glow: <span id="glow-value">15</span>px</label>
+            <input type="range" id="glow" min="0" max="30" value="15">
+        </div>
+        
+        <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #ff8800;">
+            <label style="font-weight: bold; margin-bottom: 8px; display: block;">Presets:</label>
+            <button class="preset-btn" onclick="loadPreset('consciousness')">Consciousness</button>
+            <button class="preset-btn" onclick="loadPreset('matrix')">Matrix</button>
+            <button class="preset-btn" onclick="loadPreset('neural')">Neural</button>
+            <button class="preset-btn" onclick="loadPreset('calm')">Calm</button>
+            <button class="preset-btn" onclick="loadPreset('intense')">Intense</button>
+        </div>
+    </div>
+
+    <script>
+        /**
+         * BINARY PARTICLE SYSTEM
+         * Matrix-inspired visualization using 0s and 1s
+         * Performance-optimized for 60fps
+         */
+
+        class BinaryParticleSystem {
+            constructor(canvas) {
+                this.canvas = canvas;
+                this.ctx = canvas.getContext('2d');
+                this.particles = [];
+                this.config = {
+                    density: 0.5,        // Particle density (0-1)
+                    speed: 1.0,          // Animation speed multiplier
+                    animationMode: 'falling',
+                    colorScheme: 'orange',
+                    intensity: 0.7,      // Brightness/activity (0-1)
+                    glow: 15             // Glow radius in pixels
+                };
+                
+                this.colors = {
+                    orange: { main: '#ff8800', bright: '#ffaa44', dim: '#cc6600' },
+                    green: { main: '#00ff00', bright: '#88ff88', dim: '#00cc00' },
+                    cyan: { main: '#00ffff', bright: '#88ffff', dim: '#00cccc' },
+                    purple: { main: '#aa00ff', bright: '#cc88ff', dim: '#7700cc' },
+                    rainbow: { main: '#ff0000', bright: '#ffff00', dim: '#0000ff' }
+                };
+                
+                this.resize();
+                this.init();
+                
+                window.addEventListener('resize', () => this.resize());
+            }
+            
+            resize() {
+                this.canvas.width = window.innerWidth;
+                this.canvas.height = window.innerHeight;
+                this.columns = Math.floor(this.canvas.width / 20);
+                this.rows = Math.floor(this.canvas.height / 20);
+            }
+            
+            init() {
+                this.particles = [];
+                const particleCount = Math.floor(this.columns * this.rows * this.config.density);
+                
+                for (let i = 0; i < particleCount; i++) {
+                    this.particles.push(this.createParticle());
+                }
+            }
+            
+            createParticle(x, y) {
+                return {
+                    x: x !== undefined ? x : Math.random() * this.canvas.width,
+                    y: y !== undefined ? y : Math.random() * this.canvas.height,
+                    char: Math.random() > 0.5 ? '1' : '0',
+                    size: 12 + Math.random() * 8,
+                    opacity: 0.3 + Math.random() * 0.7,
+                    speed: 0.5 + Math.random() * 2,
+                    phase: Math.random() * Math.PI * 2,
+                    frequency: 0.5 + Math.random() * 1.5,
+                    isDense: Math.random() < this.config.intensity
+                };
+            }
+            
+            getColor(particle) {
+                const scheme = this.colors[this.config.colorScheme];
+                
+                if (this.config.colorScheme === 'rainbow') {
+                    const hue = (particle.y / this.canvas.height * 360 + Date.now() * 0.01) % 360;
+                    return `hsla(${hue}, 100%, 50%, ${particle.opacity})`;
+                }
+                
+                if (particle.isDense) {
+                    return particle.char === '1' ? scheme.bright : scheme.main;
+                } else {
+                    return scheme.dim;
+                }
+            }
+            
+            update(deltaTime) {
+                const dt = deltaTime * this.config.speed;
+                
+                this.particles.forEach((p, i) => {
+                    switch (this.config.animationMode) {
+                        case 'falling':
+                            p.y += p.speed * dt * 2;
+                            if (p.y > this.canvas.height) {
+                                p.y = -20;
+                                p.x = Math.random() * this.canvas.width;
+                                p.char = Math.random() > 0.5 ? '1' : '0';
+                            }
+                            break;
+                            
+                        case 'flowing':
+                            p.y += Math.sin(p.phase + Date.now() * 0.001 * p.frequency) * dt;
+                            p.x += Math.cos(p.phase + Date.now() * 0.001 * p.frequency) * dt;
+                            
+                            if (p.x < -20) p.x = this.canvas.width + 20;
+                            if (p.x > this.canvas.width + 20) p.x = -20;
+                            if (p.y < -20) p.y = this.canvas.height + 20;
+                            if (p.y > this.canvas.height + 20) p.y = -20;
+                            break;
+                            
+                        case 'cascading':
+                            p.y += p.speed * dt * 3;
+                            p.x += Math.sin(p.y * 0.01) * dt;
+                            
+                            if (p.y > this.canvas.height) {
+                                p.y = -20;
+                                p.x = Math.random() * this.canvas.width;
+                            }
+                            break;
+                            
+                        case 'static':
+                            // Occasional character flip for static noise effect
+                            if (Math.random() < 0.01 * dt) {
+                                p.char = Math.random() > 0.5 ? '1' : '0';
+                                p.opacity = 0.3 + Math.random() * 0.7;
+                            }
+                            break;
+                            
+                        case 'pulse':
+                            const pulse = Math.sin(Date.now() * 0.002 + p.phase) * 0.3 + 0.7;
+                            p.opacity = pulse;
+                            if (Math.random() < 0.005 * dt) {
+                                p.char = Math.random() > 0.5 ? '1' : '0';
+                            }
+                            break;
+                    }
+                    
+                    // Update density based on intensity
+                    p.isDense = Math.random() < this.config.intensity;
+                });
+                
+                // Adjust particle count based on density
+                const targetCount = Math.floor(this.columns * this.rows * this.config.density);
+                
+                if (this.particles.length < targetCount) {
+                    for (let i = this.particles.length; i < targetCount; i++) {
+                        this.particles.push(this.createParticle());
+                    }
+                } else if (this.particles.length > targetCount) {
+                    this.particles.splice(targetCount);
+                }
+            }
+            
+            render() {
+                // Clear with fade effect for motion blur
+                this.ctx.fillStyle = 'rgba(0, 0, 0, 0.15)';
+                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                this.ctx.textBaseline = 'middle';
+                this.ctx.textAlign = 'center';
+                
+                this.particles.forEach(p => {
+                    const color = this.getColor(p);
+                    
+                    // Draw glow
+                    if (this.config.glow > 0) {
+                        this.ctx.shadowBlur = this.config.glow;
+                        this.ctx.shadowColor = color;
+                    }
+                    
+                    this.ctx.font = `bold ${p.size}px "Courier New", monospace`;
+                    this.ctx.fillStyle = color;
+                    this.ctx.globalAlpha = p.opacity;
+                    this.ctx.fillText(p.char, p.x, p.y);
+                });
+                
+                this.ctx.shadowBlur = 0;
+                this.ctx.globalAlpha = 1;
+            }
+            
+            setConfig(key, value) {
+                this.config[key] = value;
+                
+                if (key === 'density') {
+                    this.init();
+                }
+            }
+            
+            getConfig(key) {
+                return this.config[key];
+            }
+        }
+
+        // Initialize the system
+        const canvas = document.getElementById('canvas');
+        const system = new BinaryParticleSystem(canvas);
+        
+        let lastTime = performance.now();
+        
+        function animate() {
+            const currentTime = performance.now();
+            const deltaTime = (currentTime - lastTime) / 16.67; // Normalize to 60fps
+            lastTime = currentTime;
+            
+            system.update(deltaTime);
+            system.render();
+            
+            requestAnimationFrame(animate);
+        }
+        
+        animate();
+        
+        // Control handlers
+        document.getElementById('density').addEventListener('input', (e) => {
+            const value = e.target.value / 100;
+            system.setConfig('density', value);
+            document.getElementById('density-value').textContent = e.target.value;
+        });
+        
+        document.getElementById('speed').addEventListener('input', (e) => {
+            const value = parseFloat(e.target.value);
+            system.setConfig('speed', value);
+            document.getElementById('speed-value').textContent = value.toFixed(1);
+        });
+        
+        document.getElementById('intensity').addEventListener('input', (e) => {
+            const value = e.target.value / 100;
+            system.setConfig('intensity', value);
+            document.getElementById('intensity-value').textContent = e.target.value;
+        });
+        
+        document.getElementById('glow').addEventListener('input', (e) => {
+            const value = parseInt(e.target.value);
+            system.setConfig('glow', value);
+            document.getElementById('glow-value').textContent = value;
+        });
+        
+        document.getElementById('animation-mode').addEventListener('change', (e) => {
+            system.setConfig('animationMode', e.target.value);
+        });
+        
+        document.getElementById('color-scheme').addEventListener('change', (e) => {
+            system.setConfig('colorScheme', e.target.value);
+        });
+        
+        // Preset configurations
+        function loadPreset(name) {
+            const presets = {
+                consciousness: {
+                    density: 60,
+                    speed: 1.2,
+                    animationMode: 'pulse',
+                    colorScheme: 'orange',
+                    intensity: 80,
+                    glow: 20
+                },
+                matrix: {
+                    density: 40,
+                    speed: 2.0,
+                    animationMode: 'falling',
+                    colorScheme: 'green',
+                    intensity: 70,
+                    glow: 15
+                },
+                neural: {
+                    density: 70,
+                    speed: 0.8,
+                    animationMode: 'flowing',
+                    colorScheme: 'purple',
+                    intensity: 85,
+                    glow: 25
+                },
+                calm: {
+                    density: 30,
+                    speed: 0.5,
+                    animationMode: 'static',
+                    colorScheme: 'cyan',
+                    intensity: 40,
+                    glow: 10
+                },
+                intense: {
+                    density: 90,
+                    speed: 3.0,
+                    animationMode: 'cascading',
+                    colorScheme: 'rainbow',
+                    intensity: 95,
+                    glow: 25
+                }
+            };
+            
+            const preset = presets[name];
+            if (!preset) return;
+            
+            // Update controls
+            document.getElementById('density').value = preset.density;
+            document.getElementById('speed').value = preset.speed;
+            document.getElementById('intensity').value = preset.intensity;
+            document.getElementById('glow').value = preset.glow;
+            document.getElementById('animation-mode').value = preset.animationMode;
+            document.getElementById('color-scheme').value = preset.colorScheme;
+            
+            // Update system
+            system.setConfig('density', preset.density / 100);
+            system.setConfig('speed', preset.speed);
+            system.setConfig('animationMode', preset.animationMode);
+            system.setConfig('colorScheme', preset.colorScheme);
+            system.setConfig('intensity', preset.intensity / 100);
+            system.setConfig('glow', preset.glow);
+            
+            // Update display values
+            document.getElementById('density-value').textContent = preset.density;
+            document.getElementById('speed-value').textContent = preset.speed.toFixed(1);
+            document.getElementById('intensity-value').textContent = preset.intensity;
+            document.getElementById('glow-value').textContent = preset.glow;
+        }
+        
+        // WebSocket integration ready - example:
+        // const ws = new WebSocket('ws://localhost:8080');
+        // ws.onmessage = (event) => {
+        //     const data = JSON.parse(event.data);
+        //     system.setConfig('intensity', data.activity);
+        //     system.setConfig('density', data.density);
+        // };
+        
+        console.log('✅ Binary Particle System initialized');
+        console.log('📊 Use controls to adjust visualization');
+        console.log('🔌 WebSocket integration ready - see code comments');
+    </script>
+</body>
+</html>

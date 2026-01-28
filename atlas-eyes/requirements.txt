@@ -1,0 +1,12 @@
+# Atlas Eyes - Required Dependencies
+
+# Core vision and processing
+opencv-python>=4.8.0
+numpy>=1.24.0
+scipy>=1.11.0
+
+# API server
+Flask>=3.0.0
+
+# HTTP requests (for daemon auto-start and tests)
+requests>=2.31.0

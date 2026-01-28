@@ -1,0 +1,45 @@
+{
+  "patterns": {
+    "pre_mortem_skip": {
+      "weight": 0.0,
+      "description": "Trades taken without pre-mortem"
+    },
+    "fomo_entry": {
+      "weight": 0.0,
+      "description": "Entries driven by fear of missing out"
+    },
+    "proper_sizing": {
+      "weight": 0.0,
+      "description": "Using Kelly-based position sizing"
+    },
+    "kill_zone_timing": {
+      "weight": 0.0,
+      "description": "Entries during optimal trading hours"
+    },
+    "confirmation_wait": {
+      "weight": 0.0,
+      "description": "Waiting for confirmation before entry"
+    },
+    "stop_honored": {
+      "weight": 0.0,
+      "description": "Respecting stop-loss levels"
+    },
+    "target_reached": {
+      "weight": 0.0,
+      "description": "Hitting profit targets"
+    },
+    "revenge_trade": {
+      "weight": 0.0,
+      "description": "Trading to recover losses"
+    },
+    "overnight_hold": {
+      "weight": 0.0,
+      "description": "Holding positions overnight"
+    },
+    "news_reaction": {
+      "weight": 0.0,
+      "description": "Trades around news events"
+    }
+  },
+  "last_updated": "2026-01-27T16:27:37.707307"
+}

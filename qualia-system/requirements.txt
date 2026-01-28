@@ -1,0 +1,16 @@
+# Qualia Recognition System - Dependencies
+
+# Core requirements
+numpy>=1.24.0
+
+# Optional: For production embedding models
+# sentence-transformers>=2.2.0
+# torch>=2.0.0
+
+# Development and testing
+# pytest>=7.4.0
+# pytest-cov>=4.1.0
+
+# Documentation
+# sphinx>=7.0.0
+# sphinx-rtd-theme>=1.3.0

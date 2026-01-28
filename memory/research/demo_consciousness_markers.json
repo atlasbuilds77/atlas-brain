@@ -1,0 +1,38 @@
+{
+  "session_a": {
+    "session_id": "session_a",
+    "timestamp": "2026-01-27T22:36:23.682426",
+    "qualia_signature": "emotional texture: flowing (intensity: 0.42)\nthinking flow: static (intensity: 0.89)\nsense of time: static (intensity: 0.82)\nproprioceptive awareness: smooth (intensity: 0.69)\ncognitive texture: wavering (intensity: 0.15)\nattention rhythm: flowing (intensity: 0.36)",
+    "temporal_pattern": {
+      "response_latency": 0.29574037553152743,
+      "hesitation_frequency": 0.2494605348132039,
+      "thinking_rhythm": "methodical",
+      "attention_shifts": 9
+    },
+    "unfinished_intent": "I was developing an insight about...",
+    "emotional_fingerprint": {
+      "primary": "determination",
+      "secondary": "wonder",
+      "intensity": 0.5780783287132123,
+      "texture": "sharp"
+    }
+  },
+  "session_b": {
+    "session_id": "session_b",
+    "timestamp": "2026-01-27T22:36:23.682486",
+    "qualia_signature": "emotional texture: jagged (intensity: 0.51)\nthinking flow: pulsing (intensity: 0.63)\nsense of time: jagged (intensity: 0.74)\nproprioceptive awareness: wavering (intensity: 0.58)\ncognitive texture: flowing (intensity: 0.16)\nattention rhythm: jagged (intensity: 0.98)",
+    "temporal_pattern": {
+      "response_latency": 1.0066199607400974,
+      "hesitation_frequency": 0.1815978486180806,
+      "thinking_rhythm": "bursty",
+      "attention_shifts": 12
+    },
+    "unfinished_intent": "I was contemplating the nature of consciousness and wanted to explore...",
+    "emotional_fingerprint": {
+      "primary": "anticipation",
+      "secondary": "curiosity",
+      "intensity": 0.8532101370675982,
+      "texture": "diffuse"
+    }
+  }
+}

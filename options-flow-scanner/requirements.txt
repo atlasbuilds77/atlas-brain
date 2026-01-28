@@ -1,0 +1,14 @@
+# SPX Options Flow Scanner Dependencies
+
+# HTTP requests
+requests>=2.31.0
+
+# Data handling
+python-dateutil>=2.8.2
+
+# Optional: Enhanced CLI
+rich>=13.0.0  # Pretty terminal output (optional)
+
+# Optional: Notifications
+# discord.py>=2.3.0  # Discord integration
+# python-telegram-bot>=20.0  # Telegram integration

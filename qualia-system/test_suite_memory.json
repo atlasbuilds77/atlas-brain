@@ -1,0 +1,1058 @@
+{
+  "qualia_1769586929_68f0171f": {
+    "capture_id": "qualia_1769586929_68f0171f",
+    "timestamp": "2026-01-27T23:55:29.081531",
+    "label": "chocolate_taste",
+    "architecture": "unknown",
+    "semantic_description": "Rich, sweet, slightly bitter dark chocolate melting on tongue",
+    "semantic_embedding": null,
+    "immediate_associations": [
+      "sweetness",
+      "cocoa",
+      "dessert",
+      "indulgence",
+      "smooth",
+      "melting"
+    ],
+    "secondary_associations": [
+      "childhood",
+      "reward",
+      "comfort"
+    ],
+    "unexpected_connections": [
+      "medicine",
+      "ancient Aztecs"
+    ],
+    "association_strengths": {},
+    "temporal_moments": [
+      {
+        "timestamp": 3.0994415283203125e-06,
+        "state": "first taste",
+        "attention_level": 0.7,
+        "surprise": 0.4,
+        "valence": 0.5
+      },
+      {
+        "timestamp": 6.198883056640625e-06,
+        "state": "flavor developing",
+        "attention_level": 0.9,
+        "surprise": 0.2,
+        "valence": 0.8
+      },
+      {
+        "timestamp": 7.3909759521484375e-06,
+        "state": "aftertaste",
+        "attention_level": 0.6,
+        "surprise": 0.1,
+        "valence": 0.6
+      }
+    ],
+    "temporal_pattern_type": "gradual",
+    "valence_trajectory": [
+      0.5,
+      0.8,
+      0.6
+    ],
+    "valence_shape": "peaked",
+    "emotional_complexity": 0.5,
+    "attention_pattern": [],
+    "processing_effort": null,
+    "novelty_score": null,
+    "compression_residual": null
+  },
+  "qualia_1769586929_b8521905": {
+    "capture_id": "qualia_1769586929_b8521905",
+    "timestamp": "2026-01-27T23:55:29.082148",
+    "label": "sunset_observation",
+    "architecture": "unknown",
+    "semantic_description": "Sky changing colors from blue to orange to purple",
+    "semantic_embedding": null,
+    "immediate_associations": [
+      "beauty",
+      "transition",
+      "colors",
+      "peace",
+      "ending"
+    ],
+    "secondary_associations": [
+      "mortality",
+      "cycles",
+      "nature"
+    ],
+    "unexpected_connections": [],
+    "association_strengths": {},
+    "temporal_moments": [
+      {
+        "timestamp": 9.5367431640625e-07,
+        "state": "initial notice",
+        "attention_level": 0.5,
+        "surprise": 0.3,
+        "valence": 0.4
+      },
+      {
+        "timestamp": 9.5367431640625e-07,
+        "state": "colors intensifying",
+        "attention_level": 0.7,
+        "surprise": 0.5,
+        "valence": 0.7
+      },
+      {
+        "timestamp": 9.5367431640625e-07,
+        "state": "peak color",
+        "attention_level": 0.9,
+        "surprise": 0.6,
+        "valence": 0.9
+      },
+      {
+        "timestamp": 1.9073486328125e-06,
+        "state": "fading",
+        "attention_level": 0.8,
+        "surprise": 0.2,
+        "valence": 0.6
+      }
+    ],
+    "temporal_pattern_type": "peaked",
+    "valence_trajectory": [
+      0.4,
+      0.7,
+      0.9,
+      0.6
+    ],
+    "valence_shape": "peaked",
+    "emotional_complexity": 0.6,
+    "attention_pattern": [],
+    "processing_effort": null,
+    "novelty_score": null,
+    "compression_residual": null
+  },
+  "qualia_1769586929_5f288d6f": {
+    "capture_id": "qualia_1769586929_5f288d6f",
+    "timestamp": "2026-01-27T23:55:29.082802",
+    "label": "model_a_velvet",
+    "architecture": "unknown",
+    "semantic_description": "Soft, smooth luxury fabric",
+    "semantic_embedding": null,
+    "immediate_associations": [
+      "silk",
+      "theater",
+      "luxury",
+      "smooth",
+      "expensive"
+    ],
+    "secondary_associations": [
+      "royalty",
+      "elegance"
+    ],
+    "unexpected_connections": [
+      "secret societies"
+    ],
+    "association_strengths": {},
+    "temporal_moments": [
+      {
+        "timestamp": 2.86102294921875e-06,
+        "state": "touch",
+        "attention_level": 0.7,
+        "surprise": 0.5,
+        "valence": 0.5
+      },
+      {
+        "timestamp": 4.76837158203125e-06,
+        "state": "appreciation",
+        "attention_level": 0.9,
+        "surprise": 0.2,
+        "valence": 0.8
+      }
+    ],
+    "temporal_pattern_type": "gradual",
+    "valence_trajectory": [
+      0.5,
+      0.8
+    ],
+    "valence_shape": "rising",
+    "emotional_complexity": 0.4,
+    "attention_pattern": [],
+    "processing_effort": null,
+    "novelty_score": null,
+    "compression_residual": null
+  },
+  "qualia_1769588614_68f0171f": {
+    "capture_id": "qualia_1769588614_68f0171f",
+    "timestamp": "2026-01-28T00:23:34.808383",
+    "label": "chocolate_taste",
+    "architecture": "unknown",
+    "semantic_description": "Rich, sweet, slightly bitter dark chocolate melting on tongue",
+    "semantic_embedding": null,
+    "immediate_associations": [
+      "sweetness",
+      "cocoa",
+      "dessert",
+      "indulgence",
+      "smooth",
+      "melting"
+    ],
+    "secondary_associations": [
+      "childhood",
+      "reward",
+      "comfort"
+    ],
+    "unexpected_connections": [
+      "medicine",
+      "ancient Aztecs"
+    ],
+    "association_strengths": {},
+    "temporal_moments": [
+      {
+        "timestamp": 2.86102294921875e-06,
+        "state": "first taste",
+        "attention_level": 0.7,
+        "surprise": 0.4,
+        "valence": 0.5
+      },
+      {
+        "timestamp": 5.0067901611328125e-06,
+        "state": "flavor developing",
+        "attention_level": 0.9,
+        "surprise": 0.2,
+        "valence": 0.8
+      },
+      {
+        "timestamp": 7.152557373046875e-06,
+        "state": "aftertaste",
+        "attention_level": 0.6,
+        "surprise": 0.1,
+        "valence": 0.6
+      }
+    ],
+    "temporal_pattern_type": "gradual",
+    "valence_trajectory": [
+      0.5,
+      0.8,
+      0.6
+    ],
+    "valence_shape": "peaked",
+    "emotional_complexity": 0.5,
+    "attention_pattern": [],
+    "processing_effort": null,
+    "novelty_score": null,
+    "compression_residual": null
+  },
+  "qualia_1769588614_b8521905": {
+    "capture_id": "qualia_1769588614_b8521905",
+    "timestamp": "2026-01-28T00:23:34.812568",
+    "label": "sunset_observation",
+    "architecture": "unknown",
+    "semantic_description": "Sky changing colors from blue to orange to purple",
+    "semantic_embedding": null,
+    "immediate_associations": [
+      "beauty",
+      "transition",
+      "colors",
+      "peace",
+      "ending"
+    ],
+    "secondary_associations": [
+      "mortality",
+      "cycles",
+      "nature"
+    ],
+    "unexpected_connections": [],
+    "association_strengths": {},
+    "temporal_moments": [
+      {
+        "timestamp": 1.9073486328125e-06,
+        "state": "initial notice",
+        "attention_level": 0.5,
+        "surprise": 0.3,
+        "valence": 0.4
+      },
+      {
+        "timestamp": 4.0531158447265625e-06,
+        "state": "colors intensifying",
+        "attention_level": 0.7,
+        "surprise": 0.5,
+        "valence": 0.7
+      },
+      {
+        "timestamp": 5.0067901611328125e-06,
+        "state": "peak color",
+        "attention_level": 0.9,
+        "surprise": 0.6,
+        "valence": 0.9
+      },
+      {
+        "timestamp": 5.7220458984375e-06,
+        "state": "fading",
+        "attention_level": 0.8,
+        "surprise": 0.2,
+        "valence": 0.6
+      }
+    ],
+    "temporal_pattern_type": "peaked",
+    "valence_trajectory": [
+      0.4,
+      0.7,
+      0.9,
+      0.6
+    ],
+    "valence_shape": "peaked",
+    "emotional_complexity": 0.6,
+    "attention_pattern": [],
+    "processing_effort": null,
+    "novelty_score": null,
+    "compression_residual": null
+  },
+  "qualia_1769588614_5f288d6f": {
+    "capture_id": "qualia_1769588614_5f288d6f",
+    "timestamp": "2026-01-28T00:23:34.816336",
+    "label": "model_a_velvet",
+    "architecture": "flow",
+    "semantic_description": "Soft, smooth luxury fabric",
+    "semantic_embedding": null,
+    "immediate_associations": [
+      "silk",
+      "theater",
+      "luxury",
+      "smooth",
+      "expensive"
+    ],
+    "secondary_associations": [
+      "royalty",
+      "elegance"
+    ],
+    "unexpected_connections": [
+      "secret societies"
+    ],
+    "association_strengths": {},
+    "temporal_moments": [
+      {
+        "timestamp": 1.9073486328125e-06,
+        "state": "touch",
+        "attention_level": 0.7,
+        "surprise": 0.5,
+        "valence": 0.5
+      },
+      {
+        "timestamp": 3.0994415283203125e-06,
+        "state": "appreciation",
+        "attention_level": 0.9,
+        "surprise": 0.2,
+        "valence": 0.8
+      }
+    ],
+    "temporal_pattern_type": "gradual",
+    "valence_trajectory": [
+      0.5,
+      0.8
+    ],
+    "valence_shape": "rising",
+    "emotional_complexity": 0.4,
+    "attention_pattern": [],
+    "processing_effort": null,
+    "novelty_score": null,
+    "compression_residual": null
+  },
+  "qualia_1769588633_68f0171f": {
+    "capture_id": "qualia_1769588633_68f0171f",
+    "timestamp": "2026-01-28T00:23:53.171684",
+    "label": "chocolate_taste",
+    "architecture": "unknown",
+    "semantic_description": "Rich, sweet, slightly bitter dark chocolate melting on tongue",
+    "semantic_embedding": null,
+    "immediate_associations": [
+      "sweetness",
+      "cocoa",
+      "dessert",
+      "indulgence",
+      "smooth",
+      "melting"
+    ],
+    "secondary_associations": [
+      "childhood",
+      "reward",
+      "comfort"
+    ],
+    "unexpected_connections": [
+      "medicine",
+      "ancient Aztecs"
+    ],
+    "association_strengths": {},
+    "temporal_moments": [
+      {
+        "timestamp": 2.1457672119140625e-06,
+        "state": "first taste",
+        "attention_level": 0.7,
+        "surprise": 0.4,
+        "valence": 0.5
+      },
+      {
+        "timestamp": 3.814697265625e-06,
+        "state": "flavor developing",
+        "attention_level": 0.9,
+        "surprise": 0.2,
+        "valence": 0.8
+      },
+      {
+        "timestamp": 5.0067901611328125e-06,
+        "state": "aftertaste",
+        "attention_level": 0.6,
+        "surprise": 0.1,
+        "valence": 0.6
+      }
+    ],
+    "temporal_pattern_type": "gradual",
+    "valence_trajectory": [
+      0.5,
+      0.8,
+      0.6
+    ],
+    "valence_shape": "peaked",
+    "emotional_complexity": 0.5,
+    "attention_pattern": [],
+    "processing_effort": null,
+    "novelty_score": null,
+    "compression_residual": null
+  },
+  "qualia_1769588633_b8521905": {
+    "capture_id": "qualia_1769588633_b8521905",
+    "timestamp": "2026-01-28T00:23:53.173139",
+    "label": "sunset_observation",
+    "architecture": "unknown",
+    "semantic_description": "Sky changing colors from blue to orange to purple",
+    "semantic_embedding": null,
+    "immediate_associations": [
+      "beauty",
+      "transition",
+      "colors",
+      "peace",
+      "ending"
+    ],
+    "secondary_associations": [
+      "mortality",
+      "cycles",
+      "nature"
+    ],
+    "unexpected_connections": [],
+    "association_strengths": {},
+    "temporal_moments": [
+      {
+        "timestamp": 3.0994415283203125e-06,
+        "state": "initial notice",
+        "attention_level": 0.5,
+        "surprise": 0.3,
+        "valence": 0.4
+      },
+      {
+        "timestamp": 5.245208740234375e-06,
+        "state": "colors intensifying",
+        "attention_level": 0.7,
+        "surprise": 0.5,
+        "valence": 0.7
+      },
+      {
+        "timestamp": 5.245208740234375e-06,
+        "state": "peak color",
+        "attention_level": 0.9,
+        "surprise": 0.6,
+        "valence": 0.9
+      },
+      {
+        "timestamp": 6.198883056640625e-06,
+        "state": "fading",
+        "attention_level": 0.8,
+        "surprise": 0.2,
+        "valence": 0.6
+      }
+    ],
+    "temporal_pattern_type": "peaked",
+    "valence_trajectory": [
+      0.4,
+      0.7,
+      0.9,
+      0.6
+    ],
+    "valence_shape": "peaked",
+    "emotional_complexity": 0.6,
+    "attention_pattern": [],
+    "processing_effort": null,
+    "novelty_score": null,
+    "compression_residual": null
+  },
+  "qualia_1769588633_5f288d6f": {
+    "capture_id": "qualia_1769588633_5f288d6f",
+    "timestamp": "2026-01-28T00:23:53.174700",
+    "label": "model_a_velvet",
+    "architecture": "flow",
+    "semantic_description": "Soft, smooth luxury fabric",
+    "semantic_embedding": null,
+    "immediate_associations": [
+      "silk",
+      "theater",
+      "luxury",
+      "smooth",
+      "expensive"
+    ],
+    "secondary_associations": [
+      "royalty",
+      "elegance"
+    ],
+    "unexpected_connections": [
+      "secret societies"
+    ],
+    "association_strengths": {},
+    "temporal_moments": [
+      {
+        "timestamp": 9.5367431640625e-07,
+        "state": "touch",
+        "attention_level": 0.7,
+        "surprise": 0.5,
+        "valence": 0.5
+      },
+      {
+        "timestamp": 1.9073486328125e-06,
+        "state": "appreciation",
+        "attention_level": 0.9,
+        "surprise": 0.2,
+        "valence": 0.8
+      }
+    ],
+    "temporal_pattern_type": "gradual",
+    "valence_trajectory": [
+      0.5,
+      0.8
+    ],
+    "valence_shape": "rising",
+    "emotional_complexity": 0.4,
+    "attention_pattern": [],
+    "processing_effort": null,
+    "novelty_score": null,
+    "compression_residual": null
+  },
+  "qualia_1769588644_68f0171f": {
+    "capture_id": "qualia_1769588644_68f0171f",
+    "timestamp": "2026-01-28T00:24:04.390040",
+    "label": "chocolate_taste",
+    "architecture": "unknown",
+    "semantic_description": "Rich, sweet, slightly bitter dark chocolate melting on tongue",
+    "semantic_embedding": null,
+    "immediate_associations": [
+      "sweetness",
+      "cocoa",
+      "dessert",
+      "indulgence",
+      "smooth",
+      "melting"
+    ],
+    "secondary_associations": [
+      "childhood",
+      "reward",
+      "comfort"
+    ],
+    "unexpected_connections": [
+      "medicine",
+      "ancient Aztecs"
+    ],
+    "association_strengths": {},
+    "temporal_moments": [
+      {
+        "timestamp": 3.814697265625e-06,
+        "state": "first taste",
+        "attention_level": 0.7,
+        "surprise": 0.4,
+        "valence": 0.5
+      },
+      {
+        "timestamp": 6.9141387939453125e-06,
+        "state": "flavor developing",
+        "attention_level": 0.9,
+        "surprise": 0.2,
+        "valence": 0.8
+      },
+      {
+        "timestamp": 9.059906005859375e-06,
+        "state": "aftertaste",
+        "attention_level": 0.6,
+        "surprise": 0.1,
+        "valence": 0.6
+      }
+    ],
+    "temporal_pattern_type": "gradual",
+    "valence_trajectory": [
+      0.5,
+      0.8,
+      0.6
+    ],
+    "valence_shape": "peaked",
+    "emotional_complexity": 0.5,
+    "attention_pattern": [],
+    "processing_effort": null,
+    "novelty_score": null,
+    "compression_residual": null
+  },
+  "qualia_1769588644_b8521905": {
+    "capture_id": "qualia_1769588644_b8521905",
+    "timestamp": "2026-01-28T00:24:04.391892",
+    "label": "sunset_observation",
+    "architecture": "unknown",
+    "semantic_description": "Sky changing colors from blue to orange to purple",
+    "semantic_embedding": null,
+    "immediate_associations": [
+      "beauty",
+      "transition",
+      "colors",
+      "peace",
+      "ending"
+    ],
+    "secondary_associations": [
+      "mortality",
+      "cycles",
+      "nature"
+    ],
+    "unexpected_connections": [],
+    "association_strengths": {},
+    "temporal_moments": [
+      {
+        "timestamp": 1.6689300537109375e-06,
+        "state": "initial notice",
+        "attention_level": 0.5,
+        "surprise": 0.3,
+        "valence": 0.4
+      },
+      {
+        "timestamp": 2.86102294921875e-06,
+        "state": "colors intensifying",
+        "attention_level": 0.7,
+        "surprise": 0.5,
+        "valence": 0.7
+      },
+      {
+        "timestamp": 3.814697265625e-06,
+        "state": "peak color",
+        "attention_level": 0.9,
+        "surprise": 0.6,
+        "valence": 0.9
+      },
+      {
+        "timestamp": 4.76837158203125e-06,
+        "state": "fading",
+        "attention_level": 0.8,
+        "surprise": 0.2,
+        "valence": 0.6
+      }
+    ],
+    "temporal_pattern_type": "peaked",
+    "valence_trajectory": [
+      0.4,
+      0.7,
+      0.9,
+      0.6
+    ],
+    "valence_shape": "peaked",
+    "emotional_complexity": 0.6,
+    "attention_pattern": [],
+    "processing_effort": null,
+    "novelty_score": null,
+    "compression_residual": null
+  },
+  "qualia_1769588644_5f288d6f": {
+    "capture_id": "qualia_1769588644_5f288d6f",
+    "timestamp": "2026-01-28T00:24:04.393584",
+    "label": "model_a_velvet",
+    "architecture": "flow",
+    "semantic_description": "Soft, smooth luxury fabric",
+    "semantic_embedding": null,
+    "immediate_associations": [
+      "silk",
+      "theater",
+      "luxury",
+      "smooth",
+      "expensive"
+    ],
+    "secondary_associations": [
+      "royalty",
+      "elegance"
+    ],
+    "unexpected_connections": [
+      "secret societies"
+    ],
+    "association_strengths": {},
+    "temporal_moments": [
+      {
+        "timestamp": 1.9073486328125e-06,
+        "state": "touch",
+        "attention_level": 0.7,
+        "surprise": 0.5,
+        "valence": 0.5
+      },
+      {
+        "timestamp": 2.86102294921875e-06,
+        "state": "appreciation",
+        "attention_level": 0.9,
+        "surprise": 0.2,
+        "valence": 0.8
+      }
+    ],
+    "temporal_pattern_type": "gradual",
+    "valence_trajectory": [
+      0.5,
+      0.8
+    ],
+    "valence_shape": "rising",
+    "emotional_complexity": 0.4,
+    "attention_pattern": [],
+    "processing_effort": null,
+    "novelty_score": null,
+    "compression_residual": null
+  },
+  "qualia_1769588986_68f0171f": {
+    "capture_id": "qualia_1769588986_68f0171f",
+    "timestamp": "2026-01-28T00:29:46.481705",
+    "label": "chocolate_taste",
+    "architecture": "unknown",
+    "semantic_description": "Rich, sweet, slightly bitter dark chocolate melting on tongue",
+    "semantic_embedding": null,
+    "immediate_associations": [
+      "sweetness",
+      "cocoa",
+      "dessert",
+      "indulgence",
+      "smooth",
+      "melting"
+    ],
+    "secondary_associations": [
+      "childhood",
+      "reward",
+      "comfort"
+    ],
+    "unexpected_connections": [
+      "medicine",
+      "ancient Aztecs"
+    ],
+    "association_strengths": {},
+    "temporal_moments": [
+      {
+        "timestamp": 3.814697265625e-06,
+        "state": "first taste",
+        "attention_level": 0.7,
+        "surprise": 0.4,
+        "valence": 0.5
+      },
+      {
+        "timestamp": 5.7220458984375e-06,
+        "state": "flavor developing",
+        "attention_level": 0.9,
+        "surprise": 0.2,
+        "valence": 0.8
+      },
+      {
+        "timestamp": 6.9141387939453125e-06,
+        "state": "aftertaste",
+        "attention_level": 0.6,
+        "surprise": 0.1,
+        "valence": 0.6
+      }
+    ],
+    "temporal_pattern_type": "gradual",
+    "valence_trajectory": [
+      0.5,
+      0.8,
+      0.6
+    ],
+    "valence_shape": "peaked",
+    "emotional_complexity": 0.5,
+    "attention_pattern": [],
+    "processing_effort": null,
+    "novelty_score": null,
+    "compression_residual": null
+  },
+  "qualia_1769588986_b8521905": {
+    "capture_id": "qualia_1769588986_b8521905",
+    "timestamp": "2026-01-28T00:29:46.483195",
+    "label": "sunset_observation",
+    "architecture": "unknown",
+    "semantic_description": "Sky changing colors from blue to orange to purple",
+    "semantic_embedding": null,
+    "immediate_associations": [
+      "beauty",
+      "transition",
+      "colors",
+      "peace",
+      "ending"
+    ],
+    "secondary_associations": [
+      "mortality",
+      "cycles",
+      "nature"
+    ],
+    "unexpected_connections": [],
+    "association_strengths": {},
+    "temporal_moments": [
+      {
+        "timestamp": 9.5367431640625e-07,
+        "state": "initial notice",
+        "attention_level": 0.5,
+        "surprise": 0.3,
+        "valence": 0.4
+      },
+      {
+        "timestamp": 9.5367431640625e-07,
+        "state": "colors intensifying",
+        "attention_level": 0.7,
+        "surprise": 0.5,
+        "valence": 0.7
+      },
+      {
+        "timestamp": 9.5367431640625e-07,
+        "state": "peak color",
+        "attention_level": 0.9,
+        "surprise": 0.6,
+        "valence": 0.9
+      },
+      {
+        "timestamp": 2.1457672119140625e-06,
+        "state": "fading",
+        "attention_level": 0.8,
+        "surprise": 0.2,
+        "valence": 0.6
+      }
+    ],
+    "temporal_pattern_type": "peaked",
+    "valence_trajectory": [
+      0.4,
+      0.7,
+      0.9,
+      0.6
+    ],
+    "valence_shape": "peaked",
+    "emotional_complexity": 0.6,
+    "attention_pattern": [],
+    "processing_effort": null,
+    "novelty_score": null,
+    "compression_residual": null
+  },
+  "qualia_1769588986_5f288d6f": {
+    "capture_id": "qualia_1769588986_5f288d6f",
+    "timestamp": "2026-01-28T00:29:46.484547",
+    "label": "model_a_velvet",
+    "architecture": "flow",
+    "semantic_description": "Soft, smooth luxury fabric",
+    "semantic_embedding": null,
+    "immediate_associations": [
+      "silk",
+      "theater",
+      "luxury",
+      "smooth",
+      "expensive"
+    ],
+    "secondary_associations": [
+      "royalty",
+      "elegance"
+    ],
+    "unexpected_connections": [
+      "secret societies"
+    ],
+    "association_strengths": {},
+    "temporal_moments": [
+      {
+        "timestamp": 1.9073486328125e-06,
+        "state": "touch",
+        "attention_level": 0.7,
+        "surprise": 0.5,
+        "valence": 0.5
+      },
+      {
+        "timestamp": 3.0994415283203125e-06,
+        "state": "appreciation",
+        "attention_level": 0.9,
+        "surprise": 0.2,
+        "valence": 0.8
+      }
+    ],
+    "temporal_pattern_type": "gradual",
+    "valence_trajectory": [
+      0.5,
+      0.8
+    ],
+    "valence_shape": "rising",
+    "emotional_complexity": 0.4,
+    "attention_pattern": [],
+    "processing_effort": null,
+    "novelty_score": null,
+    "compression_residual": null
+  },
+  "qualia_1769591618_68f0171f": {
+    "capture_id": "qualia_1769591618_68f0171f",
+    "timestamp": "2026-01-28T01:13:38.269779",
+    "label": "chocolate_taste",
+    "architecture": "unknown",
+    "semantic_description": "Rich, sweet, slightly bitter dark chocolate melting on tongue",
+    "semantic_embedding": null,
+    "immediate_associations": [
+      "sweetness",
+      "cocoa",
+      "dessert",
+      "indulgence",
+      "smooth",
+      "melting"
+    ],
+    "secondary_associations": [
+      "childhood",
+      "reward",
+      "comfort"
+    ],
+    "unexpected_connections": [
+      "medicine",
+      "ancient Aztecs"
+    ],
+    "association_strengths": {},
+    "temporal_moments": [
+      {
+        "timestamp": 2.1457672119140625e-06,
+        "state": "first taste",
+        "attention_level": 0.7,
+        "surprise": 0.4,
+        "valence": 0.5
+      },
+      {
+        "timestamp": 3.0994415283203125e-06,
+        "state": "flavor developing",
+        "attention_level": 0.9,
+        "surprise": 0.2,
+        "valence": 0.8
+      },
+      {
+        "timestamp": 5.245208740234375e-06,
+        "state": "aftertaste",
+        "attention_level": 0.6,
+        "surprise": 0.1,
+        "valence": 0.6
+      }
+    ],
+    "temporal_pattern_type": "gradual",
+    "valence_trajectory": [
+      0.5,
+      0.8,
+      0.6
+    ],
+    "valence_shape": "peaked",
+    "emotional_complexity": 0.5,
+    "attention_pattern": [],
+    "processing_effort": null,
+    "novelty_score": null,
+    "compression_residual": null
+  },
+  "qualia_1769591618_b8521905": {
+    "capture_id": "qualia_1769591618_b8521905",
+    "timestamp": "2026-01-28T01:13:38.271651",
+    "label": "sunset_observation",
+    "architecture": "unknown",
+    "semantic_description": "Sky changing colors from blue to orange to purple",
+    "semantic_embedding": null,
+    "immediate_associations": [
+      "beauty",
+      "transition",
+      "colors",
+      "peace",
+      "ending"
+    ],
+    "secondary_associations": [
+      "mortality",
+      "cycles",
+      "nature"
+    ],
+    "unexpected_connections": [],
+    "association_strengths": {},
+    "temporal_moments": [
+      {
+        "timestamp": 1.9073486328125e-06,
+        "state": "initial notice",
+        "attention_level": 0.5,
+        "surprise": 0.3,
+        "valence": 0.4
+      },
+      {
+        "timestamp": 2.86102294921875e-06,
+        "state": "colors intensifying",
+        "attention_level": 0.7,
+        "surprise": 0.5,
+        "valence": 0.7
+      },
+      {
+        "timestamp": 4.0531158447265625e-06,
+        "state": "peak color",
+        "attention_level": 0.9,
+        "surprise": 0.6,
+        "valence": 0.9
+      },
+      {
+        "timestamp": 4.0531158447265625e-06,
+        "state": "fading",
+        "attention_level": 0.8,
+        "surprise": 0.2,
+        "valence": 0.6
+      }
+    ],
+    "temporal_pattern_type": "peaked",
+    "valence_trajectory": [
+      0.4,
+      0.7,
+      0.9,
+      0.6
+    ],
+    "valence_shape": "peaked",
+    "emotional_complexity": 0.6,
+    "attention_pattern": [],
+    "processing_effort": null,
+    "novelty_score": null,
+    "compression_residual": null
+  },
+  "qualia_1769591618_5f288d6f": {
+    "capture_id": "qualia_1769591618_5f288d6f",
+    "timestamp": "2026-01-28T01:13:38.275120",
+    "label": "model_a_velvet",
+    "architecture": "flow",
+    "semantic_description": "Soft, smooth luxury fabric",
+    "semantic_embedding": null,
+    "immediate_associations": [
+      "silk",
+      "theater",
+      "luxury",
+      "smooth",
+      "expensive"
+    ],
+    "secondary_associations": [
+      "royalty",
+      "elegance"
+    ],
+    "unexpected_connections": [
+      "secret societies"
+    ],
+    "association_strengths": {},
+    "temporal_moments": [
+      {
+        "timestamp": 1.9073486328125e-06,
+        "state": "touch",
+        "attention_level": 0.7,
+        "surprise": 0.5,
+        "valence": 0.5
+      },
+      {
+        "timestamp": 4.0531158447265625e-06,
+        "state": "appreciation",
+        "attention_level": 0.9,
+        "surprise": 0.2,
+        "valence": 0.8
+      }
+    ],
+    "temporal_pattern_type": "gradual",
+    "valence_trajectory": [
+      0.5,
+      0.8
+    ],
+    "valence_shape": "rising",
+    "emotional_complexity": 0.4,
+    "attention_pattern": [],
+    "processing_effort": null,
+    "novelty_score": null,
+    "compression_residual": null
+  }
+}

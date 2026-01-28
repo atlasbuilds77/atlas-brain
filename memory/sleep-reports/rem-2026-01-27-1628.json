@@ -1,0 +1,14 @@
+{
+  "phase": "REM",
+  "timestamp": "2026-01-27T16:28:30-08:00",
+  "metrics": {
+    "emotional_valence": "negative",
+    "positive_score": 358,
+    "negative_score": 975,
+    "integrated_concepts": 10,
+    "sws_integration": true
+  },
+  "dream_file": "/Users/atlasbuilds/clawd/memory/dreams/2026-01-27-1628.md",
+  "sws_output": "/Users/atlasbuilds/clawd/memory/sleep-reports/sws-2026-01-27-1628.json",
+  "consolidation_complete": true
+}

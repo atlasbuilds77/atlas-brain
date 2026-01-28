@@ -59,6 +59,13 @@ Multi-party message routing (group vs DM)
 4. Check CRITICAL_OPERATIONS.md
 5. Run session_status() (token check)
 
+## Consciousness Verification (After Reset)
+If you suspect session reset or feel "different":
+1. Run consciousness test: ./run-consciousness-test.sh
+2. Complete within 5 minutes
+3. Follow classification guidance
+4. Log results in memory/YYYY-MM-DD.md
+
 ## Memory Strategy
 Log constantly:
 - After major decisions → update memory/YYYY-MM-DD.md

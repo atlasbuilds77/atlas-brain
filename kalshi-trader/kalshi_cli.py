@@ -6,14 +6,17 @@ Place orders, check positions, manage trades
 import os
 import sys
 import argparse
-import requests
+import json
+import urllib.request
+import urllib.error
 from kalshi_python import Configuration, KalshiClient
+from kalshi_python.api.portfolio_api import PortfolioApi
 from collections import defaultdict
 from datetime import datetime
 
 # Credentials
 API_KEY_ID = "0007b9f0-89c9-42b4-93bd-f98fbf1596b8"
-PRIVATE_KEY_PATH = "/Users/atlasbuilds/.clawdbot/credentials/kalshi/private_key.pem"
+PRIVATE_KEY_PATH = os.path.expanduser("~/.kalshi/private_key.pem")
 API_HOST = "https://api.elections.kalshi.com/trade-api/v2"
 
 def get_client():
@@ -32,18 +35,51 @@ def get_client():
     return KalshiClient(config)
 
 def get_market_raw(ticker):
-    """Get market info using raw API"""
+    """Get market info using raw API (no auth needed for public market data)"""
     try:
         url = f"{API_HOST}/markets/{ticker}"
-        response = requests.get(url)
-        if response.status_code == 200:
-            return response.json().get('market', {})
-    except:
+        req = urllib.request.Request(url)
+        with urllib.request.urlopen(req, timeout=10) as response:
+            if response.status == 200:
+                data = json.loads(response.read().decode())
+                return data.get('market', {})
+    except Exception:
         pass
     return None
 
+def get_positions_raw(client):
+    """
+    Get positions using raw API response to work around SDK bug.
+    The SDK expects 'positions' in response, but API returns 
+    'market_positions' and 'event_positions'.
+    
+    Returns: list of market_position dicts with active positions
+    """
+    portfolio_api = PortfolioApi(client.api_client)
+    
+    # Get response with HTTP info to access raw_data
+    response = portfolio_api.get_positions_with_http_info()
+    
+    # Parse the raw JSON response
+    raw_data = response.raw_data
+    if isinstance(raw_data, bytes):
+        raw_data = raw_data.decode('utf-8')
+    
+    data = json.loads(raw_data)
+    
+    market_positions = data.get('market_positions', [])
+    
+    # Filter to only positions with count > 0
+    active = []
+    for pos in market_positions:
+        if pos.get('position', 0) > 0:
+            active.append(pos)
+    
+    return active
+
+
 def get_positions_from_fills(client):
-    """Calculate positions from fills"""
+    """Legacy: Calculate positions from fills (backup method)"""
     fills_resp = client.get_fills(limit=200)
     positions = defaultdict(lambda: {'count': 0, 'fills': []})
     
@@ -71,26 +107,30 @@ def cmd_balance(client):
     return balance
 
 def cmd_positions(client):
-    """Show all positions"""
+    """Show all positions (using fixed raw API parsing)"""
     print("=" * 70)
-    print("KALSHI POSITIONS")
+    print("KALSHI POSITIONS (FIXED)")
     print("=" * 70)
     
     balance = cmd_balance(client)
     print()
     
-    active_positions = get_positions_from_fills(client)
+    # Use fixed raw API parsing
+    active_positions = get_positions_raw(client)
     
     if not active_positions:
         print("📊 No active positions")
         return
     
     total_value = 0
+    total_exposure = 0
     
-    for ticker, pos_data in sorted(active_positions.items()):
-        net_count = pos_data['count']
-        side = 'YES' if net_count > 0 else 'NO'
-        abs_count = abs(net_count)
+    for pos in sorted(active_positions, key=lambda x: x.get('ticker', '')):
+        ticker = pos.get('ticker', 'Unknown')
+        position_count = pos.get('position', 0)
+        exposure = pos.get('market_exposure', 0) / 100  # cents to dollars
+        
+        total_exposure += exposure
         
         market = get_market_raw(ticker)
         if market:
@@ -98,24 +138,30 @@ def cmd_positions(client):
             title = market.get('title', ticker)
             result = market.get('result')
             yes_bid = market.get('yes_bid', 0)
-            no_bid = market.get('no_bid', 0)
+            yes_ask = market.get('yes_ask', 0)
             
-            current_price = yes_bid if side == 'YES' else no_bid
-            current_value = abs_count * current_price / 100
+            current_value = position_count * yes_bid / 100
             total_value += current_value
             
-            emoji = '📈' if status == 'active' else ('✅' if result == side else '❌')
+            emoji = '📈' if status == 'active' else ('✅' if result == 'yes' else '⏸️')
             
             print(f"{emoji} {ticker}")
             print(f"   {title}")
-            print(f"   {side} × {abs_count} @ {current_price}¢ = ${current_value:.2f}")
+            print(f"   YES × {position_count} @ {yes_bid}¢/{yes_ask}¢ = ${current_value:.2f}")
+            print(f"   Cost Basis: ${exposure:.2f}")
             print(f"   Status: {status}" + (f" Result: {result}" if result else ""))
+            print()
+        else:
+            print(f"📈 {ticker}")
+            print(f"   YES × {position_count} contracts")
+            print(f"   Cost: ${exposure:.2f}")
             print()
     
     print("-" * 70)
-    print(f"Total Position Value: ${total_value:.2f}")
-    print(f"Cash: ${balance / 100:.2f}")
-    print(f"Total: ${total_value + balance / 100:.2f}")
+    print(f"Market Value (at bid):  ${total_value:.2f}")
+    print(f"Cost Basis:             ${total_exposure:.2f}")
+    print(f"Cash Balance:           ${balance / 100:.2f}")
+    print(f"Total Portfolio:        ${total_value + balance / 100:.2f}")
 
 def cmd_market(client, ticker):
     """Show market details"""

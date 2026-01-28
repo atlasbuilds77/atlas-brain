@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Brain Node Fix</title>
+</head>
+<body>
+    <h1>Testing Brain Node Loading Fix</h1>
+    <p>Open the browser console to see if nodes load correctly.</p>
+    
+    <script>
+        // Test the embedded data approach
+        const EMBEDDED_NODE_DATA = {
+  "memoryNodes": {
+    "protocols": [
+      {"file": "memory/protocols/position-sizing-kelly.md", "name": "position-sizing-kelly", "region": "memory", "color": "cyan"},
+      {"file": "memory/protocols/anti-hallucination-protocol.md", "name": "anti-hallucination-protocol", "region": "memory", "color": "cyan"}
+    ],
+    "trading": [
+      {"file": "memory/trading/MASTER-CRYPTO-PLAYBOOK.md", "name": "MASTER-CRYPTO-PLAYBOOK", "region": "memory", "color": "blue"}
+    ],
+    "people": [
+      {"file": "memory/people/orion.md", "name": "orion", "region": "memory", "color": "yellow"}
+    ]
+  },
+  "tools": [
+    {"name": "browser", "region": "tools", "color": "purple"}
+  ],
+  "cognitiveSystem": [
+    {"name": "pattern_detection", "region": "pattern", "color": "orange"}
+  ]
+};
+        
+        function loadNodeData() {
+            console.log('Using embedded node data:', EMBEDDED_NODE_DATA);
+            return EMBEDDED_NODE_DATA;
+        }
+        
+        // Test the function
+        const data = loadNodeData();
+        console.log('Test successful! Data loaded:', data);
+        
+        // Count nodes
+        let totalNodes = 0;
+        if (data.memoryNodes) {
+            totalNodes += data.memoryNodes.protocols?.length || 0;
+            totalNodes += data.memoryNodes.trading?.length || 0;
+            totalNodes += data.memoryNodes.people?.length || 0;
+        }
+        totalNodes += data.tools?.length || 0;
+        totalNodes += data.cognitiveSystem?.length || 0;
+        
+        console.log(`Total nodes in test: ${totalNodes}`);
+        document.body.innerHTML += `<p><strong>Total nodes loaded: ${totalNodes}</strong></p>`;
+    </script>
+</body>
+</html>

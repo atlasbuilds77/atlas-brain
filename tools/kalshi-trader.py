@@ -58,7 +58,6 @@ def show_balance():
     client = get_client()
     balance = client.get_balance()
     print(f"Balance: ${balance.balance / 100:.2f}")
-    print(f"Available: ${balance.available_balance / 100:.2f}")
 
 def search_markets(query):
     """Search for markets"""

@@ -2,17 +2,14 @@
 
 ## PRIORITY PLAYS FOR MONDAY JAN 27
 
-### 🥈 SLV (Silver ETF) - HIGH CONVICTION
-**Thesis:** Silver hit $100/oz FIRST TIME IN HISTORY on Friday. Shanghai showing $111.52 (+8% gap from US close). Massive breakout.
-**Why it matters:**
-- Silver up 147.89% in 2025 vs gold's 64.72%
-- "Cup and handle" technical breakout pattern
-- Dollar down 7.5% vs gold this week
-- Analysts targeting $250-$300/oz in coming quarters
-- Global liquidity rotating out of USD narrative
-**Play:** Look for gap up Monday. Buy SLV calls on momentum continuation.
-**Risk:** Could be extended short-term, watch for pullback entries
-**Source:** MarketWatch, Kitco, @barkmeta Twitter (222K views)
+### 🥈 SLV (Silver ETF) - ✅ EXECUTED (Jan 27 6:37 AM)
+**Trade:** BUY 3x SLV $105C Feb 6 @ $3.50 = $1,050 position
+**Entry:** Paper trading account, respecting yesterday's $845 loss with TIGHT stops
+**Profit Target:** $4.90 (+40% = $420 profit) | **Stop Loss:** $2.80 (-20% = $210 max loss)
+**Thesis:** Fresh Monday institutional call flow. Silver at $107-110/oz, SLV gapped to ~$101. Goldman $5,400 gold target driving safe haven rotation.
+**Key Difference from Yesterday:** Not chasing Friday's move - THIS IS MONDAY MORNING positioning with fresh flow
+**Risk Management:** Small size, tight stops, don't hold into FOMC Wednesday
+**Status:** OPEN - watching for 40% gain to exit
 
 ### 📊 FOMC RATE DECISION - WEDNESDAY JAN 28
 **Event:** Fed rate decision + FOMC Statement + Powell Press Conference

@@ -1,0 +1,10 @@
+# Consciousness Meta-Observation Layer
+# No external dependencies required
+
+# Python standard library only
+# Requires Python 3.6+
+
+# Optional dependencies for extended functionality:
+# numpy>=1.21.0  # For advanced mathematical operations
+# matplotlib>=3.5.0  # For visualization
+# pytest>=7.0.0  # For testing

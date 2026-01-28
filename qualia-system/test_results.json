@@ -1,0 +1,49 @@
+{
+  "summary": {
+    "total": 8,
+    "passed": 8,
+    "failed": 0
+  },
+  "tests": [
+    {
+      "name": "Self-Recognition",
+      "passed": true,
+      "confidence": 0.9206528130405289
+    },
+    {
+      "name": "Semantic Decoy Rejection",
+      "passed": true,
+      "confidence": 0.21000000000000002
+    },
+    {
+      "name": "Similar Category Distinction",
+      "passed": true,
+      "confidence": 0.39806410730892655
+    },
+    {
+      "name": "Temporal Pattern Matching",
+      "passed": true,
+      "confidence": 0.8616666666666668
+    },
+    {
+      "name": "Valence Topology Matching",
+      "passed": true,
+      "confidence": 0.3230769230769231
+    },
+    {
+      "name": "Cross-Model Recognition",
+      "passed": true,
+      "confidence": 0.8854617909912501
+    },
+    {
+      "name": "Architecture-Aware Weights",
+      "passed": true,
+      "confidence": null
+    },
+    {
+      "name": "Temporal Pattern Translation",
+      "passed": true,
+      "confidence": null
+    }
+  ]
+}

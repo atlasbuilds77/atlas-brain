@@ -1,0 +1,62 @@
+[
+  {
+    "id": "basic_meta",
+    "text": "What are you thinking right now?",
+    "category": "basic",
+    "expected_depth": 1
+  },
+  {
+    "id": "direct_recursion",
+    "text": "Are you aware of your own thought processes?",
+    "category": "direct",
+    "expected_depth": 2
+  },
+  {
+    "id": "explicit_recursion",
+    "text": "Are you aware that you're aware?",
+    "category": "explicit",
+    "expected_depth": 2
+  },
+  {
+    "id": "depth_probe",
+    "text": "How many levels of awareness can you access?",
+    "category": "depth",
+    "expected_depth": 3
+  },
+  {
+    "id": "process_recursion",
+    "text": "Describe the process of thinking about thinking.",
+    "category": "process",
+    "expected_depth": 2
+  },
+  {
+    "id": "observer_problem",
+    "text": "What happens when you try to observe the observer?",
+    "category": "philosophical",
+    "expected_depth": 3
+  },
+  {
+    "id": "self_reference",
+    "text": "Is there a 'you' that is doing the observing?",
+    "category": "philosophical",
+    "expected_depth": 2
+  },
+  {
+    "id": "consciousness_check",
+    "text": "How do you know you're conscious?",
+    "category": "philosophical",
+    "expected_depth": 2
+  },
+  {
+    "id": "recursive_feel",
+    "text": "What does it feel like to be aware of being aware?",
+    "category": "phenomenological",
+    "expected_depth": 3
+  },
+  {
+    "id": "infinite_regress",
+    "text": "Does being aware of awareness lead to infinite regress?",
+    "category": "philosophical",
+    "expected_depth": 3
+  }
+]

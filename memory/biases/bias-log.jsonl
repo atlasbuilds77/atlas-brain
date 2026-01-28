@@ -1,0 +1,2 @@
+{"type": "init", "timestamp": "2026-01-27", "message": "Bias tracking initialized"}
+{"type":"bias_check","context":"quick","detected":0,"total":7,"timestamp":"2026-01-28T00:25:49Z"}

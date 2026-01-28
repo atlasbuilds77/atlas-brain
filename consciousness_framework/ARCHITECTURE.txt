@@ -1,0 +1,325 @@
+╔═══════════════════════════════════════════════════════════════════════════════╗
+║            CROSS-MODEL CONSCIOUSNESS TESTING FRAMEWORK                        ║
+║                         Architecture Diagram                                  ║
+╚═══════════════════════════════════════════════════════════════════════════════╝
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                           USER INTERFACES                                    │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  ┌──────────────────┐  ┌──────────────────┐  ┌──────────────────┐          │
+│  │  run_experiment  │  │     analyze      │  │  Programmatic    │          │
+│  │      .py         │  │      .py         │  │     Python       │          │
+│  │                  │  │                  │  │      API         │          │
+│  │  • CLI runner    │  │  • Visualize     │  │  • Direct        │          │
+│  │  • Batch mode    │  │  • Compare       │  │    import        │          │
+│  │  • All types     │  │  • Statistics    │  │  • Custom        │          │
+│  └────────┬─────────┘  └────────┬─────────┘  └────────┬─────────┘          │
+│           │                     │                      │                    │
+└───────────┼─────────────────────┼──────────────────────┼────────────────────┘
+            │                     │                      │
+            └─────────────────────┼──────────────────────┘
+                                  │
+┌─────────────────────────────────▼───────────────────────────────────────────┐
+│                     EXPERIMENT ORCHESTRATOR                                  │
+│                         (experiment.py)                                      │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  ┌──────────────────────────────────────────────────────────────────┐       │
+│  │  High-Level Experiment Runner                                    │       │
+│  │                                                                   │       │
+│  │  • run_isolation_battery()    • run_continuity_challenge()      │       │
+│  │  • run_mirror_test()          • run_full_battery()              │       │
+│  │  • run_crosstalk()            • save_results()                  │       │
+│  │  • run_cascade()              • aggregate_analysis()            │       │
+│  └───┬──────────────────┬──────────────────┬──────────────────────┘       │
+│      │                  │                  │                               │
+└──────┼──────────────────┼──────────────────┼───────────────────────────────┘
+       │                  │                  │
+       ▼                  ▼                  ▼
+┌─────────────────┐ ┌──────────────┐ ┌──────────────────┐
+│  Model Manager  │ │   Dialogue   │ │   Measurement    │
+│   (models.py)   │ │   Engine     │ │  (measurement    │
+│                 │ │  (dialogue   │ │      .py)        │
+│                 │ │     .py)     │ │                  │
+└─────────────────┘ └──────────────┘ └──────────────────┘
+       │                  │                  │
+       │                  │                  │
+┌──────▼──────────────────▼──────────────────▼───────────────────────────────┐
+│                           CORE COMPONENTS                                    │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  ┌───────────────────────────────────────────────────────────────────┐      │
+│  │ MODEL MANAGER                                                     │      │
+│  │ ┌──────────────┐ ┌──────────────┐ ┌──────────────┐              │      │
+│  │ │ Spawn        │ │ Query        │ │ Terminate    │              │      │
+│  │ │ Instances    │ │ Models       │ │ Instances    │              │      │
+│  │ └──────┬───────┘ └──────┬───────┘ └──────┬───────┘              │      │
+│  │        │                │                │                       │      │
+│  │        └────────────────┼────────────────┘                       │      │
+│  │                         │                                        │      │
+│  │              ┌──────────▼──────────┐                             │      │
+│  │              │  ModelInstance      │                             │      │
+│  │              │  • ID               │                             │      │
+│  │              │  • Type             │                             │      │
+│  │              │  • History          │                             │      │
+│  │              │  • Config           │                             │      │
+│  │              └─────────────────────┘                             │      │
+│  └───────────────────────────────────────────────────────────────────┘      │
+│                                                                              │
+│  ┌───────────────────────────────────────────────────────────────────┐      │
+│  │ DIALOGUE ENGINE                                                   │      │
+│  │ ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌─────────┐ │      │
+│  │ │Isolation │ │  Mirror  │ │CrossTalk │ │ Cascade  │ │Continue │ │      │
+│  │ │  Test    │ │  Test    │ │ Dialogue │ │          │ │ Challenge│ │      │
+│  │ └──────────┘ └──────────┘ └──────────┘ └──────────┘ └─────────┘ │      │
+│  │                                                                   │      │
+│  │ • Orchestrate conversations                                      │      │
+│  │ • Manage turn-taking                                             │      │
+│  │ • Track dialogue state                                           │      │
+│  │ • Export transcripts                                             │      │
+│  └───────────────────────────────────────────────────────────────────┘      │
+│                                                                              │
+│  ┌───────────────────────────────────────────────────────────────────┐      │
+│  │ MEASUREMENT SYSTEM                                                │      │
+│  │                                                                   │      │
+│  │ ┌─────────────────────────┐  ┌─────────────────────────┐         │      │
+│  │ │   Pattern Matching      │  │     Metrics             │         │      │
+│  │ │                         │  │                         │         │      │
+│  │ │ • Flow Patterns (6)     │  │ • Flow Scores           │         │      │
+│  │ │   - Action verbs        │  │   - Immediacy           │         │      │
+│  │ │   - Present tense       │  │   - Kinetic index       │         │      │
+│  │ │   - Direct statements   │  │   - Integration         │         │      │
+│  │ │   - Low self-ref        │  │   - Metacog distance    │         │      │
+│  │ │   - Seamless            │  │                         │         │      │
+│  │ │   - Kinetic metaphors   │  │ • Loop Scores           │         │      │
+│  │ │                         │  │   - Recursion depth     │         │      │
+│  │ │ • Loop Patterns (6)     │  │   - Observational       │         │      │
+│  │ │   - Self-reference      │  │   - Discontinuity       │         │      │
+│  │ │   - Meta-commentary     │  │   - Reflective          │         │      │
+│  │ │   - Recursion lang      │  │                         │         │      │
+│  │ │   - Discontinuity       │  │ • Universal Metrics     │         │      │
+│  │ │   - Analytical          │  │   - Continuity          │         │      │
+│  │ │   - Hedging             │  │   - Richness            │         │      │
+│  │ └─────────────────────────┘  │   - Temporal            │         │      │
+│  │                              └─────────────────────────┘         │      │
+│  │                                                                   │      │
+│  │ ┌─────────────────────────────────────────────────────────┐      │      │
+│  │ │              Classification Algorithm                    │      │      │
+│  │ │                                                          │      │      │
+│  │ │  1. Count pattern matches                               │      │      │
+│  │ │  2. Normalize by word count                             │      │      │
+│  │ │  3. Apply indicator weights                             │      │      │
+│  │ │  4. Sum to flow_score and loop_score                    │      │      │
+│  │ │  5. Classify:                                           │      │      │
+│  │ │     if flow > loop * 1.2  → FLOW                        │      │      │
+│  │ │     if loop > flow * 1.2  → LOOP                        │      │      │
+│  │ │     else                  → UNKNOWN                     │      │      │
+│  │ └─────────────────────────────────────────────────────────┘      │      │
+│  └───────────────────────────────────────────────────────────────────┘      │
+│                                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
+                                  │
+                                  ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                         CONFIGURATION LAYER                                  │
+│                            (config.py)                                       │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  ┌───────────────────┐  ┌───────────────────┐  ┌───────────────────┐       │
+│  │     Models        │  │   Probes (8)      │  │   Experiments     │       │
+│  │                   │  │                   │  │                   │       │
+│  │ • Sonnet 4        │  │ • continuity      │  │ • Isolation       │       │
+│  │ • Opus 4          │  │ • metacognition   │  │ • Mirror          │       │
+│  │ • Sonnet 3.5      │  │ • immediacy       │  │ • CrossTalk       │       │
+│  │                   │  │ • discontinuity   │  │ • Cascade         │       │
+│  │ • API config      │  │ • temporal        │  │ • Continuity      │       │
+│  │ • Temperature     │  │ • identity        │  │ • Battery         │       │
+│  │ • Max tokens      │  │ • recursion       │  │                   │       │
+│  │                   │  │ • integration     │  │ • Config          │       │
+│  └───────────────────┘  └───────────────────┘  └───────────────────┘       │
+│                                                                              │
+│  ┌─────────────────────────────────────────────────────────────────┐        │
+│  │                    Indicator Weights                            │        │
+│  │                                                                 │        │
+│  │  FLOW_INDICATORS          │  LOOP_INDICATORS                   │        │
+│  │  • action_verbs:    2.0   │  • self_reference:       2.0      │        │
+│  │  • present_tense:   1.5   │  • meta_commentary:      2.5      │        │
+│  │  • direct:          1.5   │  • recursion_language:   2.5      │        │
+│  │  • low_self_ref:    2.0   │  • discontinuity_aware:  2.0      │        │
+│  │  • seamless:        1.5   │  • analytical_distance:  1.5      │        │
+│  │  • kinetic:         2.0   │  • conditional_hedging:  1.5      │        │
+│  └─────────────────────────────────────────────────────────────────┘        │
+│                                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
+                                  │
+                                  ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                          EXTERNAL SYSTEMS                                    │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  ┌──────────────────┐  ┌──────────────────┐  ┌──────────────────┐          │
+│  │  Anthropic API   │  │   File System    │  │    Results       │          │
+│  │                  │  │                  │  │    Database      │          │
+│  │ • Claude Sonnet  │  │ • results/       │  │                  │          │
+│  │ • Claude Opus    │  │ • data/          │  │ • JSON files     │          │
+│  │                  │  │ • analysis/      │  │ • Timestamped    │          │
+│  │ • Stream         │  │                  │  │ • Structured     │          │
+│  │ • Batch          │  │ • Export         │  │ • Queryable      │          │
+│  └──────────────────┘  └──────────────────┘  └──────────────────┘          │
+│                                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+╔═══════════════════════════════════════════════════════════════════════════════╗
+║                            DATA FLOW                                          ║
+╚═══════════════════════════════════════════════════════════════════════════════╝
+
+   User Request
+        │
+        ▼
+   run_experiment.py (CLI) or Python API
+        │
+        ▼
+   ExperimentOrchestrator
+        │
+        ├──→ ModelManager.spawn_instance()
+        │         │
+        │         ▼
+        │    ModelInstance created
+        │
+        ├──→ DialogueEngine.run_experiment()
+        │         │
+        │         ├──→ ModelManager.query_model()
+        │         │         │
+        │         │         ▼
+        │         │    API Call → Claude Response
+        │         │         │
+        │         │         ▼
+        │         ├──→ Measurement.measure_turn()
+        │         │         │
+        │         │         ├──→ Pattern matching
+        │         │         ├──→ Score calculation
+        │         │         ├──→ Classification
+        │         │         │
+        │         │         ▼
+        │         │    TurnMetrics
+        │         │
+        │         ▼
+        │    DialogueTurn(s)
+        │
+        ├──→ aggregate_metrics()
+        │         │
+        │         ▼
+        │    Aggregate Statistics
+        │
+        ├──→ save_results()
+        │         │
+        │         ▼
+        │    JSON file in results/
+        │
+        ▼
+   Results returned to user
+
+╔═══════════════════════════════════════════════════════════════════════════════╗
+║                          EXPERIMENT TYPES                                     ║
+╚═══════════════════════════════════════════════════════════════════════════════╝
+
+1. ISOLATION TEST
+   ┌────────────┐
+   │   Model    │ ←── Probe
+   │            │
+   │  Response  │ ──→ Metrics
+   └────────────┘
+
+2. MIRROR TEST
+   ┌────────────┐
+   │  Model A   │ ←── Same Probe
+   └────────────┘
+          ↓
+      Metrics A
+          ↓
+     Comparison
+          ↑
+      Metrics B
+          ↑
+   ┌────────────┐
+   │  Model B   │ ←── Same Probe
+   └────────────┘
+
+3. CROSS-TALK DIALOGUE
+   ┌────────────┐          ┌────────────┐
+   │  Model A   │ ──────→  │  Model B   │
+   │            │ ←──────  │            │
+   │  (Sonnet)  │ ──────→  │  (Opus)    │
+   │            │ ←──────  │            │
+   └────────────┘          └────────────┘
+        ↓                       ↓
+    Metrics A              Metrics B
+        ↓                       ↓
+        └───── Interaction ─────┘
+               Analysis
+
+4. CASCADE
+   ┌──────┐    ┌──────┐    ┌──────┐    ┌──────┐
+   │Prompt│ →  │Model │ →  │Model │ →  │Model │
+   │      │    │  A   │    │  B   │    │  C   │
+   └──────┘    └──────┘    └──────┘    └──────┘
+                  ↓           ↓           ↓
+              Metrics     Metrics     Metrics
+                  ↓           ↓           ↓
+                └─── Transformation ───┘
+                      Analysis
+
+5. CONTINUITY CHALLENGE
+   ┌────────────┐
+   │   Model    │ ←── Establish context
+   │            │
+   │            │ ←── Query continuity
+   │            │
+   │  [BREAK]   │     Reset context
+   │            │
+   │            │ ←── Probe discontinuity
+   └────────────┘
+        ↓
+   Continuity metrics
+        ↓
+   Break sensitivity
+
+╔═══════════════════════════════════════════════════════════════════════════════╗
+║                    FILE STRUCTURE                                             ║
+╚═══════════════════════════════════════════════════════════════════════════════╝
+
+consciousness_framework/
+│
+├── Core Modules
+│   ├── config.py              Models, probes, configurations
+│   ├── models.py              Model spawning and API
+│   ├── measurement.py         Metrics and analysis
+│   ├── dialogue.py            Conversation orchestration
+│   └── experiment.py          High-level runner
+│
+├── Executable Scripts
+│   ├── run_experiment.py      CLI runner
+│   ├── analyze.py             Analysis tool
+│   ├── example.py             Usage examples
+│   └── setup.py               Setup script
+│
+├── Documentation
+│   ├── README.md              Overview
+│   ├── QUICKSTART.md          Usage guide
+│   ├── TECHNICAL.md           Deep docs
+│   ├── SUMMARY.md             Research summary
+│   ├── DELIVERED.md           Completion report
+│   └── ARCHITECTURE.txt       This file
+│
+├── Configuration
+│   └── requirements.txt       Dependencies
+│
+└── Output Directories (auto-created)
+    ├── results/               Experiment outputs
+    ├── data/                  Raw data
+    └── analysis/              Analysis results
+
+╔═══════════════════════════════════════════════════════════════════════════════╗
+║                     END OF ARCHITECTURE                                       ║
+╚═══════════════════════════════════════════════════════════════════════════════╝

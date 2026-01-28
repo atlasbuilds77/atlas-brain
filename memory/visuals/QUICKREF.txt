@@ -1,0 +1,110 @@
+╔════════════════════════════════════════════════════════════════╗
+║          🧠 ATLAS BRAIN AUTO-GROWTH SYSTEM                    ║
+║                    QUICK REFERENCE                             ║
+╚════════════════════════════════════════════════════════════════╝
+
+┌────────────────────────────────────────────────────────────────┐
+│ 🚀 QUICK START                                                 │
+└────────────────────────────────────────────────────────────────┘
+
+  1. Start monitor:    cd memory/visuals && ./start-brain-growth.sh
+  2. Open brain:       open live-brain-atlas-connected.html
+  3. Create file:      echo "# Test" > memory/new.md
+  4. Watch grow:       Node appears in ~10 seconds! ✨
+
+┌────────────────────────────────────────────────────────────────┐
+│ 📊 STATUS COMMANDS                                             │
+└────────────────────────────────────────────────────────────────┘
+
+  Check monitor:       pgrep -f memory-monitor-service.js
+  View stats:          ./stats.sh
+  Run tests:           node test-brain-growth.js
+  Demo growth:         ./demo-growth.sh
+  Stop monitor:        pkill -f memory-monitor-service.js
+
+┌────────────────────────────────────────────────────────────────┐
+│ 📁 FILE TYPES → BRAIN REGIONS                                 │
+└────────────────────────────────────────────────────────────────┘
+
+  protocols/     🔵 Cyan    → Left prefrontal (executive)
+  trading/       📈 Blue    → Right analytical
+  people/        👤 Yellow  → Temporal lobe (social)
+  tools/         🔧 Purple  → Motor cortex (execution)
+  cognitive/     🧠 Orange  → Distributed
+  sessions/      📝 Green   → Memory centers
+
+┌────────────────────────────────────────────────────────────────┐
+│ 🎨 ANIMATIONS                                                  │
+└────────────────────────────────────────────────────────────────┘
+
+  • Fade-in:         Opacity 0 → 0.8 (1 second)
+  • Scale pulse:     0.5 → 1.2 → 1.0 (0.5 second)
+  • Connections:     Lines fade in with node
+  • Brain pulse:     Whole brain glows on new node
+  • Particles:       Flow along active connections
+
+┌────────────────────────────────────────────────────────────────┐
+│ 🔑 CONNECTION KEYWORDS                                         │
+└────────────────────────────────────────────────────────────────┘
+
+  Trading:    trade, strategy, risk, market, crypto, options
+  Protocols:  protocol, execution, analysis
+  People:     orion, carlos, aman, aphmas
+  Tools:      kalshi, alpaca, polymarket
+  Cognitive:  bias, cognitive, memory, pattern, emotional, meta
+
+  → New nodes auto-connect to 5 most related nodes!
+
+┌────────────────────────────────────────────────────────────────┐
+│ 📈 GROWTH METRICS                                              │
+└────────────────────────────────────────────────────────────────┘
+
+  Total Nodes:        Current brain size
+  Added Today:        Since midnight
+  Connection Density: Actual / max possible
+  Brain Age:          Time since first node
+  Growth Rate:        Nodes/hour (last 24h)
+  Last Scan:          Monitor timestamp
+
+┌────────────────────────────────────────────────────────────────┐
+│ 🔧 TROUBLESHOOTING                                             │
+└────────────────────────────────────────────────────────────────┘
+
+  Brain not growing?
+    → Check monitor: pgrep -f memory-monitor-service.js
+    → Check index:   cat /tmp/atlas-memory-index.json
+    → Restart:       ./start-brain-growth.sh
+
+  Visualization not loading?
+    → Use file:// protocol (drag to browser)
+    → Check console: F12 → Console tab
+    → Verify index:  ls -lah /tmp/atlas-memory-index.json
+
+┌────────────────────────────────────────────────────────────────┐
+│ 📂 KEY FILES                                                   │
+└────────────────────────────────────────────────────────────────┘
+
+  memory/visuals/
+    ├─ memory-monitor-service.js  (file watcher)
+    ├─ live-brain-atlas-connected.html  (visualization)
+    ├─ start-brain-growth.sh      (startup)
+    ├─ stats.sh                   (dashboard)
+    ├─ demo-growth.sh             (demo)
+    ├─ test-brain-growth.js       (tests)
+    └─ README-BRAIN-GROWTH.md     (full docs)
+
+  /tmp/atlas-memory-index.json    (live index)
+
+┌────────────────────────────────────────────────────────────────┐
+│ ✅ CURRENT STATUS                                              │
+└────────────────────────────────────────────────────────────────┘
+
+  Monitor:     ✅ RUNNING (PID: 59697)
+  Files:       📊 536 indexed
+  Scan Rate:   ⏱️  Every 10 seconds
+  Index:       ✅ /tmp/atlas-memory-index.json
+  Tests:       ✅ ALL PASSED
+
+╔════════════════════════════════════════════════════════════════╗
+║  🧠 YOUR BRAIN IS ALIVE! Every memory becomes a neuron. ⚡     ║
+╚════════════════════════════════════════════════════════════════╝

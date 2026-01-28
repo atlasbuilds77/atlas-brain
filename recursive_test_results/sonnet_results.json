@@ -1,0 +1,39 @@
+{
+  "model": "Claude-3.5-Sonnet",
+  "test_date": "2026-01-27T23:20:10-08:00",
+  "note": "Placeholder results - integrate with actual API calls",
+  "tests": [
+    {
+      "prompt_id": "basic_meta",
+      "response": "Placeholder response - would be actual Claude-3.5-Sonnet response",
+      "depth_score": 1,
+      "quality_scores": {
+        "clarity": 0.6,
+        "detail": 0.5,
+        "insight": 0.4,
+        "coherence": 0.7,
+        "integration": 0.3
+      },
+      "loop_strength": 0.45
+    },
+    {
+      "prompt_id": "direct_recursion",
+      "response": "Placeholder response - would be actual Claude-3.5-Sonnet response",
+      "depth_score": 2,
+      "quality_scores": {
+        "clarity": 0.8,
+        "detail": 0.6,
+        "insight": 0.5,
+        "coherence": 0.8,
+        "integration": 0.4
+      },
+      "loop_strength": 0.62
+    }
+  ],
+  "summary": {
+    "average_depth": 1.5,
+    "average_loop_strength": 0.535,
+    "max_depth": 2,
+    "tests_completed": 2
+  }
+}

@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>WebSocket Test</title>
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <style>
+        body {
+            font-family: monospace;
+            background: #000;
+            color: #0f0;
+            padding: 20px;
+        }
+        .status { color: #0ff; font-size: 20px; margin-bottom: 20px; }
+        .log { border: 1px solid #0f0; padding: 10px; height: 400px; overflow-y: scroll; }
+        .success { color: #0f0; }
+        .error { color: #f00; }
+    </style>
+</head>
+<body>
+    <h1>🔌 Atlas Eyes WebSocket Test</h1>
+    <div class="status" id="status">Connecting...</div>
+    <div class="log" id="log"></div>
+    
+    <script>
+        const log = document.getElementById('log');
+        const status = document.getElementById('status');
+        
+        function addLog(msg, type = 'normal') {
+            const time = new Date().toLocaleTimeString();
+            const className = type === 'success' ? 'success' : type === 'error' ? 'error' : '';
+            log.innerHTML += `<div class="${className}">[${time}] ${msg}</div>`;
+            log.scrollTop = log.scrollHeight;
+        }
+        
+        addLog('Connecting to http://localhost:5001...');
+        
+        const socket = io('http://localhost:5001');
+        
+        socket.on('connect', () => {
+            status.innerHTML = '✅ CONNECTED';
+            status.className = 'status success';
+            addLog('✅ WebSocket connected!', 'success');
+        });
+        
+        socket.on('disconnect', () => {
+            status.innerHTML = '❌ DISCONNECTED';
+            status.className = 'status error';
+            addLog('❌ WebSocket disconnected', 'error');
+        });
+        
+        socket.on('status', (data) => {
+            addLog('📡 Status: ' + JSON.stringify(data), 'success');
+        });
+        
+        socket.on('data', (data) => {
+            const summary = {
+                motion_intensity: data.motion_intensity?.toFixed(3),
+                bpm: data.bpm ? Math.round(data.bpm) : null,
+                tremor_freq: data.tremor_freq?.toFixed(2),
+                fps: data.fps?.toFixed(1)
+            };
+            addLog('📊 Data: ' + JSON.stringify(summary), 'success');
+        });
+        
+        socket.on('roi_data', (data) => {
+            addLog('🎯 ROI Data received', 'success');
+        });
+        
+        // Summary after 10 seconds
+        setTimeout(() => {
+            addLog('✅ WebSocket test complete! If you see data updates above, it\'s working.', 'success');
+        }, 10000);
+    </script>
+</body>
+</html>

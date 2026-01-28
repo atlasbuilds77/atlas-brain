@@ -1,0 +1,19 @@
+{
+  "phase": "SWS",
+  "timestamp": "2026-01-27T16:28:28-08:00",
+  "metrics": {
+    "recent_files_processed": 25,
+    "high_salience_events": 18,
+    "patterns_extracted": 10,
+    "stale_patterns": 0
+  },
+  "high_salience_files": [
+    {"file": "/Users/atlasbuilds/clawd/memory/audits/2026-01-27-self-audit.md", "salience": 3625},
+    {"file": "/Users/atlasbuilds/clawd/memory/capabilities/neuroplasticity-live.md", "salience": 2680},
+    {"file": "/Users/atlasbuilds/clawd/memory/capabilities/emotional-intelligence-live.md", "salience": 1980},
+    {"file": "/Users/atlasbuilds/clawd/memory/research/sleep-dream-mechanisms-2026.md", "salience": 1677},
+    {"file": "/Users/atlasbuilds/clawd/memory/protocols/trading-workflow-unified.md", "salience": 1645}
+  ],
+  "pattern_file": "/Users/atlasbuilds/clawd/memory/patterns/sws-2026-01-27-1628.md",
+  "ready_for_rem": true
+}

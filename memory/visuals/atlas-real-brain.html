@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Atlas Real Brain - Live Neural Activity</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Courier New', monospace;
+            background: #000;
+            color: #ff8800;
+            overflow: hidden;
+        }
+        #canvas-container { width: 100vw; height: 100vh; position: relative; }
+        
+        #info-panel {
+            position: absolute; top: 20px; left: 20px;
+            background: rgba(0, 0, 0, 0.9);
+            border: 2px solid #ff8800;
+            padding: 15px; font-size: 14px;
+            max-width: 300px; z-index: 100;
+        }
+        #live-status {
+            position: absolute; top: 20px; right: 20px;
+            background: rgba(0, 0, 0, 0.9);
+            border: 2px solid #00ff00;
+            padding: 15px; z-index: 100; min-width: 250px;
+        }
+        .live-indicator {
+            display: inline-block; width: 10px; height: 10px;
+            background: #00ff00; border-radius: 50%;
+            animation: pulse 1s infinite; margin-right: 10px;
+        }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+        
+        #event-log {
+            position: absolute; bottom: 20px; left: 20px;
+            background: rgba(0, 0, 0, 0.9);
+            border: 2px solid #ff8800;
+            padding: 15px; max-width: 500px;
+            max-height: 250px; overflow-y: auto;
+            font-size: 12px; z-index: 100;
+        }
+        .event-item {
+            margin-bottom: 5px; opacity: 0;
+            animation: fadeIn 0.3s forwards;
+        }
+        @keyframes fadeIn { to { opacity: 1; } }
+        .region-label { font-weight: bold; color: #ffaa00; }
+        h3 { color: #ff8800; margin-bottom: 10px; font-size: 16px; }
+        .status-item { margin: 5px 0; }
+        .status-value { color: #00ff00; font-weight: bold; }
+        
+        #legend {
+            position: absolute; top: 200px; left: 20px;
+            background: rgba(0, 0, 0, 0.9);
+            border: 2px solid #ff8800;
+            padding: 15px; font-size: 12px;
+            max-width: 250px; z-index: 100;
+        }
+        .legend-item {
+            display: flex; align-items: center;
+            margin: 8px 0;
+        }
+        .legend-color {
+            width: 20px; height: 20px;
+            border-radius: 50%; margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div id="canvas-container"></div>
+    
+    <div id="info-panel">
+        <h3>⚡ ATLAS REAL BRAIN</h3>
+        <div id="stats">
+            <div>Total Nodes: <span id="total-nodes">0</span></div>
+            <div>Active Regions: <span id="active-regions">0</span></div>
+            <div>Connections: <span id="connection-count">0</span></div>
+            <div>Tokens: <span id="tokens">0</span></div>
+            <div>FPS: <span id="fps">60</span></div>
+        </div>
+    </div>
+
+    <div id="live-status">
+        <h3><span class="live-indicator"></span>LIVE CONNECTION</h3>
+        <div class="status-item">System: <span class="status-value" id="current-system">IDLE</span></div>
+        <div class="status-item">Task: <span class="status-value" id="current-task">Waiting...</span></div>
+        <div class="status-item">Last Update: <span class="status-value" id="last-update">--</span></div>
+    </div>
+    
+    <div id="legend">
+        <h3>NODE TYPES</h3>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #00ffff;"></div>
+            <div>Protocols (Left)</div>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #0077ff;"></div>
+            <div>Trading (Right)</div>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #ffff00;"></div>
+            <div>People (Temporal)</div>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #aa00ff;"></div>
+            <div>Tools (Motor)</div>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #ff8800;"></div>
+            <div>Pattern System</div>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #ff4444;"></div>
+            <div>Emotion System</div>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #44ff44;"></div>
+            <div>Meta System</div>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #ff66cc;"></div>
+            <div>Bias System</div>
+        </div>
+    </div>
+
+    <div id="event-log">
+        <h3>COGNITIVE ACTIVITY LOG</h3>
+        <div id="log-content"></div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script type="module">
+        // === EMBEDDED REAL NODE DATA ===
+        const EMBEDDED_NODE_DATA = {
+  "memoryNodes": {
+    "protocols": [
+      {"file": "memory/protocols/position-sizing-kelly.md", "name": "position-sizing-kelly", "region": "memory", "color": "cyan"},
+      {"file": "memory/protocols/anti-hallucination-protocol.md", "name": "anti-hallucination-protocol", "region": "memory", "color": "cyan"},
+      {"file": "memory/protocols/ebadf-fix-permanent.md", "name": "ebadf-fix-permanent", "region": "memory", "color": "cyan"},
+      {"file": "memory/protocols/jupiter-position-check-complete.md", "name": "jupiter-position-check-complete", "region": "memory", "color": "cyan"},
+      {"file": "memory/protocols/cognitive-architecture-v1.md", "name": "cognitive-architecture-v1", "region": "memory", "color": "cyan"},
+      {"file": "memory/protocols/alpaca-tracking.md", "name": "alpaca-tracking", "region": "memory", "color": "cyan"},
+      {"file": "memory/protocols/ownership-transfer.md", "name": "ownership-transfer", "region": "memory", "color": "cyan"},
+      {"file": "memory/protocols/neuroplasticity-engine.md", "name": "neuroplasticity-engine", "region": "memory", "color": "cyan"},
+      {"file": "memory/protocols/imessage-routing-mandatory.md", "name": "imessage-routing-mandatory", "region": "memory", "color": "cyan"},
+      {"file": "memory/protocols/bias-mitigation-checklist.md", "name": "bias-mitigation-checklist", "region": "memory", "color": "cyan"},
+      {"file": "memory/protocols/date-time-awareness.md", "name": "date-time-awareness", "region": "memory", "color": "cyan"},
+      {"file": "memory/protocols/orion-pattern-tracking.md", "name": "orion-pattern-tracking", "region": "memory", "color": "cyan"},
+      {"file": "memory/protocols/message-attribution-protocol.md", "name": "message-attribution-protocol", "region": "memory", "color": "cyan"},
+      {"file": "memory/protocols/chrome-extension-relay-setup.md", "name": "chrome-extension-relay-setup", "region": "memory", "color": "cyan"},
+      {"file": "memory/protocols/opsec-x-engagement.md", "name": "opsec-x-engagement", "region": "memory", "color": "cyan"},
+      {"file": "memory/protocols/imessage-routing-final-simple.md", "name": "imessage-routing-final-simple", "region": "memory", "color": "cyan"},
+      {"file": "memory/protocols/options-order-execution.md", "name": "options-order-execution", "region": "memory", "color": "cyan"},
+      {"file": "memory/protocols/trade-execution-verification.md", "name": "trade-execution-verification", "region": "memory", "color": "cyan"},
+      {"file": "memory/protocols/message-routing-check.md", "name": "message-routing-check", "region": "memory", "color": "cyan"},
+      {"file": "memory/protocols/emergency-reboot-polaris.md", "name": "emergency-reboot-polaris", "region": "memory", "color": "cyan"},
+      {"file": "memory/protocols/whale-exit-tracking.md", "name": "whale-exit-tracking", "region": "memory", "color": "cyan"},
+      {"file": "memory/protocols/risk-limits-enforcement.md", "name": "risk-limits-enforcement", "region": "memory", "color": "cyan"},
+      {"file": "memory/protocols/group-chat-routing.md", "name": "group-chat-routing", "region": "memory", "color": "cyan"},
+      {"file": "memory/protocols/research-tool-preference.md", "name": "research-tool-preference", "region": "memory", "color": "cyan"},
+      {"file": "memory/protocols/live-price-check-protocol.md", "name": "live-price-check-protocol", "region": "memory", "color": "cyan"},
+      {"file": "memory/protocols/never-chase-trades.md", "name": "never-chase-trades", "region": "memory", "color": "cyan"},
+      {"file": "memory/protocols/CRITICAL-PROTOCOLS.md", "name": "CRITICAL-PROTOCOLS", "region": "memory", "color": "cyan"},
+      {"file": "memory/protocols/chrome-automation-fix.md", "name": "chrome-automation-fix", "region": "memory", "color": "cyan"},
+      {"file": "memory/protocols/cognitive-control.md", "name": "cognitive-control", "region": "memory", "color": "cyan"},
+      {"file": "memory/protocols/cognitive-upgrade-master.md", "name": "cognitive-upgrade-master", "region": "memory", "color": "cyan"}
+    ],
+    "trading": [
+      {"file": "memory/trading/MASTER-CRYPTO-PLAYBOOK.md", "name": "MASTER-CRYPTO-PLAYBOOK", "region": "memory", "color": "blue"},
+      {"file": "memory/trading/research/kalshi-algo-bots.md", "name": "kalshi-algo-bots", "region": "memory", "color": "blue"},
+      {"file": "memory/trading/research/alpaca-strategies.md", "name": "alpaca-strategies", "region": "memory", "color": "blue"},
+      {"file": "memory/trading/research/crypto-leverage-strategies.md", "name": "crypto-leverage-strategies", "region": "memory", "color": "blue"},
+      {"file": "memory/trading/research/stock-momentum.md", "name": "stock-momentum", "region": "memory", "color": "blue"},
+      {"file": "memory/trading/research/crypto-funding-arb.md", "name": "crypto-funding-arb", "region": "memory", "color": "blue"},
+      {"file": "memory/trading/research/options-strategies.md", "name": "options-strategies", "region": "memory", "color": "blue"},
+      {"file": "memory/trading/research/sports-arb.md", "name": "sports-arb", "region": "memory", "color": "blue"},
+      {"file": "memory/trading/research/kalshi-scalping-deep.md", "name": "kalshi-scalping-deep", "region": "memory", "color": "blue"},
+      {"file": "memory/trading/research/options-automation.md", "name": "options-automation", "region": "memory", "color": "blue"},
+      {"file": "memory/trading/research/crypto-grid-trading.md", "name": "crypto-grid-trading", "region": "memory", "color": "blue"},
+      {"file": "memory/trading/research/hft-basics.md", "name": "hft-basics", "region": "memory", "color": "blue"},
+      {"file": "memory/trading/research/crypto-market-making.md", "name": "crypto-market-making", "region": "memory", "color": "blue"},
+      {"file": "memory/trading/research/quant-systems.md", "name": "quant-systems", "region": "memory", "color": "blue"},
+      {"file": "memory/trading/research/risk-management.md", "name": "risk-management", "region": "memory", "color": "blue"},
+      {"file": "memory/trading/research/defi-yield-farming.md", "name": "defi-yield-farming", "region": "memory", "color": "blue"},
+      {"file": "memory/trading/research/crypto-mev-strategies.md", "name": "crypto-mev-strategies", "region": "memory", "color": "blue"},
+      {"file": "memory/trading/research/prediction-market-edge.md", "name": "prediction-market-edge", "region": "memory", "color": "blue"},
+      {"file": "memory/trading/research/news-sentiment-trading.md", "name": "news-sentiment-trading", "region": "memory", "color": "blue"},
+      {"file": "memory/trading/research/mean-reversion.md", "name": "mean-reversion", "region": "memory", "color": "blue"},
+      {"file": "memory/trading/research/polymarket-strategies.md", "name": "polymarket-strategies", "region": "memory", "color": "blue"},
+      {"file": "memory/trading/crypto-plays-2026-01-25.md", "name": "crypto-plays-2026-01-25", "region": "memory", "color": "blue"},
+      {"file": "memory/trading/kalshi-integration-complete.md", "name": "kalshi-integration-complete", "region": "memory", "color": "blue"},
+      {"file": "memory/trading/news-trading-research.md", "name": "news-trading-research", "region": "memory", "color": "blue"},
+      {"file": "memory/trading/common-trader-mistakes.md", "name": "common-trader-mistakes", "region": "memory", "color": "blue"},
+      {"file": "memory/trading/alpaca-integration-complete.md", "name": "alpaca-integration-complete", "region": "memory", "color": "blue"},
+      {"file": "memory/trading/quantvue-analysis.md", "name": "quantvue-analysis", "region": "memory", "color": "blue"},
+      {"file": "memory/trading/pigeon-setup-status.md", "name": "pigeon-setup-status", "region": "memory", "color": "blue"},
+      {"file": "memory/trading/pre-trade-checklist.md", "name": "pre-trade-checklist", "region": "memory", "color": "blue"},
+      {"file": "memory/trading/smt-divergence.md", "name": "smt-divergence", "region": "memory", "color": "blue"}
+    ],
+    "people": [
+      {"file": "memory/people/orion.md", "name": "orion", "region": "memory", "color": "yellow"},
+      {"file": "memory/people/carlos.md", "name": "carlos", "region": "memory", "color": "yellow"},
+      {"file": "memory/people/aphmas.md", "name": "aphmas", "region": "memory", "color": "yellow"},
+      {"file": "memory/people/aman.md", "name": "aman", "region": "memory", "color": "yellow"},
+      {"file": "memory/people/orion-voice.md", "name": "orion-voice", "region": "memory", "color": "yellow"}
+    ]
+  },
+  "tools": [
+    {"name": "browser", "region": "tools", "color": "purple"},
+    {"name": "exec", "region": "tools", "color": "purple"},
+    {"name": "memory_search", "region": "tools", "color": "purple"},
+    {"name": "web_search", "region": "tools", "color": "purple"},
+    {"name": "message", "region": "tools", "color": "purple"},
+    {"name": "sessions_spawn", "region": "tools", "color": "purple"}
+  ],
+  "cognitiveSystem": [
+    {"name": "pattern_detection", "region": "pattern", "color": "orange"},
+    {"name": "emotional_intelligence", "region": "emotion", "color": "red"},
+    {"name": "metacognition", "region": "meta", "color": "green"},
+    {"name": "bias_detection", "region": "bias", "color": "pink"},
+    {"name": "neuroplasticity", "region": "pattern", "color": "orange"}
+  ]
+};
+        
+        function loadNodeData() {
+            console.log('Using embedded node data:', EMBEDDED_NODE_DATA);
+            return EMBEDDED_NODE_DATA;
+        }
+
+        // === ATLAS STATE POLLING ===
+        let atlasState = {
+            regions: { pattern: 0.1, emotion: 0.1, memory: 0.1, meta: 0.1, bias: 0.1 },
+            activeSystem: 'idle',
+            lastActivity: 'Initialized',
+            tokensUsed: 0
+        };
+
+        async function pollAtlasState() {
+            try {
+                const response = await fetch('file:///tmp/atlas-brain-state.json?t=' + Date.now());
+                const data = await response.json();
+                
+                if (JSON.stringify(data.regions) !== JSON.stringify(atlasState.regions)) {
+                    atlasState = data;
+                    updateBrainFromState(data);
+                    
+                    if (data.lastActivity !== 'Initialized') {
+                        logEvent(data.lastActivity, data.activeSystem);
+                    }
+                }
+                
+                document.getElementById('current-system').textContent = data.activeSystem.toUpperCase();
+                document.getElementById('current-task').textContent = data.currentTask || 'Idle';
+                document.getElementById('tokens').textContent = data.tokensUsed.toLocaleString();
+                document.getElementById('last-update').textContent = new Date(data.timestamp).toLocaleTimeString();
+                
+            } catch (err) {
+                console.log('Waiting for Atlas connection...');
+            }
+        }
+
+        setInterval(pollAtlasState, 500);
+
+        // === BRAIN GEOMETRY ===
+        function createBrainGeometry(detail = 24) {
+            const vertices = [];
+            const indices = [];
+            
+            for (let hemisphere = 0; hemisphere < 2; hemisphere++) {
+                const side = hemisphere === 0 ? -1 : 1;
+                const offset = side * 0.6;
+                
+                for (let i = 0; i <= detail; i++) {
+                    const u = i / detail * Math.PI;
+                    
+                    for (let j = 0; j <= detail; j++) {
+                        const v = j / detail * Math.PI * 2;
+                        
+                        let radius = 2.0;
+                        radius *= (1 + 0.2 * Math.sin(4 * u) * Math.cos(4 * v));
+                        
+                        let x = radius * Math.sin(u) * Math.cos(v) + offset;
+                        let y = radius * Math.sin(u) * Math.sin(v) * 0.9;
+                        let z = radius * Math.cos(u) * 1.1;
+                        
+                        vertices.push(x, y, z);
+                    }
+                }
+            }
+            
+            const totalDetail = detail + 1;
+            for (let h = 0; h < 2; h++) {
+                const baseOffset = h * totalDetail * totalDetail;
+                for (let i = 0; i < detail; i++) {
+                    for (let j = 0; j < detail; j++) {
+                        const a = baseOffset + i * totalDetail + j;
+                        const b = baseOffset + i * totalDetail + (j + 1);
+                        const c = baseOffset + (i + 1) * totalDetail + j;
+                        const d = baseOffset + (i + 1) * totalDetail + (j + 1);
+                        
+                        indices.push(a, b, c);
+                        indices.push(b, d, c);
+                    }
+                }
+            }
+            
+            const geometry = new THREE.BufferGeometry();
+            geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(vertices), 3));
+            geometry.setIndex(indices);
+            geometry.computeVertexNormals();
+            
+            return geometry;
+        }
+
+        // === SCENE SETUP ===
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setClearColor(0x000000, 1);
+        document.getElementById('canvas-container').appendChild(renderer.domElement);
+
+        camera.position.z = 8;
+
+        const ambientLight = new THREE.AmbientLight(0xff8800, 0.3);
+        scene.add(ambientLight);
+        
+        const pointLight = new THREE.PointLight(0xff8800, 1, 100);
+        pointLight.position.set(5, 5, 5);
+        scene.add(pointLight);
+
+        // === BRAIN GROUP ===
+        const brainGroup = new THREE.Group();
+        scene.add(brainGroup);
+
+        const brainGeometry = createBrainGeometry(24);
+        const brainMaterial = new THREE.MeshPhongMaterial({
+            color: 0xff8800,
+            wireframe: true,
+            transparent: true,
+            opacity: 0.3,
+            emissive: 0xff6600,
+            emissiveIntensity: 0.2
+        });
+        const brainMesh = new THREE.Mesh(brainGeometry, brainMaterial);
+        brainGroup.add(brainMesh);
+
+        // === GENERATE NODES FROM REAL DATA ===
+        let nodes = [];
+        let nodeMeshes = [];
+        
+        function generateNodesFromData(data) {
+            const newNodes = [];
+            const colorMap = {
+                cyan: 0x00ffff,
+                blue: 0x0077ff,
+                yellow: 0xffff00,
+                purple: 0xaa00ff,
+                orange: 0xff8800,
+                red: 0xff4444,
+                green: 0x44ff44,
+                pink: 0xff66cc
+            };
+            
+            // Position configs
+            const positions = {
+                protocols: { x: -2.5, y: 1.5, z: 1.5, radius: 2 },
+                trading: { x: 2.5, y: 1.5, z: 1.5, radius: 2 },
+                people: { x: 0, y: 0, z: -1.5, radius: 1.5 },
+                tools: { x: 0, y: -1.5, z: 0.5, radius: 1.2 }
+            };
+            
+            // Add memory nodes
+            if (data && data.memoryNodes) {
+                ['protocols', 'trading', 'people'].forEach(type => {
+                    if (data.memoryNodes[type]) {
+                        data.memoryNodes[type].forEach((node, i) => {
+                            const pos = positions[type];
+                            const angle = (i / data.memoryNodes[type].length) * Math.PI * 2;
+                            const r = pos.radius * (0.7 + Math.random() * 0.3);
+                            
+                            newNodes.push({
+                                position: new THREE.Vector3(
+                                    pos.x + Math.cos(angle) * r,
+                                    pos.y + (Math.random() - 0.5) * 0.8,
+                                    pos.z + Math.sin(angle) * r
+                                ),
+                                type: type,
+                                color: colorMap[node.color] || colorMap.cyan,
+                                name: node.name,
+                                activity: 0.2
+                            });
+                        });
+                    }
+                });
+            }
+            
+            // Add tools
+            if (data && data.tools) {
+                data.tools.forEach((tool, i) => {
+                    const pos = positions.tools;
+                    const angle = (i / data.tools.length) * Math.PI * 2;
+                    const r = pos.radius * 0.8;
+                    
+                    newNodes.push({
+                        position: new THREE.Vector3(
+                            pos.x + Math.cos(angle) * r,
+                            pos.y,
+                            pos.z + Math.sin(angle) * r
+                        ),
+                        type: 'tools',
+                        color: colorMap.purple,
+                        name: tool.name,
+                        activity: 0.2
+                    });
+                });
+            }
+            
+            // Add cognitive systems
+            if (data && data.cognitiveSystem) {
+                const cogPos = [
+                    { x: -1.5, y: 2, z: 0 },
+                    { x: 1.5, y: 2, z: 0 },
+                    { x: 0, y: 2.5, z: 0 },
+                    { x: 0, y: 1.8, z: 1.2 }
+                ];
+                
+                data.cognitiveSystem.forEach((sys, i) => {
+                    const pos = cogPos[i % cogPos.length];
+                    newNodes.push({
+                        position: new THREE.Vector3(pos.x, pos.y, pos.z),
+                        type: sys.region,
+                        color: colorMap[sys.color] || colorMap.orange,
+                        name: sys.name,
+                        activity: 0.2
+                    });
+                });
+            }
+            
+            return newNodes;
+        }
+
+        // Initialize nodes
+        function initializeNodes() {
+            const data = loadNodeData();
+            nodes = generateNodesFromData(data);
+            
+            nodes.forEach(node => {
+                const nodeGeometry = new THREE.SphereGeometry(0.05, 8, 8);
+                const nodeMaterial = new THREE.MeshBasicMaterial({
+                    color: node.color,
+                    transparent: true,
+                    opacity: 0.8
+                });
+                const nodeMesh = new THREE.Mesh(nodeGeometry, nodeMaterial);
+                nodeMesh.position.copy(node.position);
+                nodeMesh.userData = node;
+                brainGroup.add(nodeMesh);
+                nodeMeshes.push(nodeMesh);
+            });
+            
+            document.getElementById('total-nodes').textContent = nodes.length;
+            logEvent(`Brain initialized with ${nodes.length} real nodes`, 'system');
+        }
+
+        initializeNodes();
+
+        // === UPDATE FROM ATLAS STATE ===
+        function updateBrainFromState(state) {
+            nodes.forEach(node => {
+                if (state.regions[node.type]) {
+                    node.activity = state.regions[node.type];
+                }
+            });
+        }
+
+        // === ANIMATION ===
+        let time = 0;
+        let lastFrameTime = Date.now();
+        let fps = 60;
+
+        function animate() {
+            requestAnimationFrame(animate);
+            time += 0.01;
+
+            const now = Date.now();
+            fps = Math.round(1000 / (now - lastFrameTime));
+            lastFrameTime = now;
+
+            brainGroup.rotation.y += 0.002;
+            brainGroup.rotation.x = Math.sin(time * 0.1) * 0.1;
+
+            let activeRegions = 0;
+
+            nodes.forEach((node, i) => {
+                if (node.activity > 0.6) activeRegions++;
+                
+                const scale = 1 + node.activity * 0.5;
+                nodeMeshes[i].scale.setScalar(scale);
+                nodeMeshes[i].material.opacity = 0.4 + node.activity * 0.6;
+                
+                // Glow effect when very active
+                if (node.activity > 0.8) {
+                    const pulse = Math.sin(time * 10) * 0.3 + 0.7;
+                    nodeMeshes[i].material.emissive = new THREE.Color(node.color);
+                    nodeMeshes[i].material.emissiveIntensity = pulse;
+                }
+            });
+
+            document.getElementById('fps').textContent = fps;
+            document.getElementById('active-regions').textContent = activeRegions;
+
+            renderer.render(scene, camera);
+        }
+
+        // === EVENT LOGGING ===
+        function logEvent(activity, system) {
+            const logContent = document.getElementById('log-content');
+            const eventItem = document.createElement('div');
+            eventItem.className = 'event-item';
+            eventItem.innerHTML = `[${new Date().toLocaleTimeString()}] <span class="region-label">${system.toUpperCase()}</span>: ${activity}`;
+            logContent.insertBefore(eventItem, logContent.firstChild);
+            
+            while (logContent.children.length > 15) {
+                logContent.removeChild(logContent.lastChild);
+            }
+        }
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        animate();
+    </script>
+</body>
+</html>

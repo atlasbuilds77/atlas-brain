@@ -1,0 +1,164 @@
+```
+╔═══════════════════════════════════════════════════════════════════════════╗
+║                   ATLAS BRAIN VISUALIZATION - JARVIS MODE                 ║
+║                            ARCHITECTURE DIAGRAM                           ║
+╚═══════════════════════════════════════════════════════════════════════════╝
+
+┌─────────────────────────────────────────────────────────────────────────┐
+│                         COGNITIVE SYSTEMS LAYER                         │
+│  ┌───────────────┐  ┌──────────────┐  ┌────────────┐  ┌─────────────┐ │
+│  │ Pattern API   │  │ Somatic      │  │ Bias Check │  │ Cognitive   │ │
+│  │ (pattern-api  │  │ Marker       │  │ (bias-check│  │ Mode        │ │
+│  │  .py)         │  │ (somatic-    │  │  .sh)      │  │ (cognitive- │ │
+│  │               │  │  marker.py)  │  │            │  │  mode.sh)   │ │
+│  └───────┬───────┘  └──────┬───────┘  └─────┬──────┘  └──────┬──────┘ │
+│          │                 │                 │                 │        │
+│          └─────────────────┴─────────────────┴─────────────────┘        │
+│                                    │                                     │
+└────────────────────────────────────┼─────────────────────────────────────┘
+                                     │
+                                     │ Cognitive Events
+                                     ▼
+┌─────────────────────────────────────────────────────────────────────────┐
+│                         INSTRUMENTATION LAYER                           │
+│  ┌────────────────────────────────────────────────────────────────────┐ │
+│  │  brain-logger.py           brain-monitor.sh                        │ │
+│  │  ┌──────────────────┐      ┌──────────────────┐                   │ │
+│  │  │ Python API       │      │ Shell Functions  │                   │ │
+│  │  │ - pattern_match()│      │ - log_event()    │                   │ │
+│  │  │ - emotion()      │      │ - test mode      │                   │ │
+│  │  │ - mode_switch()  │      │ - watch mode     │                   │ │
+│  │  │ - decision()     │      │                  │                   │ │
+│  │  └──────────────────┘      └──────────────────┘                   │ │
+│  └────────────────────────────────────────────────────────────────────┘ │
+│                                    │                                     │
+│                                    ▼                                     │
+│                         logs/brain-events.jsonl                         │
+│  ┌────────────────────────────────────────────────────────────────────┐ │
+│  │ {"timestamp":"2026-01-27T...","event_type":"pattern_match",...}    │ │
+│  │ {"timestamp":"2026-01-27T...","event_type":"emotion",...}          │ │
+│  │ {"timestamp":"2026-01-27T...","event_type":"mode_switch",...}      │ │
+│  └────────────────────────────────────────────────────────────────────┘ │
+└─────────────────────────────────────────────────────────────────────────┘
+                                     │
+                                     │ File Monitoring
+                                     ▼
+┌─────────────────────────────────────────────────────────────────────────┐
+│                         STREAMING SERVER LAYER                          │
+│  ┌────────────────────────────────────────────────────────────────────┐ │
+│  │  brain-viz-server.py (Python asyncio + aiohttp)                    │ │
+│  │  ┌──────────────────┐   ┌──────────────────┐                      │ │
+│  │  │ File Monitor     │   │ WebSocket Server │                      │ │
+│  │  │ - Tail JSONL     │──▶│ - Broadcast      │                      │ │
+│  │  │ - Parse events   │   │ - Client mgmt    │                      │ │
+│  │  │ - Enrich data    │   │ - Real-time      │                      │ │
+│  │  └──────────────────┘   └──────────────────┘                      │ │
+│  │                                 │                                   │ │
+│  │                          HTTP API Endpoints:                       │ │
+│  │                          - GET /             (serve HTML)          │ │
+│  │                          - GET /ws           (WebSocket)           │ │
+│  │                          - POST /api/demo    (demo mode)           │ │
+│  │                          - POST /api/test-event                    │ │
+│  └────────────────────────────────────────────────────────────────────┘ │
+└─────────────────────────────────────────────────────────────────────────┘
+                                     │
+                                     │ WebSocket Stream
+                                     ▼
+┌─────────────────────────────────────────────────────────────────────────┐
+│                         VISUALIZATION LAYER                             │
+│  ┌────────────────────────────────────────────────────────────────────┐ │
+│  │  live-brain.html (Three.js WebGL)                                  │ │
+│  │                                                                     │ │
+│  │  ┌───────────────────────────────────────────────────────────────┐ │ │
+│  │  │                    3D SCENE RENDER                            │ │ │
+│  │  │                                                               │ │ │
+│  │  │       🟠  ← Central Brain Sphere (Orange/Amber)              │ │ │
+│  │  │      ╱│╲    Pulsing based on activity                        │ │ │
+│  │  │     ╱ │ ╲                                                     │ │ │
+│  │  │    ╱  │  ╲  ✨ Particle Network (1000 nodes)                │ │ │
+│  │  │   ╱   │   ╲    Neural pathways animation                     │ │ │
+│  │  │  ╱    │    ╲                                                  │ │ │
+│  │  │ 🟢    🔴    🔵  ← 6 Regional Nodes                          │ │ │
+│  │  │  Pattern Emotion Meta    (Light up when active)             │ │ │
+│  │  │                                                               │ │ │
+│  │  │ 🟦 Memory   🟠 Bias   🟠 Core                               │ │ │
+│  │  │                                                               │ │ │
+│  │  └───────────────────────────────────────────────────────────────┘ │ │
+│  │                                                                     │ │
+│  │  ┌───────────────────────────────────────────────────────────────┐ │ │
+│  │  │                    HUD OVERLAY                                │ │ │
+│  │  │  ╔═══════════════════════════════════════════════════════╗   │ │ │
+│  │  │  ║     ATLAS COGNITIVE SYSTEM                            ║   │ │ │
+│  │  │  ╚═══════════════════════════════════════════════════════╝   │ │ │
+│  │  │                                                               │ │ │
+│  │  │  ┌─────────────────────┐      ┌────────────────────────┐    │ │ │
+│  │  │  │ Current Mode:       │      │ ● CONNECTED            │    │ │ │
+│  │  │  │   DMN MODE          │      └────────────────────────┘    │ │ │
+│  │  │  └─────────────────────┘                                     │ │ │
+│  │  │                                                               │ │ │
+│  │  │  ┌────────────────────────────────────────────────────────┐  │ │ │
+│  │  │  │ Event Feed:                                            │  │ │ │
+│  │  │  │ • Pattern 'FOMO' detected - HIGH NEGATIVE              │  │ │ │
+│  │  │  │ • Somatic marker: anxiety response                     │  │ │ │
+│  │  │  │ • Metacognitive check: verifying claims                │  │ │ │
+│  │  │  └────────────────────────────────────────────────────────┘  │ │ │
+│  │  │                                                               │ │ │
+│  │  │  ┌────────────────┐                                          │ │ │
+│  │  │  │ Regions:       │                                          │ │ │
+│  │  │  │ ▶ Pattern [██] │ ← Activity bars                         │ │ │
+│  │  │  │   Emotion [  ] │                                          │ │ │
+│  │  │  │   Meta    [█ ] │                                          │ │ │
+│  │  │  │   Memory  [  ] │                                          │ │ │
+│  │  │  │   Bias    [  ] │                                          │ │ │
+│  │  │  └────────────────┘                                          │ │ │
+│  │  └───────────────────────────────────────────────────────────────┘ │ │
+│  └────────────────────────────────────────────────────────────────────┘ │
+└─────────────────────────────────────────────────────────────────────────┘
+                                     │
+                                     ▼
+                            Browser (Desktop/Mobile)
+                            http://localhost:8765
+
+
+╔═══════════════════════════════════════════════════════════════════════════╗
+║                            DATA FLOW SUMMARY                              ║
+╚═══════════════════════════════════════════════════════════════════════════╝
+
+  Cognitive Event → Logger → JSONL File → Server Monitor → WebSocket
+                                                                ↓
+                                                          Browser renders
+                                                                ↓
+                                                    3D brain sphere pulses
+                                                    Region node lights up
+                                                    Event appears in feed
+                                                    Particles animate
+
+╔═══════════════════════════════════════════════════════════════════════════╗
+║                         EVENT TYPE → VISUAL MAPPING                       ║
+╚═══════════════════════════════════════════════════════════════════════════╝
+
+  pattern_match   → Green region lights up  → "Pattern detected"
+  emotion         → Red region lights up    → "Anxiety response"
+  mode_switch     → Core sphere pulses      → "DMN MODE" label
+  metacognition   → Blue region lights up   → "Verifying claims"
+  memory          → Light blue lights up    → "Retrieved memory"
+  bias_detection  → Orange region lights up → "Bias detected"
+  decision        → Bright green flash      → "Decision executed"
+
+╔═══════════════════════════════════════════════════════════════════════════╗
+║                            QUICK START FLOW                               ║
+╚═══════════════════════════════════════════════════════════════════════════╝
+
+  $ ./scripts/start-brain-viz.sh demo
+           ↓
+  Server starts on :8765
+           ↓
+  Open browser → http://localhost:8765
+           ↓
+  See brain sphere rotating
+           ↓
+  Demo events auto-generate
+           ↓
+  Watch regions light up in real-time!
+
+```

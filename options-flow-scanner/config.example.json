@@ -1,0 +1,24 @@
+{
+  "api_name": "unusual_whales",
+  "api_key": "YOUR_API_KEY_HERE",
+  "api_config": {
+    "secret_key": "FOR_APIS_THAT_NEED_IT"
+  },
+  "tickers": [
+    "SPX",
+    "SPY"
+  ],
+  "poll_interval": 10,
+  "thresholds": {
+    "min_premium": 200000,
+    "spx_min_premium": 500000,
+    "min_contracts": 100,
+    "volume_oi_ratio": 2.0
+  },
+  "alert_file": "/tmp/flow_alerts.txt",
+  "notifications": {
+    "discord_webhook": "",
+    "telegram_bot_token": "",
+    "telegram_chat_id": ""
+  }
+}

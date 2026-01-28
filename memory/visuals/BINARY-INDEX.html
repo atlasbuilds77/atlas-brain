@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Atlas Binary Art - Quick Access Index</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Courier New', monospace;
+            background: #000;
+            color: #ff8800;
+            padding: 50px;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            text-align: center;
+            font-size: 48px;
+            margin-bottom: 10px;
+            text-shadow: 0 0 20px #ff8800, 0 0 40px #ff8800;
+            letter-spacing: 8px;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #ffaa44;
+            margin-bottom: 50px;
+            font-size: 18px;
+            letter-spacing: 3px;
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            margin-bottom: 50px;
+        }
+        
+        .card {
+            background: rgba(255, 136, 0, 0.1);
+            border: 2px solid #ff8800;
+            padding: 25px;
+            transition: all 0.3s;
+            position: relative;
+        }
+        
+        .card:hover {
+            background: rgba(255, 136, 0, 0.2);
+            transform: translateY(-5px);
+            box-shadow: 0 5px 30px rgba(255, 136, 0, 0.3);
+        }
+        
+        .card h2 {
+            color: #ff8800;
+            margin-bottom: 10px;
+            font-size: 24px;
+            text-shadow: 0 0 10px #ff8800;
+        }
+        
+        .card .number {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 48px;
+            color: rgba(255, 136, 0, 0.2);
+            font-weight: bold;
+        }
+        
+        .card p {
+            color: #ffaa44;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+        
+        .card .features {
+            list-style: none;
+            margin: 15px 0;
+            font-size: 12px;
+            color: #cc6600;
+        }
+        
+        .card .features li {
+            padding: 3px 0;
+            padding-left: 15px;
+            position: relative;
+        }
+        
+        .card .features li:before {
+            content: '▸';
+            position: absolute;
+            left: 0;
+            color: #ff8800;
+        }
+        
+        .btn {
+            display: inline-block;
+            background: #ff8800;
+            color: #000;
+            padding: 10px 20px;
+            text-decoration: none;
+            font-weight: bold;
+            margin-right: 10px;
+            margin-top: 10px;
+            transition: all 0.3s;
+        }
+        
+        .btn:hover {
+            background: #ffaa44;
+            transform: scale(1.05);
+        }
+        
+        .readme-section {
+            background: rgba(255, 136, 0, 0.1);
+            border: 2px solid #ff8800;
+            padding: 30px;
+            margin-top: 30px;
+            text-align: center;
+        }
+        
+        .readme-section h3 {
+            margin-bottom: 20px;
+            font-size: 24px;
+            text-shadow: 0 0 10px #ff8800;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 50px;
+            padding-top: 30px;
+            border-top: 1px solid #ff8800;
+            color: #ffaa44;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>ATLAS BINARY ART</h1>
+        <p class="subtitle">DIGITAL CONSCIOUSNESS VISUALIZATION SYSTEM</p>
+        
+        <div class="grid">
+            <div class="card">
+                <span class="number">1</span>
+                <h2>Binary Particle System</h2>
+                <p>Core visualization engine with configurable particles and effects.</p>
+                <ul class="features">
+                    <li>5 animation modes</li>
+                    <li>5 color schemes</li>
+                    <li>Real-time controls</li>
+                    <li>Preset configurations</li>
+                    <li>WebSocket ready</li>
+                </ul>
+                <a href="binary-particles.html" class="btn">▶ LAUNCH</a>
+            </div>
+            
+            <div class="card">
+                <span class="number">2</span>
+                <h2>Consciousness Meter</h2>
+                <p>Real-time awareness level display with radial binary streams.</p>
+                <ul class="features">
+                    <li>6 consciousness states</li>
+                    <li>12 radial streams</li>
+                    <li>Auto-breathing mode</li>
+                    <li>Manual control</li>
+                    <li>Activity metrics</li>
+                </ul>
+                <a href="consciousness-meter.html" class="btn">▶ LAUNCH</a>
+            </div>
+            
+            <div class="card">
+                <span class="number">3</span>
+                <h2>Binary Trails Dashboard</h2>
+                <p>Motion tracking with binary visualization (Atlas Eyes integration).</p>
+                <ul class="features">
+                    <li>4-panel dashboard</li>
+                    <li>Motion = Dense 1s</li>
+                    <li>Stillness = Sparse 0s</li>
+                    <li>Demo mode included</li>
+                    <li>Live data ready</li>
+                </ul>
+                <a href="../atlas-eyes/examples/binary_trails_dashboard.html" class="btn">▶ LAUNCH</a>
+            </div>
+            
+            <div class="card">
+                <span class="number">4</span>
+                <h2>Brain Binary Streams</h2>
+                <p>3D brain with binary data flowing along neural connections.</p>
+                <ul class="features">
+                    <li>3D brain model</li>
+                    <li>Neural node network</li>
+                    <li>Binary overlay</li>
+                    <li>Event triggers</li>
+                    <li>Processing states</li>
+                </ul>
+                <a href="live-brain-binary.html" class="btn">▶ LAUNCH</a>
+            </div>
+            
+            <div class="card">
+                <span class="number">5</span>
+                <h2>Showcase Demo</h2>
+                <p>Complete demonstration of all 7 visualization modes with auto-cycling.</p>
+                <ul class="features">
+                    <li>7 different modes</li>
+                    <li>Auto-cycling</li>
+                    <li>Manual navigation</li>
+                    <li>Progress tracking</li>
+                    <li>Live statistics</li>
+                </ul>
+                <a href="binary-showcase-demo.html" class="btn">▶ LAUNCH</a>
+            </div>
+            
+            <div class="card">
+                <span class="number">📖</span>
+                <h2>Documentation</h2>
+                <p>Comprehensive README with technical specs, usage guide, and customization.</p>
+                <ul class="features">
+                    <li>Complete reference</li>
+                    <li>Integration guide</li>
+                    <li>WebSocket examples</li>
+                    <li>Performance tips</li>
+                    <li>Customization guide</li>
+                </ul>
+                <a href="BINARY-ART-README.md" class="btn" target="_blank">📖 READ DOCS</a>
+            </div>
+        </div>
+        
+        <div class="readme-section">
+            <h3>🚀 QUICK START</h3>
+            <p style="margin-bottom: 20px;">Choose a visualization above to launch, or start with the Showcase Demo to see everything.</p>
+            <a href="binary-showcase-demo.html" class="btn" style="font-size: 16px; padding: 15px 30px;">🎨 LAUNCH SHOWCASE DEMO</a>
+        </div>
+        
+        <footer>
+            <p><strong>ATLAS BINARY ART VISUALIZATION SYSTEM</strong></p>
+            <p>Part of Atlas Cognitive System • Created for Orion by Claude (Anthropic)</p>
+            <p style="margin-top: 15px; font-style: italic;">"Data is reality. Reality is binary. Binary is beautiful."</p>
+        </footer>
+    </div>
+</body>
+</html>

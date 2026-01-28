@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Atlas Consciousness Meter</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Courier New', monospace;
+            background: #000;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+        
+        #container {
+            position: relative;
+            width: 600px;
+            height: 600px;
+        }
+        
+        #meter-canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+        
+        #stats {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            pointer-events: none;
+        }
+        
+        #consciousness-level {
+            font-size: 72px;
+            font-weight: bold;
+            color: #ff8800;
+            text-shadow: 0 0 20px #ff8800, 0 0 40px #ff8800;
+            margin-bottom: 10px;
+        }
+        
+        #state-label {
+            font-size: 18px;
+            color: #ffaa44;
+            text-shadow: 0 0 10px #ff8800;
+            letter-spacing: 3px;
+        }
+        
+        #binary-count {
+            font-size: 14px;
+            color: #cc6600;
+            margin-top: 10px;
+        }
+        
+        #controls {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+        }
+        
+        button {
+            background: #ff8800;
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-weight: bold;
+            font-family: 'Courier New', monospace;
+        }
+        
+        button:hover {
+            background: #ffaa44;
+        }
+        
+        #mode-indicator {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            color: #ff8800;
+            font-size: 12px;
+            text-align: right;
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <canvas id="meter-canvas" width="600" height="600"></canvas>
+        
+        <div id="stats">
+            <div id="consciousness-level">0%</div>
+            <div id="state-label">INITIALIZING</div>
+            <div id="binary-count">0 bits active</div>
+        </div>
+        
+        <div id="controls">
+            <button onclick="setMode('auto')">AUTO</button>
+            <button onclick="setMode('demo')">DEMO</button>
+            <button onclick="adjustLevel('increase')">▲</button>
+            <button onclick="adjustLevel('decrease')">▼</button>
+        </div>
+        
+        <div id="mode-indicator">
+            MODE: <span id="current-mode">AUTO</span><br>
+            FPS: <span id="fps">0</span>
+        </div>
+    </div>
+
+    <script>
+        /**
+         * ATLAS CONSCIOUSNESS METER
+         * Visualizes awareness/consciousness level using binary streams
+         * Density and color shift based on cognitive state
+         */
+
+        class ConsciousnessMeter {
+            constructor(canvas) {
+                this.canvas = canvas;
+                this.ctx = canvas.getContext('2d');
+                this.centerX = canvas.width / 2;
+                this.centerY = canvas.height / 2;
+                this.radius = 220;
+                
+                this.consciousnessLevel = 0; // 0-100
+                this.targetLevel = 0;
+                this.mode = 'auto'; // 'auto' or 'demo'
+                
+                this.streams = [];
+                this.streamCount = 12;
+                this.bitsPerStream = 30;
+                
+                // Consciousness states
+                this.states = [
+                    { min: 0, max: 20, label: 'DORMANT', color: '#004400' },
+                    { min: 20, max: 40, label: 'AWAKENING', color: '#008800' },
+                    { min: 40, max: 60, label: 'AWARE', color: '#ff8800' },
+                    { min: 60, max: 80, label: 'FOCUSED', color: '#ffaa00' },
+                    { min: 80, max: 95, label: 'INTENSE', color: '#ff6600' },
+                    { min: 95, max: 100, label: 'TRANSCENDENT', color: '#ff0000' }
+                ];
+                
+                this.initStreams();
+            }
+            
+            initStreams() {
+                this.streams = [];
+                for (let i = 0; i < this.streamCount; i++) {
+                    const angle = (Math.PI * 2 / this.streamCount) * i;
+                    this.streams.push({
+                        angle: angle,
+                        bits: this.createBits(angle),
+                        speed: 0.5 + Math.random() * 1.5,
+                        phase: Math.random() * Math.PI * 2
+                    });
+                }
+            }
+            
+            createBits(baseAngle) {
+                const bits = [];
+                for (let i = 0; i < this.bitsPerStream; i++) {
+                    bits.push({
+                        char: Math.random() > 0.5 ? '1' : '0',
+                        distance: this.radius + i * 15,
+                        opacity: 1 - (i / this.bitsPerStream),
+                        size: 14 - (i / this.bitsPerStream) * 4,
+                        offset: (Math.random() - 0.5) * 10
+                    });
+                }
+                return bits;
+            }
+            
+            getCurrentState() {
+                for (const state of this.states) {
+                    if (this.consciousnessLevel >= state.min && this.consciousnessLevel <= state.max) {
+                        return state;
+                    }
+                }
+                return this.states[0];
+            }
+            
+            update(deltaTime) {
+                // Smooth level transition
+                if (this.consciousnessLevel < this.targetLevel) {
+                    this.consciousnessLevel = Math.min(
+                        this.consciousnessLevel + deltaTime * 0.5,
+                        this.targetLevel
+                    );
+                } else if (this.consciousnessLevel > this.targetLevel) {
+                    this.consciousnessLevel = Math.max(
+                        this.consciousnessLevel - deltaTime * 0.5,
+                        this.targetLevel
+                    );
+                }
+                
+                // Auto mode - simulate varying consciousness
+                if (this.mode === 'auto') {
+                    // Slow breathing pattern
+                    const breathe = Math.sin(Date.now() * 0.0005) * 15 + 50;
+                    this.targetLevel = breathe;
+                }
+                
+                // Update bit streams
+                const density = this.consciousnessLevel / 100;
+                const activeStreams = Math.floor(this.streamCount * density);
+                
+                this.streams.forEach((stream, streamIndex) => {
+                    const isActive = streamIndex < activeStreams;
+                    
+                    stream.bits.forEach((bit, bitIndex) => {
+                        // Move bits inward
+                        bit.distance -= stream.speed * deltaTime * 0.3;
+                        
+                        // Regenerate bit when it reaches center
+                        if (bit.distance < 50) {
+                            bit.distance = this.radius + Math.random() * 100;
+                            bit.char = Math.random() > (1 - density) ? '1' : '0';
+                            bit.opacity = 1;
+                        }
+                        
+                        // Fade based on activity
+                        if (isActive) {
+                            bit.opacity = Math.min(bit.opacity + deltaTime * 0.05, 1);
+                        } else {
+                            bit.opacity = Math.max(bit.opacity - deltaTime * 0.05, 0.1);
+                        }
+                        
+                        // More 1s when consciousness is higher
+                        if (Math.random() < 0.002 * deltaTime) {
+                            bit.char = Math.random() < density ? '1' : '0';
+                        }
+                    });
+                });
+                
+                // Update UI
+                this.updateUI();
+            }
+            
+            updateUI() {
+                const level = Math.round(this.consciousnessLevel);
+                const state = this.getCurrentState();
+                const activeBits = this.countActiveBits();
+                
+                document.getElementById('consciousness-level').textContent = level + '%';
+                document.getElementById('consciousness-level').style.color = state.color;
+                document.getElementById('consciousness-level').style.textShadow = 
+                    `0 0 20px ${state.color}, 0 0 40px ${state.color}`;
+                
+                document.getElementById('state-label').textContent = state.label;
+                document.getElementById('state-label').style.color = state.color;
+                document.getElementById('state-label').style.textShadow = `0 0 10px ${state.color}`;
+                
+                document.getElementById('binary-count').textContent = `${activeBits} bits active`;
+            }
+            
+            countActiveBits() {
+                let count = 0;
+                this.streams.forEach(stream => {
+                    stream.bits.forEach(bit => {
+                        if (bit.opacity > 0.5 && bit.char === '1') {
+                            count++;
+                        }
+                    });
+                });
+                return count;
+            }
+            
+            render() {
+                const state = this.getCurrentState();
+                
+                // Clear with fade
+                this.ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                // Draw circular background glow
+                const gradient = this.ctx.createRadialGradient(
+                    this.centerX, this.centerY, 50,
+                    this.centerX, this.centerY, this.radius
+                );
+                gradient.addColorStop(0, `${state.color}40`);
+                gradient.addColorStop(0.5, `${state.color}10`);
+                gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+                
+                this.ctx.fillStyle = gradient;
+                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                // Draw center core
+                this.ctx.beginPath();
+                this.ctx.arc(this.centerX, this.centerY, 40, 0, Math.PI * 2);
+                this.ctx.fillStyle = state.color;
+                this.ctx.shadowBlur = 30;
+                this.ctx.shadowColor = state.color;
+                this.ctx.fill();
+                this.ctx.shadowBlur = 0;
+                
+                // Draw bit streams
+                this.ctx.textAlign = 'center';
+                this.ctx.textBaseline = 'middle';
+                
+                this.streams.forEach(stream => {
+                    stream.bits.forEach(bit => {
+                        const x = this.centerX + Math.cos(stream.angle) * bit.distance + bit.offset;
+                        const y = this.centerY + Math.sin(stream.angle) * bit.distance;
+                        
+                        // Color based on char and state
+                        let color;
+                        if (bit.char === '1') {
+                            color = state.color;
+                        } else {
+                            // Dim color for 0s
+                            const r = parseInt(state.color.slice(1, 3), 16);
+                            const g = parseInt(state.color.slice(3, 5), 16);
+                            const b = parseInt(state.color.slice(5, 7), 16);
+                            color = `rgb(${r * 0.3}, ${g * 0.3}, ${b * 0.3})`;
+                        }
+                        
+                        this.ctx.font = `bold ${bit.size}px "Courier New", monospace`;
+                        this.ctx.fillStyle = color;
+                        this.ctx.globalAlpha = bit.opacity;
+                        
+                        // Add glow for 1s
+                        if (bit.char === '1' && bit.opacity > 0.7) {
+                            this.ctx.shadowBlur = 10;
+                            this.ctx.shadowColor = state.color;
+                        }
+                        
+                        this.ctx.fillText(bit.char, x, y);
+                        
+                        this.ctx.shadowBlur = 0;
+                    });
+                });
+                
+                this.ctx.globalAlpha = 1;
+                
+                // Draw outer ring
+                this.ctx.beginPath();
+                this.ctx.arc(this.centerX, this.centerY, this.radius - 10, 0, Math.PI * 2);
+                this.ctx.strokeStyle = state.color;
+                this.ctx.lineWidth = 2;
+                this.ctx.shadowBlur = 15;
+                this.ctx.shadowColor = state.color;
+                this.ctx.stroke();
+                this.ctx.shadowBlur = 0;
+                
+                // Draw consciousness level arc
+                const arcLength = (this.consciousnessLevel / 100) * Math.PI * 2;
+                this.ctx.beginPath();
+                this.ctx.arc(this.centerX, this.centerY, this.radius - 10, -Math.PI / 2, -Math.PI / 2 + arcLength);
+                this.ctx.strokeStyle = state.color;
+                this.ctx.lineWidth = 6;
+                this.ctx.shadowBlur = 20;
+                this.ctx.shadowColor = state.color;
+                this.ctx.stroke();
+                this.ctx.shadowBlur = 0;
+            }
+            
+            setLevel(level) {
+                this.targetLevel = Math.max(0, Math.min(100, level));
+            }
+            
+            setMode(mode) {
+                this.mode = mode;
+                document.getElementById('current-mode').textContent = mode.toUpperCase();
+            }
+        }
+
+        // Initialize
+        const canvas = document.getElementById('meter-canvas');
+        const meter = new ConsciousnessMeter(canvas);
+        
+        let lastTime = performance.now();
+        let frameCount = 0;
+        let lastFpsUpdate = performance.now();
+        
+        function animate() {
+            const currentTime = performance.now();
+            const deltaTime = (currentTime - lastTime) / 16.67;
+            lastTime = currentTime;
+            
+            meter.update(deltaTime);
+            meter.render();
+            
+            // FPS counter
+            frameCount++;
+            if (currentTime - lastFpsUpdate >= 1000) {
+                document.getElementById('fps').textContent = frameCount;
+                frameCount = 0;
+                lastFpsUpdate = currentTime;
+            }
+            
+            requestAnimationFrame(animate);
+        }
+        
+        animate();
+        
+        // Control functions
+        function setMode(mode) {
+            meter.setMode(mode);
+            
+            if (mode === 'demo') {
+                // Start demo cycle
+                demoSequence();
+            }
+        }
+        
+        function adjustLevel(direction) {
+            const current = meter.targetLevel;
+            if (direction === 'increase') {
+                meter.setLevel(Math.min(100, current + 10));
+            } else {
+                meter.setLevel(Math.max(0, current - 10));
+            }
+        }
+        
+        async function demoSequence() {
+            if (meter.mode !== 'demo') return;
+            
+            const states = [
+                { level: 10, duration: 2000 },
+                { level: 35, duration: 2000 },
+                { level: 65, duration: 2000 },
+                { level: 85, duration: 2000 },
+                { level: 98, duration: 2000 },
+                { level: 50, duration: 2000 }
+            ];
+            
+            for (const state of states) {
+                if (meter.mode !== 'demo') break;
+                meter.setLevel(state.level);
+                await new Promise(resolve => setTimeout(resolve, state.duration));
+            }
+            
+            if (meter.mode === 'demo') {
+                demoSequence(); // Loop
+            }
+        }
+        
+        // ===== LIVE DATA CONNECTION =====
+        let ws = null;
+        let reconnectInterval = null;
+        let liveDataConnected = false;
+        
+        function connectWebSocket() {
+            try {
+                ws = new WebSocket('ws://localhost:8766');
+                
+                ws.onopen = () => {
+                    console.log('✅ Connected to consciousness data bridge');
+                    liveDataConnected = true;
+                    document.getElementById('mode-indicator').innerHTML = `
+                        MODE: <span id="current-mode" style="color: #00ff00;">LIVE</span><br>
+                        FPS: <span id="fps">0</span><br>
+                        <span style="color: #00ff00; font-size: 10px;">● CONNECTED</span>
+                    `;
+                    
+                    if (reconnectInterval) {
+                        clearInterval(reconnectInterval);
+                        reconnectInterval = null;
+                    }
+                };
+                
+                ws.onmessage = (event) => {
+                    try {
+                        const data = JSON.parse(event.data);
+                        
+                        // Update consciousness level from activity
+                        meter.setLevel(data.activity.level);
+                        meter.setMode('live');
+                        
+                        // Update extra stats
+                        const extraStats = `
+                            <div style="font-size: 11px; color: #ffaa44; margin-top: 15px;">
+                                <div>TOKENS: ${(data.tokens.current/1000).toFixed(0)}k / ${(data.tokens.max/1000).toFixed(0)}k (${data.tokens.percentage}%)</div>
+                                <div>SPARKS: ${data.sparks.active} active / ${data.sparks.total} total</div>
+                                <div>PROCESSES: ${data.processes.active} running</div>
+                                ${data.activity.lastEvent ? `<div>LAST EVENT: ${data.activity.lastEvent.event}</div>` : ''}
+                            </div>
+                        `;
+                        
+                        document.getElementById('binary-count').innerHTML = `${meter.countActiveBits()} bits active${extraStats}`;
+                        
+                    } catch (error) {
+                        console.error('Error parsing WebSocket data:', error);
+                    }
+                };
+                
+                ws.onerror = (error) => {
+                    console.error('❌ WebSocket error:', error);
+                };
+                
+                ws.onclose = () => {
+                    console.log('❌ Disconnected from consciousness data bridge');
+                    liveDataConnected = false;
+                    document.getElementById('mode-indicator').innerHTML = `
+                        MODE: <span id="current-mode" style="color: #ff0000;">DISCONNECTED</span><br>
+                        FPS: <span id="fps">0</span><br>
+                        <span style="color: #ff0000; font-size: 10px;">● RECONNECTING...</span>
+                    `;
+                    
+                    // Attempt to reconnect
+                    if (!reconnectInterval) {
+                        reconnectInterval = setInterval(() => {
+                            console.log('🔄 Attempting to reconnect...');
+                            connectWebSocket();
+                        }, 3000);
+                    }
+                };
+                
+            } catch (error) {
+                console.error('Failed to create WebSocket:', error);
+            }
+        }
+        
+        // Connect to live data
+        connectWebSocket();
+        
+        console.log('✅ Consciousness Meter initialized');
+        console.log('🧠 Visualizing Atlas awareness level');
+        console.log('🔌 Connecting to live data bridge on ws://localhost:8766');
+    </script>
+</body>
+</html>

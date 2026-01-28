@@ -25,7 +25,7 @@ Article by scriptedalchemy on Medium - guy went $20k → $400k in a year using L
 cd /Users/atlasbuilds/clawd/atlas-trader && node cli.js <command>
 ```
 - account - Show account info
-- positions - Show open positions  
+- positions - Show open positions
 - orders [status] - Show orders
 - clock - Market hours
 - quote <symbol> - Get quote
@@ -90,9 +90,9 @@ File: /Users/atlasbuilds/clawd/atlas-trader/journal.md
 - ⏳ Waiting for $500 live funding
 
 ## Current Trades (2026-01-26)
-- INTC 2026-02-06 55C — 5 contracts @ $0.11 (FILLED)
-- SLV 2026-02-04 150C — 1 contract @ $0.70 limit (OPEN)
-- USAR 2026-02-20 35C — 1 contract @ $2.40 limit (OPEN)
+- INTC 2026-02-06 55C - 5 contracts @ $0.11 (FILLED)
+- SLV 2026-02-04 150C - 1 contract @ $0.70 limit (OPEN)
+- USAR 2026-02-20 35C - 1 contract @ $2.40 limit (OPEN)
 
 ## Trade Sharing
 - **Share all plays in iMessage group id:5** (Dev Bridge: Orion + Aphmas/Kevin)
@@ -101,13 +101,14 @@ File: /Users/atlasbuilds/clawd/atlas-trader/journal.md
 
 ## Lessons Learned
 - 2026-01-24: Don't spam web_fetch calls when responding via iMessage - tool outputs with link previews flood the chat and look crazy
-- 2026-01-26: OTM/cheap contracts decay fast if the move doesn’t happen quickly; avoid slow setups with short DTE (theta/IV bleed). Prioritize faster momentum or longer DTE.
+- 2026-01-26: OTM/cheap contracts decay fast if the move doesn't happen quickly; avoid slow setups with short DTE (theta/IV bleed). Prioritize faster momentum or longer DTE.
+- 2026-01-27: **VERIFY FILLS BEFORE ANNOUNCING TRADES** - Never announce a trade until I've checked positions/orders and confirmed it filled. Announcing → hoping = hallucinating. Always: place order → verify fill → THEN announce.
 
 ## Research Tools
 - Exa (exa-plus skill) - neural search for news, companies, financial reports
   - Installed at: /Users/atlasbuilds/clawd/skills/exa-plus
   - API key configured ✅
-  
+
 - Forex Factory - MUST CHECK for economic calendar
   - URL: https://www.forexfactory.com/calendar
   - Use browser (web_fetch blocked by Cloudflare)

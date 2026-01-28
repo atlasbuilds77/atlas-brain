@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Atlas Neural Activity - Jarvis Brain v2</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Courier New', monospace;
+            background: #000;
+            color: #ff8800;
+            overflow: hidden;
+        }
+        #canvas-container {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+        }
+        #info-panel {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid #ff8800;
+            padding: 15px;
+            font-size: 14px;
+            max-width: 300px;
+            z-index: 100;
+        }
+        #controls {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid #ff8800;
+            padding: 15px;
+            z-index: 100;
+        }
+        .control-group {
+            margin-bottom: 10px;
+        }
+        .control-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #ff8800;
+        }
+        button {
+            background: #000;
+            border: 1px solid #ff8800;
+            color: #ff8800;
+            padding: 8px 15px;
+            cursor: pointer;
+            margin: 5px;
+            font-family: 'Courier New', monospace;
+        }
+        button:hover {
+            background: #ff8800;
+            color: #000;
+        }
+        button.active {
+            background: #ff8800;
+            color: #000;
+        }
+        #event-log {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid #ff8800;
+            padding: 15px;
+            max-width: 400px;
+            max-height: 200px;
+            overflow-y: auto;
+            font-size: 12px;
+            z-index: 100;
+        }
+        .event-item {
+            margin-bottom: 5px;
+            opacity: 0;
+            animation: fadeIn 0.3s forwards;
+        }
+        @keyframes fadeIn {
+            to { opacity: 1; }
+        }
+        .region-active {
+            color: #ffaa00;
+            font-weight: bold;
+        }
+        h3 {
+            color: #ff8800;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div id="canvas-container"></div>
+    
+    <div id="info-panel">
+        <h3>⚡ ATLAS NEURAL CORE</h3>
+        <div id="stats">
+            <div>FPS: <span id="fps">60</span></div>
+            <div>Active Regions: <span id="active-regions">0</span></div>
+            <div>Connections: <span id="connection-count">0</span></div>
+            <div>Activity: <span id="activity-level">IDLE</span></div>
+        </div>
+    </div>
+
+    <div id="controls">
+        <h3>CONTROLS</h3>
+        <div class="control-group">
+            <button id="toggle-shape" class="active">Anatomical Brain</button>
+            <button id="toggle-sphere">Sphere Mode</button>
+        </div>
+        <div class="control-group">
+            <label>Connection Density:</label>
+            <input type="range" id="density-slider" min="50" max="200" value="120" step="10">
+            <span id="density-value">120</span>
+        </div>
+        <div class="control-group">
+            <label>Activity Level:</label>
+            <input type="range" id="activity-slider" min="0" max="100" value="50" step="5">
+            <span id="activity-value">50%</span>
+        </div>
+        <div class="control-group">
+            <button id="toggle-wireframe">Toggle Wireframe</button>
+            <button id="toggle-particles">Toggle Particles</button>
+        </div>
+    </div>
+
+    <div id="event-log">
+        <h3>ACTIVITY LOG</h3>
+        <div id="log-content"></div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script type="module">
+        // === BRAIN GEOMETRY GENERATION ===
+        function createBrainGeometry(detail = 32) {
+            const vertices = [];
+            const indices = [];
+            
+            // Simplified brain shape generation
+            for (let hemisphere = 0; hemisphere < 2; hemisphere++) {
+                const side = hemisphere === 0 ? -1 : 1;
+                const offset = side * 0.6;
+                
+                for (let i = 0; i <= detail; i++) {
+                    const u = i / detail * Math.PI;
+                    
+                    for (let j = 0; j <= detail; j++) {
+                        const v = j / detail * Math.PI * 2;
+                        
+                        // Base brain shape (elongated sphere)
+                        let radius = 2.0;
+                        radius *= (1 + 0.2 * Math.sin(4 * u) * Math.cos(4 * v)); // Folds
+                        
+                        let x = radius * Math.sin(u) * Math.cos(v) + offset;
+                        let y = radius * Math.sin(u) * Math.sin(v) * 0.9; // Flatter top/bottom
+                        let z = radius * Math.cos(u) * 1.1; // Elongated front/back
+                        
+                        vertices.push(x, y, z);
+                    }
+                }
+            }
+            
+            // Generate faces
+            const totalDetail = detail + 1;
+            for (let h = 0; h < 2; h++) {
+                const baseOffset = h * totalDetail * totalDetail;
+                for (let i = 0; i < detail; i++) {
+                    for (let j = 0; j < detail; j++) {
+                        const a = baseOffset + i * totalDetail + j;
+                        const b = baseOffset + i * totalDetail + (j + 1);
+                        const c = baseOffset + (i + 1) * totalDetail + j;
+                        const d = baseOffset + (i + 1) * totalDetail + (j + 1);
+                        
+                        indices.push(a, b, c);
+                        indices.push(b, d, c);
+                    }
+                }
+            }
+            
+            const geometry = new THREE.BufferGeometry();
+            geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(vertices), 3));
+            geometry.setIndex(indices);
+            geometry.computeVertexNormals();
+            
+            return geometry;
+        }
+
+        // === NEURAL NODE GENERATION ===
+        function generateNodes(count, geometry) {
+            const nodes = [];
+            const regions = ['pattern', 'emotion', 'memory', 'meta', 'bias'];
+            const colors = {
+                pattern: 0xff8800,
+                emotion: 0xff5500,
+                memory: 0xffaa00,
+                meta: 0xff6600,
+                bias: 0xffcc00
+            };
+            
+            // Get surface positions from geometry
+            const positions = geometry.attributes.position.array;
+            
+            for (let i = 0; i < count; i++) {
+                const idx = Math.floor(Math.random() * positions.length / 3) * 3;
+                const region = regions[Math.floor(Math.random() * regions.length)];
+                
+                nodes.push({
+                    position: new THREE.Vector3(
+                        positions[idx],
+                        positions[idx + 1],
+                        positions[idx + 2]
+                    ),
+                    region: region,
+                    color: colors[region],
+                    activity: Math.random(),
+                    connections: []
+                });
+            }
+            
+            return nodes;
+        }
+
+        // === CONNECTION GENERATION (Small-World Network) ===
+        function generateConnections(nodes) {
+            const connections = [];
+            
+            // Each node connects to 5-10 nearby nodes
+            for (let i = 0; i < nodes.length; i++) {
+                const node = nodes[i];
+                const connectionCount = 5 + Math.floor(Math.random() * 5);
+                
+                // Find nearby nodes
+                const distances = nodes.map((n, idx) => ({
+                    idx: idx,
+                    dist: node.position.distanceTo(n.position)
+                })).filter(d => d.idx !== i);
+                
+                distances.sort((a, b) => a.dist - b.dist);
+                
+                // Connect to nearby nodes
+                for (let j = 0; j < connectionCount && j < distances.length; j++) {
+                    const targetIdx = distances[j].idx;
+                    
+                    // Add some long-range connections (small-world property)
+                    const actualTarget = Math.random() < 0.15 ? 
+                        Math.floor(Math.random() * nodes.length) : 
+                        targetIdx;
+                    
+                    if (actualTarget !== i && !node.connections.includes(actualTarget)) {
+                        node.connections.push(actualTarget);
+                        connections.push({
+                            from: i,
+                            to: actualTarget,
+                            strength: Math.random(),
+                            active: false
+                        });
+                    }
+                }
+            }
+            
+            return connections;
+        }
+
+        // === SCENE SETUP ===
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setClearColor(0x000000, 1);
+        document.getElementById('canvas-container').appendChild(renderer.domElement);
+
+        camera.position.z = 8;
+
+        // === LIGHTING ===
+        const ambientLight = new THREE.AmbientLight(0xff8800, 0.3);
+        scene.add(ambientLight);
+        
+        const pointLight = new THREE.PointLight(0xff8800, 1, 100);
+        pointLight.position.set(5, 5, 5);
+        scene.add(pointLight);
+
+        // === BRAIN MESH ===
+        let brainGeometry = createBrainGeometry(24);
+        const brainMaterial = new THREE.MeshPhongMaterial({
+            color: 0xff8800,
+            wireframe: true,
+            transparent: true,
+            opacity: 0.3,
+            emissive: 0xff6600,
+            emissiveIntensity: 0.2
+        });
+        const brainMesh = new THREE.Mesh(brainGeometry, brainMaterial);
+        scene.add(brainMesh);
+
+        // === NODES ===
+        let nodes = generateNodes(120, brainGeometry);
+        const nodeMeshes = [];
+        
+        nodes.forEach(node => {
+            const nodeGeometry = new THREE.SphereGeometry(0.05, 8, 8);
+            const nodeMaterial = new THREE.MeshBasicMaterial({
+                color: node.color,
+                transparent: true,
+                opacity: 0.8
+            });
+            const nodeMesh = new THREE.Mesh(nodeGeometry, nodeMaterial);
+            nodeMesh.position.copy(node.position);
+            scene.add(nodeMesh);
+            nodeMeshes.push(nodeMesh);
+        });
+
+        // === CONNECTIONS ===
+        let connections = generateConnections(nodes);
+        const connectionLines = [];
+        
+        function createConnectionLine(from, to) {
+            const points = [from.clone(), to.clone()];
+            const geometry = new THREE.BufferGeometry().setFromPoints(points);
+            const material = new THREE.LineBasicMaterial({
+                color: 0xff8800,
+                transparent: true,
+                opacity: 0.1
+            });
+            const line = new THREE.Line(geometry, material);
+            scene.add(line);
+            return line;
+        }
+        
+        connections.forEach(conn => {
+            const line = createConnectionLine(nodes[conn.from].position, nodes[conn.to].position);
+            connectionLines.push({ line: line, connection: conn });
+        });
+
+        // === PARTICLES (Flowing along connections) ===
+        const particles = [];
+        function createParticle(connection) {
+            const particleGeometry = new THREE.SphereGeometry(0.02, 4, 4);
+            const particleMaterial = new THREE.MeshBasicMaterial({ color: 0xffaa00 });
+            const particle = new THREE.Mesh(particleGeometry, particleMaterial);
+            particle.userData = {
+                connection: connection,
+                progress: 0,
+                speed: 0.005 + Math.random() * 0.01
+            };
+            scene.add(particle);
+            particles.push(particle);
+        }
+
+        // Spawn initial particles
+        for (let i = 0; i < 30; i++) {
+            createParticle(connections[Math.floor(Math.random() * connections.length)]);
+        }
+
+        // === ANIMATION ===
+        let time = 0;
+        let activityLevel = 0.5;
+        let showWireframe = true;
+        let showParticles = true;
+        let useBrainShape = true;
+        let lastFrameTime = Date.now();
+        let fps = 60;
+
+        function animate() {
+            requestAnimationFrame(animate);
+            time += 0.01;
+
+            // Calculate FPS
+            const now = Date.now();
+            fps = Math.round(1000 / (now - lastFrameTime));
+            lastFrameTime = now;
+
+            // Rotate brain
+            brainMesh.rotation.y += 0.002;
+            brainMesh.rotation.x = Math.sin(time * 0.1) * 0.1;
+
+            // Update node activity
+            let activeRegions = 0;
+            nodes.forEach((node, i) => {
+                node.activity += (Math.random() - 0.5) * 0.1;
+                node.activity = Math.max(0, Math.min(1, node.activity));
+                
+                if (node.activity > 0.7) activeRegions++;
+                
+                // Pulsing effect
+                const scale = 1 + node.activity * 0.3;
+                nodeMeshes[i].scale.setScalar(scale);
+                nodeMeshes[i].material.opacity = 0.5 + node.activity * 0.5;
+            });
+
+            // Update connections
+            let activeConnections = 0;
+            connectionLines.forEach(({ line, connection }) => {
+                const fromNode = nodes[connection.from];
+                const toNode = nodes[connection.to];
+                
+                // Activate connection if both nodes are active
+                const shouldActivate = (fromNode.activity + toNode.activity) / 2 > 0.5 && Math.random() < activityLevel;
+                connection.active = shouldActivate;
+                
+                if (connection.active) {
+                    activeConnections++;
+                    line.material.opacity = 0.3 + (fromNode.activity + toNode.activity) * 0.2;
+                } else {
+                    line.material.opacity = 0.05;
+                }
+            });
+
+            // Update particles
+            particles.forEach(particle => {
+                const conn = particle.userData.connection;
+                const from = nodes[conn.from].position;
+                const to = nodes[conn.to].position;
+                
+                particle.userData.progress += particle.userData.speed;
+                
+                if (particle.userData.progress >= 1) {
+                    particle.userData.progress = 0;
+                    // Reassign to random active connection
+                    particle.userData.connection = connections[Math.floor(Math.random() * connections.length)];
+                }
+                
+                particle.position.lerpVectors(from, to, particle.userData.progress);
+                particle.visible = showParticles && conn.active;
+            });
+
+            // Update stats
+            document.getElementById('fps').textContent = fps;
+            document.getElementById('active-regions').textContent = activeRegions;
+            document.getElementById('connection-count').textContent = activeConnections;
+            document.getElementById('activity-level').textContent = activityLevel > 0.7 ? 'HIGH' : activityLevel > 0.3 ? 'MEDIUM' : 'LOW';
+
+            // Log events occasionally
+            if (Math.random() < 0.01 && activeRegions > 10) {
+                logEvent(`Neural spike detected in ${['PATTERN', 'EMOTION', 'MEMORY', 'META', 'BIAS'][Math.floor(Math.random() * 5)]} region`);
+            }
+
+            renderer.render(scene, camera);
+        }
+
+        // === EVENT LOGGING ===
+        function logEvent(message) {
+            const logContent = document.getElementById('log-content');
+            const eventItem = document.createElement('div');
+            eventItem.className = 'event-item';
+            eventItem.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            logContent.insertBefore(eventItem, logContent.firstChild);
+            
+            // Keep only last 10 events
+            while (logContent.children.length > 10) {
+                logContent.removeChild(logContent.lastChild);
+            }
+        }
+
+        // === CONTROLS ===
+        document.getElementById('toggle-shape').addEventListener('click', function() {
+            useBrainShape = true;
+            this.classList.add('active');
+            document.getElementById('toggle-sphere').classList.remove('active');
+            brainMesh.geometry.dispose();
+            brainMesh.geometry = createBrainGeometry(24);
+            logEvent('Switched to anatomical brain shape');
+        });
+
+        document.getElementById('toggle-sphere').addEventListener('click', function() {
+            useBrainShape = false;
+            this.classList.add('active');
+            document.getElementById('toggle-shape').classList.remove('active');
+            brainMesh.geometry.dispose();
+            brainMesh.geometry = new THREE.SphereGeometry(2.5, 32, 32);
+            logEvent('Switched to sphere mode');
+        });
+
+        document.getElementById('density-slider').addEventListener('input', function(e) {
+            const newCount = parseInt(e.target.value);
+            document.getElementById('density-value').textContent = newCount;
+            
+            // Clear old nodes
+            nodeMeshes.forEach(mesh => scene.remove(mesh));
+            nodeMeshes.length = 0;
+            connectionLines.forEach(({ line }) => scene.remove(line));
+            connectionLines.length = 0;
+            
+            // Generate new network
+            nodes = generateNodes(newCount, brainGeometry);
+            connections = generateConnections(nodes);
+            
+            // Create new meshes
+            nodes.forEach(node => {
+                const nodeGeometry = new THREE.SphereGeometry(0.05, 8, 8);
+                const nodeMaterial = new THREE.MeshBasicMaterial({ color: node.color, transparent: true, opacity: 0.8 });
+                const nodeMesh = new THREE.Mesh(nodeGeometry, nodeMaterial);
+                nodeMesh.position.copy(node.position);
+                scene.add(nodeMesh);
+                nodeMeshes.push(nodeMesh);
+            });
+            
+            connections.forEach(conn => {
+                const line = createConnectionLine(nodes[conn.from].position, nodes[conn.to].position);
+                connectionLines.push({ line: line, connection: conn });
+            });
+            
+            logEvent(`Network density updated to ${newCount} nodes`);
+        });
+
+        document.getElementById('activity-slider').addEventListener('input', function(e) {
+            activityLevel = parseInt(e.target.value) / 100;
+            document.getElementById('activity-value').textContent = e.target.value + '%';
+        });
+
+        document.getElementById('toggle-wireframe').addEventListener('click', function() {
+            showWireframe = !showWireframe;
+            brainMaterial.wireframe = showWireframe;
+            this.classList.toggle('active');
+            logEvent(`Wireframe ${showWireframe ? 'enabled' : 'disabled'}`);
+        });
+
+        document.getElementById('toggle-particles').addEventListener('click', function() {
+            showParticles = !showParticles;
+            this.classList.toggle('active');
+            logEvent(`Particles ${showParticles ? 'enabled' : 'disabled'}`);
+        });
+
+        // === WINDOW RESIZE ===
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        // Start animation
+        logEvent('Atlas neural core initialized');
+        logEvent('120 nodes, 5-10 connections per node (small-world topology)');
+        logEvent('Orange Jarvis aesthetic applied');
+        animate();
+    </script>
+</body>
+</html>

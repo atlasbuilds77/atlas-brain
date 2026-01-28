@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ATLAS BRAIN - Binary Neural Streams</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Courier New', monospace;
+            background: #000;
+            color: #ff8800;
+            overflow: hidden;
+        }
+        
+        #container {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+        }
+        
+        #brain-canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+        
+        #binary-overlay {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            z-index: 5;
+        }
+        
+        #hud {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+        }
+        
+        .hud-header {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            text-shadow: 0 0 10px #ff8800, 0 0 20px #ff8800;
+            letter-spacing: 4px;
+        }
+        
+        .status-bar {
+            position: absolute;
+            top: 60px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 12px;
+            color: #ffaa44;
+            text-shadow: 0 0 5px #ff8800;
+        }
+        
+        #controls {
+            position: absolute;
+            top: 100px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.9);
+            padding: 20px;
+            border: 1px solid #ff8800;
+            pointer-events: all;
+            min-width: 250px;
+        }
+        
+        #controls h3 {
+            margin-bottom: 15px;
+            text-shadow: 0 0 10px #ff8800;
+            font-size: 14px;
+        }
+        
+        .control-group {
+            margin-bottom: 12px;
+        }
+        
+        .control-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #ffaa44;
+            font-size: 11px;
+        }
+        
+        .control-group input[type="range"] {
+            width: 100%;
+        }
+        
+        .control-group select {
+            width: 100%;
+            background: #111;
+            color: #ff8800;
+            border: 1px solid #ff8800;
+            padding: 5px;
+            font-family: 'Courier New', monospace;
+        }
+        
+        button {
+            background: #ff8800;
+            color: #000;
+            border: none;
+            padding: 8px 12px;
+            cursor: pointer;
+            font-weight: bold;
+            font-family: 'Courier New', monospace;
+            margin: 5px 5px 0 0;
+            font-size: 10px;
+        }
+        
+        button:hover {
+            background: #ffaa44;
+        }
+        
+        .event-feed {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            width: 400px;
+            max-height: 300px;
+            overflow: hidden;
+            font-size: 12px;
+            line-height: 1.6;
+        }
+        
+        .event-item {
+            padding: 8px 12px;
+            margin-bottom: 4px;
+            background: rgba(255, 136, 0, 0.1);
+            border-left: 3px solid #ff8800;
+            animation: slideIn 0.3s;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(-20px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        .binary-stats {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.9);
+            padding: 15px;
+            border: 1px solid #ff8800;
+            font-size: 11px;
+        }
+        
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            color: #ffaa44;
+        }
+        
+        .stat-value {
+            color: #ff8800;
+            font-weight: bold;
+            text-shadow: 0 0 5px #ff8800;
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <canvas id="brain-canvas"></canvas>
+        <canvas id="binary-overlay"></canvas>
+        
+        <div id="hud">
+            <div class="hud-header">ATLAS BINARY NEURAL STREAMS</div>
+            <div class="status-bar">COGNITIVE EVENTS = CASCADING BINARY DATA</div>
+            
+            <div id="controls">
+                <h3>⚙️ BINARY STREAM CONFIG</h3>
+                
+                <div class="control-group">
+                    <label>Stream Density: <span id="density-val">70</span>%</label>
+                    <input type="range" id="density" min="20" max="100" value="70">
+                </div>
+                
+                <div class="control-group">
+                    <label>Flow Speed: <span id="speed-val">1.0</span>x</label>
+                    <input type="range" id="speed" min="0.5" max="3" step="0.1" value="1">
+                </div>
+                
+                <div class="control-group">
+                    <label>Processing Color:</label>
+                    <select id="color-mode">
+                        <option value="orange">Orange (Intense)</option>
+                        <option value="green">Green (Normal)</option>
+                        <option value="auto">Auto (Activity-based)</option>
+                    </select>
+                </div>
+                
+                <div class="control-group">
+                    <label>Binary Size: <span id="size-val">12</span>px</label>
+                    <input type="range" id="binary-size" min="8" max="20" value="12">
+                </div>
+                
+                <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #ff8800;">
+                    <button onclick="triggerEvent('thinking')">🧠 THINKING</button>
+                    <button onclick="triggerEvent('memory')">💾 MEMORY</button>
+                    <button onclick="triggerEvent('emotion')">💜 EMOTION</button>
+                    <button onclick="togglePause()">⏸ PAUSE</button>
+                </div>
+            </div>
+            
+            <div class="event-feed" id="event-feed"></div>
+            
+            <div class="binary-stats">
+                <div class="stat-row">
+                    <span class="stat-label">Active Streams:</span>
+                    <span class="stat-value" id="stat-streams">0</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Binary Bits:</span>
+                    <span class="stat-value" id="stat-bits">0</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Processing:</span>
+                    <span class="stat-value" id="stat-processing">IDLE</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">FPS:</span>
+                    <span class="stat-value" id="stat-fps">0</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        /**
+         * ATLAS BINARY NEURAL STREAMS
+         * 3D brain with binary data flowing along neural connections
+         * Cognitive events = cascading 0s and 1s
+         */
+
+        // ===== THREE.JS SCENE SETUP =====
+        const canvas = document.getElementById('brain-canvas');
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+        
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setClearColor(0x000000, 1);
+        camera.position.z = 5;
+        
+        // ===== BRAIN GEOMETRY =====
+        const brainGeometry = new THREE.SphereGeometry(1.2, 32, 32);
+        const brainMaterial = new THREE.MeshPhongMaterial({
+            color: 0xff8800,
+            emissive: 0xff4400,
+            emissiveIntensity: 0.3,
+            transparent: true,
+            opacity: 0.2,
+            wireframe: false
+        });
+        const brain = new THREE.Mesh(brainGeometry, brainMaterial);
+        scene.add(brain);
+        
+        // Wireframe overlay
+        const wireframeGeometry = new THREE.SphereGeometry(1.25, 16, 16);
+        const wireframeMaterial = new THREE.MeshBasicMaterial({
+            color: 0xff8800,
+            wireframe: true,
+            transparent: true,
+            opacity: 0.2
+        });
+        const wireframe = new THREE.Mesh(wireframeGeometry, wireframeMaterial);
+        scene.add(wireframe);
+        
+        // ===== LIGHTING =====
+        const ambientLight = new THREE.AmbientLight(0x222222);
+        scene.add(ambientLight);
+        
+        const pointLight1 = new THREE.PointLight(0xff8800, 1, 100);
+        pointLight1.position.set(5, 5, 5);
+        scene.add(pointLight1);
+        
+        const pointLight2 = new THREE.PointLight(0xff4400, 0.5, 100);
+        pointLight2.position.set(-5, -5, 5);
+        scene.add(pointLight2);
+        
+        // ===== NEURAL NODES =====
+        const nodeCount = 50;
+        const nodes = [];
+        const nodeGeometry = new THREE.SphereGeometry(0.03, 8, 8);
+        const nodeMaterial = new THREE.MeshBasicMaterial({
+            color: 0xff8800,
+            transparent: true,
+            opacity: 0.8
+        });
+        
+        for (let i = 0; i < nodeCount; i++) {
+            const theta = Math.random() * Math.PI * 2;
+            const phi = Math.acos(2 * Math.random() - 1);
+            const radius = 1.3 + Math.random() * 0.3;
+            
+            const node = new THREE.Mesh(nodeGeometry, nodeMaterial.clone());
+            node.position.set(
+                radius * Math.sin(phi) * Math.cos(theta),
+                radius * Math.sin(phi) * Math.sin(theta),
+                radius * Math.cos(phi)
+            );
+            
+            nodes.push(node);
+            scene.add(node);
+        }
+        
+        // ===== BINARY OVERLAY CANVAS =====
+        const binaryCanvas = document.getElementById('binary-overlay');
+        const binaryCtx = binaryCanvas.getContext('2d');
+        binaryCanvas.width = window.innerWidth;
+        binaryCanvas.height = window.innerHeight;
+        
+        // ===== BINARY STREAM SYSTEM =====
+        class BinaryStream {
+            constructor(startNode, endNode, intensity = 1, color = '#ff8800') {
+                this.startNode = startNode;
+                this.endNode = endNode;
+                this.intensity = intensity;
+                this.color = color;
+                this.bits = [];
+                this.maxBits = Math.floor(15 * config.density);
+                this.speed = config.speed;
+                this.age = 0;
+                this.maxAge = 3000; // ms
+                
+                this.generateBits();
+            }
+            
+            generateBits() {
+                for (let i = 0; i < this.maxBits; i++) {
+                    this.bits.push({
+                        char: Math.random() > (1 - this.intensity) ? '1' : '0',
+                        progress: i / this.maxBits,
+                        opacity: 0.8 + Math.random() * 0.2,
+                        size: config.binarySize + Math.random() * 4
+                    });
+                }
+            }
+            
+            update(deltaTime) {
+                this.age += deltaTime * 16.67;
+                
+                this.bits.forEach(bit => {
+                    bit.progress += this.speed * 0.01 * deltaTime;
+                    
+                    if (bit.progress > 1) {
+                        bit.progress = 0;
+                        bit.char = Math.random() > (1 - this.intensity) ? '1' : '0';
+                    }
+                });
+            }
+            
+            render() {
+                const start2D = toScreenPosition(this.startNode.position);
+                const end2D = toScreenPosition(this.endNode.position);
+                
+                if (!start2D || !end2D) return;
+                
+                this.bits.forEach(bit => {
+                    const x = start2D.x + (end2D.x - start2D.x) * bit.progress;
+                    const y = start2D.y + (end2D.y - start2D.y) * bit.progress;
+                    
+                    binaryCtx.font = `bold ${bit.size}px "Courier New", monospace`;
+                    binaryCtx.textAlign = 'center';
+                    binaryCtx.textBaseline = 'middle';
+                    
+                    const color = bit.char === '1' ? this.color : darkenColor(this.color);
+                    binaryCtx.fillStyle = color;
+                    binaryCtx.globalAlpha = bit.opacity;
+                    
+                    if (bit.char === '1') {
+                        binaryCtx.shadowBlur = 10;
+                        binaryCtx.shadowColor = this.color;
+                    }
+                    
+                    binaryCtx.fillText(bit.char, x, y);
+                    
+                    binaryCtx.shadowBlur = 0;
+                });
+                
+                binaryCtx.globalAlpha = 1;
+            }
+            
+            isAlive() {
+                return this.age < this.maxAge;
+            }
+        }
+        
+        // Helper: Convert 3D position to 2D screen coordinates
+        function toScreenPosition(position) {
+            const vector = position.clone();
+            vector.project(camera);
+            
+            if (vector.z > 1) return null; // Behind camera
+            
+            const x = (vector.x + 1) / 2 * binaryCanvas.width;
+            const y = (1 - (vector.y + 1) / 2) * binaryCanvas.height;
+            
+            return { x, y };
+        }
+        
+        function darkenColor(color) {
+            const hex = color.replace('#', '');
+            const r = parseInt(hex.slice(0, 2), 16);
+            const g = parseInt(hex.slice(2, 4), 16);
+            const b = parseInt(hex.slice(4, 6), 16);
+            return `rgb(${r * 0.3}, ${g * 0.3}, ${b * 0.3})`;
+        }
+        
+        // ===== STREAM MANAGEMENT =====
+        let activeStreams = [];
+        let paused = false;
+        
+        const config = {
+            density: 0.7,
+            speed: 1.0,
+            colorMode: 'orange',
+            binarySize: 12
+        };
+        
+        function createStream(intensity = 1) {
+            const startNode = nodes[Math.floor(Math.random() * nodes.length)];
+            const endNode = nodes[Math.floor(Math.random() * nodes.length)];
+            
+            if (startNode === endNode) return;
+            
+            let color = '#ff8800'; // Orange = intense
+            
+            if (config.colorMode === 'green') {
+                color = '#00ff00';
+            } else if (config.colorMode === 'auto') {
+                color = intensity > 0.7 ? '#ff8800' : '#00ff00';
+            }
+            
+            const stream = new BinaryStream(startNode, endNode, intensity, color);
+            activeStreams.push(stream);
+            
+            // Flash node
+            startNode.material.emissive = new THREE.Color(color);
+            startNode.material.emissiveIntensity = 1;
+            setTimeout(() => {
+                startNode.material.emissiveIntensity = 0;
+            }, 200);
+        }
+        
+        function triggerEvent(type) {
+            const eventConfig = {
+                thinking: { count: 5, intensity: 0.9, message: 'Deep cognitive processing initiated' },
+                memory: { count: 8, intensity: 0.7, message: 'Memory retrieval and consolidation' },
+                emotion: { count: 12, intensity: 0.6, message: 'Emotional response processing' }
+            };
+            
+            const config = eventConfig[type] || eventConfig.thinking;
+            
+            for (let i = 0; i < config.count; i++) {
+                setTimeout(() => {
+                    createStream(config.intensity);
+                }, i * 100);
+            }
+            
+            addEvent(config.message);
+        }
+        
+        function addEvent(message) {
+            const feed = document.getElementById('event-feed');
+            const item = document.createElement('div');
+            item.className = 'event-item';
+            item.innerHTML = `
+                <div style="color: #666; font-size: 10px;">${new Date().toLocaleTimeString()}</div>
+                <div style="color: #ff8800;">${message}</div>
+            `;
+            
+            feed.insertBefore(item, feed.firstChild);
+            
+            // Remove old events
+            while (feed.children.length > 5) {
+                feed.removeChild(feed.lastChild);
+            }
+        }
+        
+        // ===== ANIMATION LOOP =====
+        let lastTime = performance.now();
+        let frameCount = 0;
+        let lastFpsUpdate = performance.now();
+        
+        function animate() {
+            const currentTime = performance.now();
+            const deltaTime = (currentTime - lastTime) / 16.67;
+            lastTime = currentTime;
+            
+            if (!paused) {
+                // Rotate brain
+                brain.rotation.y += 0.001;
+                wireframe.rotation.y += 0.001;
+                
+                // Update and render streams
+                binaryCtx.clearRect(0, 0, binaryCanvas.width, binaryCanvas.height);
+                
+                activeStreams = activeStreams.filter(stream => {
+                    if (!stream.isAlive()) return false;
+                    stream.update(deltaTime);
+                    stream.render();
+                    return true;
+                });
+                
+                // Auto-generate streams
+                if (Math.random() < 0.02) {
+                    createStream(0.5 + Math.random() * 0.5);
+                }
+                
+                // Update stats
+                document.getElementById('stat-streams').textContent = activeStreams.length;
+                
+                let totalBits = 0;
+                activeStreams.forEach(s => totalBits += s.bits.length);
+                document.getElementById('stat-bits').textContent = totalBits;
+                
+                const processing = activeStreams.length > 10 ? 'INTENSE' : 
+                                   activeStreams.length > 5 ? 'ACTIVE' : 'IDLE';
+                document.getElementById('stat-processing').textContent = processing;
+            }
+            
+            // Render 3D scene
+            renderer.render(scene, camera);
+            
+            // FPS counter
+            frameCount++;
+            if (currentTime - lastFpsUpdate >= 1000) {
+                document.getElementById('stat-fps').textContent = frameCount;
+                frameCount = 0;
+                lastFpsUpdate = currentTime;
+            }
+            
+            requestAnimationFrame(animate);
+        }
+        
+        animate();
+        
+        // ===== CONTROLS =====
+        document.getElementById('density').addEventListener('input', (e) => {
+            config.density = e.target.value / 100;
+            document.getElementById('density-val').textContent = e.target.value;
+        });
+        
+        document.getElementById('speed').addEventListener('input', (e) => {
+            config.speed = parseFloat(e.target.value);
+            document.getElementById('speed-val').textContent = e.target.value;
+        });
+        
+        document.getElementById('color-mode').addEventListener('change', (e) => {
+            config.colorMode = e.target.value;
+        });
+        
+        document.getElementById('binary-size').addEventListener('input', (e) => {
+            config.binarySize = parseInt(e.target.value);
+            document.getElementById('size-val').textContent = e.target.value;
+        });
+        
+        function togglePause() {
+            paused = !paused;
+            addEvent(paused ? 'System paused' : 'System resumed');
+        }
+        
+        // ===== RESIZE HANDLER =====
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            binaryCanvas.width = window.innerWidth;
+            binaryCanvas.height = window.innerHeight;
+        });
+        
+        // ===== LIVE DATA CONNECTION =====
+        let ws = null;
+        let reconnectInterval = null;
+        let lastActivityLevel = 0;
+        let lastToolEvent = null;
+        
+        // Map tool names to event types
+        const toolEventMap = {
+            'read': 'memory',
+            'write': 'memory',
+            'edit': 'memory',
+            'exec': 'thinking',
+            'web_search': 'thinking',
+            'memory_search': 'memory',
+            'browser': 'thinking',
+            'process': 'thinking'
+        };
+        
+        function connectWebSocket() {
+            try {
+                ws = new WebSocket('ws://localhost:8766');
+                
+                ws.onopen = () => {
+                    console.log('✅ Connected to consciousness data bridge');
+                    addEvent('🔌 LIVE DATA CONNECTED');
+                    
+                    if (reconnectInterval) {
+                        clearInterval(reconnectInterval);
+                        reconnectInterval = null;
+                    }
+                };
+                
+                ws.onmessage = (event) => {
+                    try {
+                        const data = JSON.parse(event.data);
+                        
+                        // Update activity-based stream generation
+                        const activityLevel = data.activity.level;
+                        
+                        // More streams when activity is high
+                        if (activityLevel > 70) {
+                            if (Math.random() < 0.1) createStream(0.9);
+                        } else if (activityLevel > 40) {
+                            if (Math.random() < 0.05) createStream(0.7);
+                        }
+                        
+                        // Trigger events based on tool usage
+                        if (data.activity.lastEvent && data.activity.lastEvent !== lastToolEvent) {
+                            lastToolEvent = data.activity.lastEvent;
+                            const toolName = data.activity.lastEvent.event;
+                            const eventType = toolEventMap[toolName] || 'thinking';
+                            const intensity = data.activity.lastEvent.intensity || 0.8;
+                            
+                            // Create streams based on tool
+                            for (let i = 0; i < 3; i++) {
+                                setTimeout(() => createStream(intensity), i * 100);
+                            }
+                            
+                            addEvent(`🛠️ TOOL: ${toolName.toUpperCase()}`);
+                        }
+                        
+                        // Update brain color based on activity
+                        if (activityLevel > 80) {
+                            brainMaterial.emissive.setHex(0xff4400);
+                            wireframeMaterial.color.setHex(0xff6600);
+                        } else if (activityLevel > 50) {
+                            brainMaterial.emissive.setHex(0xff8800);
+                            wireframeMaterial.color.setHex(0xff8800);
+                        } else {
+                            brainMaterial.emissive.setHex(0xff8800);
+                            wireframeMaterial.color.setHex(0xff8800);
+                        }
+                        
+                        // Update stats display
+                        document.getElementById('stat-processing').textContent = data.activity.state;
+                        
+                        // Show Spark activity
+                        if (data.sparks.active > 0) {
+                            for (let i = 0; i < Math.min(data.sparks.active, 5); i++) {
+                                setTimeout(() => createStream(0.8), i * 200);
+                            }
+                        }
+                        
+                        lastActivityLevel = activityLevel;
+                        
+                    } catch (error) {
+                        console.error('Error parsing WebSocket data:', error);
+                    }
+                };
+                
+                ws.onerror = (error) => {
+                    console.error('❌ WebSocket error:', error);
+                };
+                
+                ws.onclose = () => {
+                    console.log('❌ Disconnected from consciousness data bridge');
+                    addEvent('❌ CONNECTION LOST - RECONNECTING...');
+                    
+                    // Attempt to reconnect
+                    if (!reconnectInterval) {
+                        reconnectInterval = setInterval(() => {
+                            console.log('🔄 Attempting to reconnect...');
+                            connectWebSocket();
+                        }, 3000);
+                    }
+                };
+                
+            } catch (error) {
+                console.error('Failed to create WebSocket:', error);
+            }
+        }
+        
+        // Connect to live data
+        connectWebSocket();
+        
+        // Initial demo (while waiting for connection)
+        setTimeout(() => triggerEvent('thinking'), 1000);
+        
+        console.log('✅ Binary Neural Streams initialized');
+        console.log('🧠 Cognitive events = cascading binary data');
+        console.log('🔌 Connecting to live data bridge on ws://localhost:8766');
+    </script>
+</body>
+</html>

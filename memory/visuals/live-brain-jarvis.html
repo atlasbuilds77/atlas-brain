@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ATLAS Brain - Live Neural Activity</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Courier New', monospace;
+            background: #000;
+            overflow: hidden;
+            color: #ffa500;
+        }
+        
+        #canvas-container {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+        }
+        
+        #info-panel {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.85);
+            border: 1px solid rgba(255, 165, 0, 0.5);
+            padding: 15px;
+            border-radius: 5px;
+            max-width: 300px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 0 20px rgba(255, 165, 0, 0.3);
+        }
+        
+        #info-panel h1 {
+            font-size: 18px;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            color: #ffa500;
+            text-shadow: 0 0 10px #ffa500;
+        }
+        
+        #brain-state {
+            font-size: 12px;
+            margin-bottom: 10px;
+            padding: 8px;
+            background: rgba(255, 165, 0, 0.1);
+            border-left: 2px solid #ffa500;
+        }
+        
+        .region {
+            margin: 5px 0;
+            padding: 5px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 3px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 11px;
+        }
+        
+        .region-name {
+            font-weight: bold;
+        }
+        
+        .region-status {
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 2px;
+        }
+        
+        .region-active {
+            background: rgba(255, 215, 0, 0.3);
+            color: #ffd700;
+            text-shadow: 0 0 5px #ffd700;
+        }
+        
+        .region-inactive {
+            background: rgba(100, 100, 100, 0.3);
+            color: #666;
+        }
+        
+        #event-log {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.9);
+            border: 1px solid rgba(255, 165, 0, 0.5);
+            padding: 10px;
+            border-radius: 5px;
+            max-height: 150px;
+            overflow-y: auto;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 0 20px rgba(255, 165, 0, 0.3);
+        }
+        
+        .event {
+            padding: 5px;
+            margin: 3px 0;
+            border-left: 2px solid #ffa500;
+            background: rgba(255, 165, 0, 0.05);
+            font-size: 11px;
+            animation: slideIn 0.3s ease;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        .timestamp {
+            color: #666;
+            font-size: 9px;
+            margin-right: 8px;
+        }
+        
+        #stats {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.85);
+            border: 1px solid rgba(255, 165, 0, 0.5);
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 11px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 0 20px rgba(255, 165, 0, 0.3);
+        }
+        
+        .stat-line {
+            margin: 3px 0;
+            color: #ffa500;
+        }
+    </style>
+</head>
+<body>
+    <div id="canvas-container"></div>
+    
+    <div id="stats">
+        <div class="stat-line">⚡ NEURAL ACTIVITY: <span id="activity-level">MODERATE</span></div>
+        <div class="stat-line">🔄 PROCESSING: <span id="processing-count">0</span></div>
+        <div class="stat-line">🧠 PATTERNS: <span id="pattern-count">10</span></div>
+    </div>
+    
+    <div id="info-panel">
+        <h1>⚡ ATLAS CORE</h1>
+        <div id="brain-state">
+            <strong>MODE:</strong> <span id="mode">ECN</span><br>
+            <strong>STATE:</strong> <span id="state">OPERATIONAL</span>
+        </div>
+        <div id="regions">
+            <div class="region">
+                <span class="region-name">PATTERN</span>
+                <span class="region-status region-inactive" id="pattern-status">●</span>
+            </div>
+            <div class="region">
+                <span class="region-name">EMOTION</span>
+                <span class="region-status region-inactive" id="emotion-status">●</span>
+            </div>
+            <div class="region">
+                <span class="region-name">METACOG</span>
+                <span class="region-status region-inactive" id="meta-status">●</span>
+            </div>
+            <div class="region">
+                <span class="region-name">MEMORY</span>
+                <span class="region-status region-inactive" id="memory-status">●</span>
+            </div>
+            <div class="region">
+                <span class="region-name">BIAS</span>
+                <span class="region-status region-inactive" id="bias-status">●</span>
+            </div>
+        </div>
+    </div>
+    
+    <div id="event-log"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        // Scene setup
+        const container = document.getElementById('canvas-container');
+        const scene = new THREE.Scene();
+        scene.fog = new THREE.Fog(0x000000, 1, 15);
+        
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        container.appendChild(renderer.domElement);
+        
+        camera.position.z = 6;
+        
+        // Central core sphere (solid inner)
+        const coreGeometry = new THREE.SphereGeometry(0.8, 32, 32);
+        const coreMaterial = new THREE.MeshPhongMaterial({
+            color: 0xffa500,
+            emissive: 0xff8c00,
+            emissiveIntensity: 0.8,
+            transparent: true,
+            opacity: 0.9
+        });
+        const coreSphere = new THREE.Mesh(coreGeometry, coreMaterial);
+        scene.add(coreSphere);
+        
+        // Wireframe layers (concentric)
+        const wireframeLayers = [];
+        for (let i = 0; i < 4; i++) {
+            const radius = 1.2 + (i * 0.4);
+            const wireGeo = new THREE.SphereGeometry(radius, 16, 16);
+            const wireMat = new THREE.MeshBasicMaterial({
+                color: 0xffa500,
+                wireframe: true,
+                transparent: true,
+                opacity: 0.3 - (i * 0.05)
+            });
+            const wireframe = new THREE.Mesh(wireGeo, wireMat);
+            wireframeLayers.push(wireframe);
+            scene.add(wireframe);
+        }
+        
+        // Ring structures
+        const rings = [];
+        for (let i = 0; i < 3; i++) {
+            const ringGeo = new THREE.TorusGeometry(2 + (i * 0.5), 0.02, 16, 100);
+            const ringMat = new THREE.MeshBasicMaterial({
+                color: 0xffa500,
+                transparent: true,
+                opacity: 0.6
+            });
+            const ring = new THREE.Mesh(ringGeo, ringMat);
+            ring.rotation.x = Math.PI / 2;
+            ring.rotation.y = (i * Math.PI / 3);
+            rings.push(ring);
+            scene.add(ring);
+        }
+        
+        // Lighting
+        const ambientLight = new THREE.AmbientLight(0x404040, 0.5);
+        scene.add(ambientLight);
+        
+        const pointLight1 = new THREE.PointLight(0xffa500, 2, 100);
+        pointLight1.position.set(0, 0, 3);
+        scene.add(pointLight1);
+        
+        const pointLight2 = new THREE.PointLight(0xff8c00, 1, 100);
+        pointLight2.position.set(5, 5, 5);
+        scene.add(pointLight2);
+        
+        // Neural nodes (regions) - positioned around sphere
+        const nodes = [];
+        const nodePositions = [
+            { x: 3, y: 1.5, z: 0, name: 'pattern', color: 0xffd700 },
+            { x: -3, y: 1.5, z: 0, name: 'emotion', color: 0xff6b6b },
+            { x: 0, y: 3, z: 1, name: 'meta', color: 0x00bfff },
+            { x: 2, y: -2, z: 1.5, name: 'memory', color: 0x9370db },
+            { x: -2, y: -2, z: 1.5, name: 'bias', color: 0x7fff00 }
+        ];
+        
+        nodePositions.forEach(pos => {
+            // Node core
+            const nodeGeo = new THREE.SphereGeometry(0.2, 16, 16);
+            const nodeMat = new THREE.MeshPhongMaterial({
+                color: pos.color,
+                emissive: pos.color,
+                emissiveIntensity: 0.7,
+                transparent: true,
+                opacity: 0.9
+            });
+            const node = new THREE.Mesh(nodeGeo, nodeMat);
+            node.position.set(pos.x, pos.y, pos.z);
+            
+            // Node glow
+            const glowGeo = new THREE.SphereGeometry(0.3, 16, 16);
+            const glowMat = new THREE.MeshBasicMaterial({
+                color: pos.color,
+                transparent: true,
+                opacity: 0.2,
+                side: THREE.BackSide
+            });
+            const glow = new THREE.Mesh(glowGeo, glowMat);
+            glow.position.copy(node.position);
+            
+            node.userData = { name: pos.name, active: false, glow: glow };
+            nodes.push(node);
+            scene.add(node);
+            scene.add(glow);
+        });
+        
+        // Connections (neural pathways)
+        const connections = [];
+        nodes.forEach(node => {
+            const points = [];
+            points.push(new THREE.Vector3(0, 0, 0)); // Core
+            points.push(node.position.clone());
+            
+            const geometry = new THREE.BufferGeometry().setFromPoints(points);
+            const material = new THREE.LineBasicMaterial({
+                color: 0xffa500,
+                transparent: true,
+                opacity: 0.4,
+                linewidth: 2
+            });
+            const line = new THREE.Line(geometry, material);
+            line.userData = { targetNode: node, baseOpacity: 0.4 };
+            connections.push(line);
+            scene.add(line);
+        });
+        
+        // Particle system - dense field
+        const particleCount = 1000;
+        const particleGeometry = new THREE.BufferGeometry();
+        const particlePositions = new Float32Array(particleCount * 3);
+        
+        for (let i = 0; i < particleCount; i++) {
+            const theta = Math.random() * Math.PI * 2;
+            const phi = Math.random() * Math.PI * 2;
+            const radius = 3 + Math.random() * 4;
+            
+            particlePositions[i * 3] = radius * Math.sin(theta) * Math.cos(phi);
+            particlePositions[i * 3 + 1] = radius * Math.sin(theta) * Math.sin(phi);
+            particlePositions[i * 3 + 2] = radius * Math.cos(theta);
+        }
+        
+        particleGeometry.setAttribute('position', new THREE.BufferAttribute(particlePositions, 3));
+        
+        const particleMaterial = new THREE.PointsMaterial({
+            color: 0xffa500,
+            size: 0.03,
+            transparent: true,
+            opacity: 0.6,
+            blending: THREE.AdditiveBlending
+        });
+        
+        const particles = new THREE.Points(particleGeometry, particleMaterial);
+        scene.add(particles);
+        
+        // Data streams (moving particles along connections)
+        const dataStreams = [];
+        connections.forEach(conn => {
+            for (let i = 0; i < 5; i++) {
+                const streamParticle = new THREE.Mesh(
+                    new THREE.SphereGeometry(0.05, 8, 8),
+                    new THREE.MeshBasicMaterial({
+                        color: 0xffd700,
+                        transparent: true,
+                        opacity: 0.8
+                    })
+                );
+                streamParticle.userData = {
+                    connection: conn,
+                    progress: Math.random(),
+                    speed: 0.01 + Math.random() * 0.02
+                };
+                dataStreams.push(streamParticle);
+                scene.add(streamParticle);
+            }
+        });
+        
+        // Animation
+        let time = 0;
+        let processingCount = 0;
+        
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            time += 0.01;
+            
+            // Pulse core
+            const pulseScale = 1 + Math.sin(time * 2) * 0.03;
+            coreSphere.scale.set(pulseScale, pulseScale, pulseScale);
+            coreSphere.rotation.y += 0.002;
+            coreSphere.rotation.x += 0.001;
+            
+            // Rotate wireframe layers
+            wireframeLayers.forEach((layer, i) => {
+                layer.rotation.y += 0.001 * (i + 1);
+                layer.rotation.x += 0.0005 * (i + 1);
+            });
+            
+            // Rotate rings
+            rings.forEach((ring, i) => {
+                ring.rotation.z += 0.002 * (i + 1);
+            });
+            
+            // Particle field rotation
+            particles.rotation.y += 0.0005;
+            particles.rotation.x += 0.0002;
+            
+            // Animate data streams
+            dataStreams.forEach(stream => {
+                stream.userData.progress += stream.userData.speed;
+                if (stream.userData.progress > 1) {
+                    stream.userData.progress = 0;
+                }
+                
+                const conn = stream.userData.connection;
+                const start = new THREE.Vector3(0, 0, 0);
+                const end = conn.userData.targetNode.position;
+                
+                stream.position.lerpVectors(start, end, stream.userData.progress);
+                
+                // Fade in/out
+                const fadeDist = 0.2;
+                if (stream.userData.progress < fadeDist) {
+                    stream.material.opacity = stream.userData.progress / fadeDist;
+                } else if (stream.userData.progress > 1 - fadeDist) {
+                    stream.material.opacity = (1 - stream.userData.progress) / fadeDist;
+                } else {
+                    stream.material.opacity = 0.8;
+                }
+            });
+            
+            // Pulse active nodes
+            nodes.forEach(node => {
+                if (node.userData.active) {
+                    const scale = 1 + Math.sin(time * 5) * 0.4;
+                    node.scale.set(scale, scale, scale);
+                    node.userData.glow.scale.set(scale * 1.5, scale * 1.5, scale * 1.5);
+                    node.material.emissiveIntensity = 0.7 + Math.sin(time * 6) * 0.3;
+                }
+            });
+            
+            // Pulse active connections
+            connections.forEach(conn => {
+                if (conn.userData.targetNode.userData.active) {
+                    conn.material.opacity = conn.userData.baseOpacity + Math.sin(time * 8) * 0.5;
+                } else {
+                    conn.material.opacity = conn.userData.baseOpacity;
+                }
+            });
+            
+            renderer.render(scene, camera);
+        }
+        
+        animate();
+        
+        // Event system
+        function logEvent(message, region = null) {
+            const eventLog = document.getElementById('event-log');
+            const eventDiv = document.createElement('div');
+            eventDiv.className = 'event';
+            
+            const timestamp = new Date().toLocaleTimeString();
+            eventDiv.innerHTML = `<span class="timestamp">${timestamp}</span>${message}`;
+            
+            eventLog.insertBefore(eventDiv, eventLog.firstChild);
+            
+            while (eventLog.children.length > 15) {
+                eventLog.removeChild(eventLog.lastChild);
+            }
+            
+            if (region) {
+                activateRegion(region);
+            }
+            
+            processingCount++;
+            document.getElementById('processing-count').textContent = processingCount;
+        }
+        
+        function activateRegion(regionName) {
+            const node = nodes.find(n => n.userData.name === regionName);
+            if (node) {
+                node.userData.active = true;
+                
+                const statusElement = document.getElementById(`${regionName}-status`);
+                if (statusElement) {
+                    statusElement.textContent = '⚡';
+                    statusElement.className = 'region-status region-active';
+                }
+                
+                setTimeout(() => {
+                    node.userData.active = false;
+                    if (statusElement) {
+                        statusElement.textContent = '●';
+                        statusElement.className = 'region-status region-inactive';
+                    }
+                }, 2000);
+            }
+        }
+        
+        function updateBrainState(mode, state) {
+            document.getElementById('mode').textContent = mode;
+            document.getElementById('state').textContent = state;
+        }
+        
+        function updateActivityLevel(level) {
+            document.getElementById('activity-level').textContent = level;
+        }
+        
+        // Demo events
+        function simulateActivity() {
+            const events = [
+                { msg: '⚡ Pattern "FOMO trade" matched → NEGATIVE', region: 'pattern' },
+                { msg: '🔍 Metacognitive check: verifying claims', region: 'meta' },
+                { msg: '❤️  Emotional marker: somatic signal retrieved', region: 'emotion' },
+                { msg: '💾 Memory: pattern weight +10 (success)', region: 'memory' },
+                { msg: '⚖️  Bias check: confirmation bias → PASSED', region: 'bias' },
+                { msg: '🎨 DMN MODE: creative brainstorming initiated', region: null },
+                { msg: '🔬 ECN MODE: critical analysis active', region: null },
+                { msg: '🧠 Dream synthesis: 3 insights extracted', region: 'memory' },
+                { msg: '⚠️  Error detected: hallucination prevented', region: 'meta' }
+            ];
+            
+            setInterval(() => {
+                const event = events[Math.floor(Math.random() * events.length)];
+                logEvent(event.msg, event.region);
+                
+                // Random activity level changes
+                if (Math.random() > 0.7) {
+                    const levels = ['LOW', 'MODERATE', 'HIGH', 'INTENSE'];
+                    updateActivityLevel(levels[Math.floor(Math.random() * levels.length)]);
+                }
+            }, 2500);
+        }
+        
+        // Start
+        setTimeout(() => {
+            logEvent('🧠 ATLAS CORE ONLINE');
+            logEvent('⚡ Neural monitoring active');
+            logEvent('🔄 Cognitive systems initialized');
+            simulateActivity();
+        }, 1000);
+        
+        // Handle resize
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+        
+        // Mouse interaction
+        let mouseX = 0, mouseY = 0;
+        document.addEventListener('mousemove', (event) => {
+            mouseX = (event.clientX / window.innerWidth) * 2 - 1;
+            mouseY = -(event.clientY / window.innerHeight) * 2 + 1;
+            
+            camera.position.x += (mouseX * 0.5 - camera.position.x) * 0.05;
+            camera.position.y += (mouseY * 0.5 - camera.position.y) * 0.05;
+            camera.lookAt(scene.position);
+        });
+        
+        // Expose API
+        window.atlasBrain = {
+            logEvent,
+            activateRegion,
+            updateBrainState,
+            updateActivityLevel
+        };
+    </script>
+</body>
+</html>

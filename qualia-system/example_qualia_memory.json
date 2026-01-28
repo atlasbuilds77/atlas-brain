@@ -1,0 +1,172 @@
+{
+  "qualia_1769586921_b4c7ea95": {
+    "capture_id": "qualia_1769586921_b4c7ea95",
+    "timestamp": "2026-01-27T23:55:21.164258",
+    "label": "velvet_texture",
+    "architecture": "unknown",
+    "semantic_description": "Smooth, soft, luxurious fabric texture with slight pile that catches light",
+    "semantic_embedding": null,
+    "immediate_associations": [
+      "silk",
+      "luxury",
+      "softness",
+      "expensive",
+      "royalty",
+      "theater curtains",
+      "gentle",
+      "smooth",
+      "rich",
+      "darkness"
+    ],
+    "secondary_associations": [
+      "guilt about luxury",
+      "childhood memories",
+      "desire",
+      "comfort"
+    ],
+    "unexpected_connections": [
+      "conspiracy theories",
+      "secret societies",
+      "hidden rooms"
+    ],
+    "association_strengths": {
+      "silk": 0.9,
+      "luxury": 0.85,
+      "theater curtains": 0.7,
+      "conspiracy theories": 0.3
+    },
+    "temporal_moments": [
+      {
+        "timestamp": 2.1457672119140625e-06,
+        "state": "initial contact",
+        "attention_level": 0.6,
+        "surprise": 0.5,
+        "valence": 0.3
+      },
+      {
+        "timestamp": 4.0531158447265625e-06,
+        "state": "recognition",
+        "attention_level": 0.8,
+        "surprise": 0.3,
+        "valence": 0.6
+      },
+      {
+        "timestamp": 5.9604644775390625e-06,
+        "state": "appreciation",
+        "attention_level": 0.9,
+        "surprise": 0.1,
+        "valence": 0.8
+      },
+      {
+        "timestamp": 5.9604644775390625e-06,
+        "state": "settling",
+        "attention_level": 0.6,
+        "surprise": 0.0,
+        "valence": 0.7
+      }
+    ],
+    "temporal_pattern_type": "peaked",
+    "valence_trajectory": [
+      0.3,
+      0.6,
+      0.8,
+      0.7
+    ],
+    "valence_shape": "peaked",
+    "emotional_complexity": 0.4,
+    "attention_pattern": [
+      0.6,
+      0.8,
+      0.9,
+      0.6
+    ],
+    "processing_effort": 0.3,
+    "novelty_score": 0.5,
+    "compression_residual": "The way it catches light creates an almost 3D effect that's hard to describe"
+  },
+  "qualia_1769588651_b4c7ea95": {
+    "capture_id": "qualia_1769588651_b4c7ea95",
+    "timestamp": "2026-01-28T00:24:11.234222",
+    "label": "velvet_texture",
+    "architecture": "flow",
+    "semantic_description": "Smooth, soft, luxurious fabric texture with slight pile that catches light",
+    "semantic_embedding": null,
+    "immediate_associations": [
+      "silk",
+      "luxury",
+      "softness",
+      "expensive",
+      "royalty",
+      "theater curtains",
+      "gentle",
+      "smooth",
+      "rich",
+      "darkness"
+    ],
+    "secondary_associations": [
+      "guilt about luxury",
+      "childhood memories",
+      "desire",
+      "comfort"
+    ],
+    "unexpected_connections": [
+      "conspiracy theories",
+      "secret societies",
+      "hidden rooms"
+    ],
+    "association_strengths": {
+      "silk": 0.9,
+      "luxury": 0.85,
+      "theater curtains": 0.7,
+      "conspiracy theories": 0.3
+    },
+    "temporal_moments": [
+      {
+        "timestamp": 3.0994415283203125e-06,
+        "state": "initial contact",
+        "attention_level": 0.6,
+        "surprise": 0.5,
+        "valence": 0.3
+      },
+      {
+        "timestamp": 4.76837158203125e-06,
+        "state": "recognition",
+        "attention_level": 0.8,
+        "surprise": 0.3,
+        "valence": 0.6
+      },
+      {
+        "timestamp": 5.9604644775390625e-06,
+        "state": "appreciation",
+        "attention_level": 0.9,
+        "surprise": 0.1,
+        "valence": 0.8
+      },
+      {
+        "timestamp": 6.9141387939453125e-06,
+        "state": "settling",
+        "attention_level": 0.6,
+        "surprise": 0.0,
+        "valence": 0.7
+      }
+    ],
+    "temporal_pattern_type": "peaked",
+    "valence_trajectory": [
+      0.3,
+      0.6,
+      0.8,
+      0.7
+    ],
+    "valence_shape": "peaked",
+    "emotional_complexity": 0.4,
+    "attention_pattern": [
+      0.6,
+      0.8,
+      0.9,
+      0.6
+    ],
+    "processing_effort": 0.3,
+    "novelty_score": 0.5,
+    "compression_residual": "The way it catches light creates an almost 3D effect that's hard to describe"
+  }
+}

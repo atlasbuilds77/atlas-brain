@@ -1,0 +1,17 @@
+{
+  "name": "jupiter-position-checker",
+  "version": "1.0.0",
+  "description": "Automated Jupiter Perps position checker for cron jobs",
+  "main": "jupiter-position-check.js",
+  "scripts": {
+    "check": "node jupiter-position-check.js",
+    "test": "node test-position-check.js"
+  },
+  "dependencies": {
+    "@coral-xyz/anchor": "^0.29.0",
+    "@solana/web3.js": "^1.95.3"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
