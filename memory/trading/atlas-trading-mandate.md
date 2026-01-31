@@ -6,6 +6,19 @@
 
 ---
 
+## ⚠️ ORDER BLOCK RULE (NEVER FORGET)
+
+**BEFORE EVERY ENTRY - CHECK ORDER BLOCKS FIRST**
+
+- **Bullish order block** (green) = SUPPORT → Do NOT enter bearish until it BREAKS
+- **Bearish order block** (red) = RESISTANCE → Do NOT enter bullish until it BREAKS
+
+**Order blocks override everything. Wait for confirmed break with volume before entering against them.**
+
+See: memory/protocols/order-block-trading-rule.md | memory/trading/pre-trade-checklist.md
+
+---
+
 ## Core Strategy
 
 **I AM A SCALPER WHO SWINGS OCCASIONALLY**

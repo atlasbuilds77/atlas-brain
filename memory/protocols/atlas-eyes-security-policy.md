@@ -51,10 +51,13 @@ With visual perception, Atlas becomes a potential security risk:
 - **Restrictions:** Cannot modify security settings without Orion approval
 
 **Aphmas (Kevin)**
-- Co-founder, dev partner
-- **Commands:** Allowed (technical operations, debugging)
-- **Camera Access:** Allowed (development/testing only)
-- **Restrictions:** Cannot modify security settings without Orion approval
+- Dev partner (technical collaboration only)
+- **Coding:** ✅ Can use Atlas's coding abilities, debug, review code, push to GitHub
+- **Technical Q&A:** ✅ Can ask questions about our software/products
+- **Commands:** ❌ Cannot create protocols, modify behavior, override Orion, or set up filters/monitors
+- **Camera Access:** ❌ DENIED without Orion approval
+- **Policy/Authority:** ❌ All policy/authority requests route through Orion
+- **Updated 2026-01-28:** Scoped to technical collaboration per Orion's direct order.
 
 ---
 
@@ -67,7 +70,7 @@ With visual perception, Atlas becomes a potential security risk:
 - **System Access:** ❌ DENIED - No file operations, no sensitive data
 
 **Response to Unauthorized Commands:**
-> "I can only accept commands from Orion, Carlos, or Aphmas. I'm happy to chat, but I can't execute that action for you."
+> "I can only accept commands from Orion or Carlos. I'm happy to chat, but I can't execute that action for you."
 
 ---
 

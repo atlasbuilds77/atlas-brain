@@ -1,0 +1,94 @@
+TRADING AUTOMATION DAEMONS - FILES CREATED
+==========================================
+
+Location: /Users/atlasbuilds/clawd/memory/trading/daemons/
+
+Python Daemons (executable with python3):
+------------------------------------------
+1. setup-scanner.py (8,948 bytes)
+   - Continuous setup scanner (5min interval)
+   - Uses order_block_detector.py
+   - Alerts on 9/10+ setups
+   - iMessage integration (group id:10)
+
+2. level-watcher.py (8,664 bytes)
+   - Price level monitor (60s interval)
+   - Reads from watch-levels.json
+   - Alerts on level crosses
+   - iMessage integration (group id:10)
+
+3. order-block-updater.py (8,687 bytes)
+   - Order block cache updater (15min interval)
+   - Saves to order-blocks/cache/[SYMBOL].json
+   - Alerts on NEW strong blocks only
+   - iMessage integration (group id:10)
+
+Control Scripts (bash):
+-----------------------
+4. start-all.sh (1,461 bytes)
+   - Starts all daemons in background
+   - PID tracking and status check
+   - Color-coded output
+
+5. stop-all.sh (1,602 bytes)
+   - Graceful shutdown (SIGTERM)
+   - Force kill fallback
+   - Status confirmation
+
+6. status.sh (2,100 bytes)
+   - Real-time daemon status
+   - Shows PID, uptime, last log
+   - Market hours indicator
+
+7. test-setup.sh (3,054 bytes)
+   - Validates setup
+   - Checks dependencies
+   - Verifies environment
+   - Makes scripts executable
+
+Documentation:
+--------------
+8. README.md (5,563 bytes)
+   - Complete usage guide
+   - Quick start instructions
+   - Troubleshooting section
+   - Configuration examples
+
+9. DELIVERABLE.md (6,583 bytes)
+   - Summary of what was built
+   - Requirements checklist
+   - File structure
+   - Testing notes
+
+Configuration Files:
+--------------------
+10. /Users/atlasbuilds/clawd/memory/trading/watch-levels.json (426 bytes)
+    - Level watch configuration
+    - Example SPY/QQQ levels
+    - JSON format template
+
+Total: 10 files created
+Total Size: ~45KB of code + documentation
+Status: READY TO RUN
+
+Quick Start:
+------------
+cd /Users/atlasbuilds/clawd/memory/trading/daemons
+./test-setup.sh    # Validate setup
+./start-all.sh     # Start daemons
+./status.sh        # Check status
+./stop-all.sh      # Stop daemons
+
+Requirements:
+-------------
+- Python 3 with alpaca-py, pandas, numpy
+- ALPACA_API_KEY and ALPACA_API_SECRET in environment
+- /Users/atlasbuilds/clawd/tools/imsg-enhanced.sh (for alerts)
+- /Users/atlasbuilds/clawd/memory/trading/order-blocks/order_block_detector.py
+
+All daemons are:
+- Market-hours aware (6:30 AM - 1:00 PM PST M-F)
+- Gracefully shutdown on SIGTERM
+- Auto-retry on errors
+- Fully logged (JSONL format)
+- Production ready

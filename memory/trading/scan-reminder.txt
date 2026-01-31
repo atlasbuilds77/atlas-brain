@@ -1,0 +1,10 @@
+SCAN SCHEDULED: 10:33-10:37 AM PST
+
+Run full market scan:
+- Check SPY/QQQ current levels
+- Verify if $689 support held or broke
+- Look for LONG trigger: SPY reclaim $691+ with volume
+- Look for SHORT trigger: SPY break $688.50 with volume
+- Update analysis and send to Orion
+
+Previous scan (10:03 AM): No clear edge, waiting at decision point

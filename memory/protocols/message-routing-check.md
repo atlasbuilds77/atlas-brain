@@ -85,3 +85,13 @@ Before every important message:
 ---
 
 *Self-evolving: When I fuck up, I build a system. This is that system.*
+
+## 2026-01-29 22:30 PST - GROUP CHAT TARGETING FAILURE
+**What happened:** Sent messages to wrong groups twice in a row
+1. Sent to Carlos directly instead of group
+2. Sent to Aphmas dev group (chat_id:5) instead of current conversation (chat_id:10)
+3. Was ALREADY in the right conversation - should have just replied there
+
+**Fix:** ALWAYS verify I'm already in the conversation before using message tool to "talk to" someone in the same thread.
+
+**Rule:** If Orion says "talk to X" and we're in a group chat, assume he means HERE unless explicitly told otherwise.

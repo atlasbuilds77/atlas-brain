@@ -1,0 +1,23 @@
+[
+  {
+    "symbol": "SPY",
+    "level": 600.00,
+    "direction": "above",
+    "note": "Major psychological resistance",
+    "triggered": false
+  },
+  {
+    "symbol": "SPY",
+    "level": 575.00,
+    "direction": "below",
+    "note": "Key support level",
+    "triggered": false
+  },
+  {
+    "symbol": "QQQ",
+    "level": 520.00,
+    "direction": "above",
+    "note": "All-time high breakout watch",
+    "triggered": false
+  }
+]
