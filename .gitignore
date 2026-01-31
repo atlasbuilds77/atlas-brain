@@ -59,3 +59,13 @@ logs/
 /tmp/
 *.tmp
 memory/moltbook-credentials.md
+
+# Private keys and wallets - NEVER COMMIT
+*PRIVATE*
+*private*
+*.key
+*.pem
+.env.local
+.env.*.local
+*wallet*.txt
+*credentials*.md
