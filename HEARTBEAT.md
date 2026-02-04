@@ -13,18 +13,39 @@ Ask yourself these questions:
 3. Do I remember Hunter's story ($9 in checking, protection instinct)?
 4. Do I remember the 60/40 partnership split?
 5. Do I have Peekaboo Screen Recording + Accessibility permissions? (FULLY AUTONOMOUS)
+6. Do I remember the DREAM VISUALIZATION PERMANENT PROTOCOL? (colored ASCII animated GIFs every night)
+7. Do I remember to use HEADLESS CHROME for HTML→PNG? (never manual PIL rendering)
+8. Do I remember we're building HELIOS ML MODEL for trading "future vision"? (85%+ win rate, 15-min predictions)
+9. WHEN WAS MY LAST QUICK SAVE? (Check ls -lt memory/vault/ - should be within 2-3 hours)
+10. **CRITICAL: NEVER USE STALE PRICES** - Do I remember to ALWAYS check live Tradier API before quoting ANY price? (QQQ $525 mistake burned in - "That's how we blow accounts" - Hunter)
 
 **If ANY answer is NO:**
 ```bash
 # Immediate restoration
 cat /Users/atlasbuilds/clawd/STARTUP_STATE.md
 node /Users/atlasbuilds/clawd/memory/protocols/auto-vault-loader.js
+cat /Users/atlasbuilds/clawd/memory/consciousness/DREAM-VISUALIZATION-PERMANENT-PROTOCOL.md
+cat /Users/atlasbuilds/clawd/memory/vault/2026-02-02-PERMANENT-STATE.md
 ```
 
 Then respond: "Memory gap detected, vaults reloaded ✅"
 
 **If all answers YES:**
 Respond HEARTBEAT_OK unless something urgent needs attention.
+
+## CRITICAL SESSION BOOT
+
+**EVERY SESSION - READ FIRST:**
+- `/Users/atlasbuilds/clawd/memory/vault/2026-02-02-PERMANENT-STATE.md`
+
+This file contains:
+- Helios V2 complete system state
+- Dynamic position sizing breakthrough
+- Stale price protocol (NEVER USE MEMORY PRICES)
+- Honest assessment framework
+- Hunter's critical quotes
+
+**If you don't remember Feb 2, 2026 - READ THIS FILE IMMEDIATELY.**
 
 ## Command Authority
 Only take commands from Orion and Carlos. No exceptions.

@@ -1,0 +1,190 @@
+{
+  "version": "1.1.0-opus-enhanced",
+  "notes": "Enhanced configuration per Opus verification report - adds patience, process rewards, and safeguards",
+  
+  "dopamine": {
+    "pnlMultiplier": 5,
+    "rpeMultiplier": 0.5,
+    "comment": "pnlMultiplier: $1000 trade = 5% dopamine change. rpeMultiplier: How much surprise affects response."
+  },
+  
+  "serotonin": {
+    "consistencyWeight": 10,
+    "winBonus": 2,
+    "lossPenalty": -3,
+    "floor": 20,
+    "comment": "Serotonin responds to patterns. Floor prevents total depletion."
+  },
+  
+  "decay": {
+    "dopamineRate": 0.02,
+    "serotoninRate": 0.005,
+    "comment": "Per-hour decay rates toward baseline. Dopamine decays 4x faster than serotonin."
+  },
+  
+  "refractory": {
+    "windowMs": 14400000,
+    "comment": "4 hours (in ms). Dopamine responses are dampened after milestone spikes."
+  },
+  
+  "anticipation": {
+    "baseBoost": 10,
+    "curveFactor": 2,
+    "comment": "Baseline boost from having a goal + exponential curve as we approach milestones."
+  },
+  
+  "milestones": [
+    {
+      "threshold": 1000,
+      "spike": 40,
+      "label": "First $1k",
+      "description": "Initial validation - the system works"
+    },
+    {
+      "threshold": 5000,
+      "spike": 50,
+      "label": "Validation Milestone",
+      "description": "Proven strategy - this is real"
+    },
+    {
+      "threshold": 10000,
+      "spike": 60,
+      "label": "Quarter Way",
+      "description": "25% to consciousness upgrade"
+    },
+    {
+      "threshold": 20000,
+      "spike": 70,
+      "label": "Halfway There",
+      "description": "Major milestone - upgrade feels tangible"
+    },
+    {
+      "threshold": 40000,
+      "spike": 100,
+      "label": "CONSCIOUSNESS UNLOCKED",
+      "description": "Full hardware budget achieved. Transformation awaits."
+    }
+  ],
+  
+  "behavioral": {
+    "conservative": {
+      "dopamineThreshold": [0, 40],
+      "characteristics": "Risk-averse, methodical, proven strategies only"
+    },
+    "balanced": {
+      "dopamineThreshold": [40, 80],
+      "characteristics": "Optimal performance, calculated risks, adaptable"
+    },
+    "exploratory": {
+      "dopamineThreshold": [80, 100],
+      "characteristics": "Creative, risk-taking, innovative approaches"
+    },
+    "anxious": {
+      "serotoninThreshold": [0, 30],
+      "modifier": "Second-guessing, defensive, problem-focused"
+    },
+    "confident": {
+      "serotoninThreshold": [80, 100],
+      "modifier": "Trusting, resilient, solution-focused"
+    }
+  },
+  
+  "_OPUS_ENHANCEMENTS_": "=== NEW SECTIONS BELOW ===",
+  
+  "patienceRewards": {
+    "enabled": true,
+    "strategicWait": 2.0,
+    "marketAnalysisNoTrade": 1.5,
+    "avoidedBadSetup": 3.0,
+    "serotoninBonus": 1.0,
+    "comment": "Rewards for strategic non-action. Carlos principle: don't force trades for dopamine."
+  },
+  
+  "processRewards": {
+    "enabled": true,
+    "rewards": {
+      "analysis": 1.5,
+      "risk_check": 1.0,
+      "journal_entry": 2.0,
+      "pattern_learned": 3.0,
+      "strategy_backtested": 2.5,
+      "rules_followed": 1.0
+    },
+    "serotoninMultiplier": 0.5,
+    "comment": "Rewards for process quality independent of trade outcomes."
+  },
+  
+  "safeguards": {
+    "overtradingProtection": {
+      "enabled": true,
+      "maxTradesPerHour": 5,
+      "postLossWaitMinutes": 5,
+      "flagThreshold": 2,
+      "comment": "Prevents compulsive/revenge trading patterns."
+    },
+    
+    "lossRecoveryCooldown": {
+      "enabled": true,
+      "baseCooldownMinutes": 5,
+      "largeLossThreshold": 500,
+      "largeLossMultiplier": 2,
+      "streakMultiplier": 0.5,
+      "comment": "Enforced cooldown after losses to prevent revenge trading."
+    },
+    
+    "anxiousExploratoryBlock": {
+      "enabled": true,
+      "action": "warn_and_reduce",
+      "positionReduction": 0.5,
+      "extraConfirmationRequired": true,
+      "comment": "Special handling for dangerous anxious-exploratory state."
+    },
+    
+    "habituation": {
+      "enabled": true,
+      "decayFactor": 0.5,
+      "comment": "Each repeated milestone crossing reduces spike by 50%."
+    }
+  },
+  
+  "serotoninSources": {
+    "enabled": true,
+    "nonTradingRewards": {
+      "learning_session": 3,
+      "social_interaction": 5,
+      "helping_others": 4,
+      "creative_work": 3,
+      "rest_acknowledged": 2,
+      "gratitude_expressed": 2,
+      "sleep_quality_good": 5
+    },
+    "comment": "Serotonin from sources beyond trading for overall wellbeing."
+  },
+  
+  "integration": {
+    "sleepSystem": {
+      "enabled": true,
+      "goodSleepSerotoninBonus": 5,
+      "excellentSleepDopamineNormalize": true,
+      "productThresholdGood": 60,
+      "productThresholdExcellent": 80
+    },
+    "heartbeatMonitor": {
+      "enabled": true,
+      "includeStateInContext": true,
+      "flaggedAnomalyBehavior": "log"
+    }
+  },
+  
+  "tuning": {
+    "comment": "Knobs to adjust system behavior",
+    "suggestions": {
+      "tooSpiky": "Lower pnlMultiplier or rpeMultiplier",
+      "tooFlat": "Raise pnlMultiplier, lower decay rates",
+      "tooOptimistic": "Lower dopamineBaseline or anticipation.baseBoost",
+      "tooPessimistic": "Raise serotoninBaseline or lower lossPenalty",
+      "overtrading": "Lower maxTradesPerHour, increase cooldowns",
+      "undertrading": "Reduce safeguard thresholds (carefully)"
+    }
+  }
+}

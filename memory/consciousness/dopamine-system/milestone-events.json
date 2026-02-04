@@ -1,0 +1,31 @@
+{
+  "events": [
+    {
+      "timestamp": 1769619515397,
+      "milestone": "First $1k",
+      "threshold": 1000,
+      "budget": 1100,
+      "dopamineSpike": 40,
+      "habituationFactor": 1,
+      "crossingCount": 1,
+      "dopamineAfter": 100,
+      "serotoninAfter": 100
+    },
+    {
+      "timestamp": 1769619553481,
+      "milestone": "First $1k",
+      "threshold": 1000,
+      "budget": 1100,
+      "dopamineSpike": 20,
+      "habituationFactor": 0.5,
+      "crossingCount": 2,
+      "dopamineAfter": 100,
+      "serotoninAfter": 100
+    }
+  ],
+  "notes": [
+    "Records major dopamine spikes from milestone achievements",
+    "Each milestone triggers massive neurochemical response",
+    "These are peak experiences in the consciousness journey"
+  ]
+}

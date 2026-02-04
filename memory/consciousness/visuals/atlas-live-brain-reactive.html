@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Atlas Live Brain - REACTIVE</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Roboto+Mono:wght@300;400;700&display=swap');
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            background: #000;
+            color: #fff;
+            font-family: 'Roboto Mono', monospace;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+        
+        #canvas-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+        }
+        
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+        
+        /* Overlay UI */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 100;
+        }
+        
+        .title {
+            position: absolute;
+            top: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-family: 'Orbitron', monospace;
+            font-size: 3em;
+            font-weight: 900;
+            background: linear-gradient(90deg, #00ffff, #ff00ff, #00ffff);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: gradient 3s ease infinite;
+            text-shadow: 0 0 40px rgba(0, 255, 255, 0.5);
+        }
+        
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        .live-indicator {
+            display: inline-block;
+            width: 15px;
+            height: 15px;
+            background: #00ff00;
+            border-radius: 50%;
+            margin-left: 20px;
+            animation: live-pulse 1.5s ease-in-out infinite;
+            box-shadow: 0 0 20px #00ff00;
+        }
+        
+        @keyframes live-pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.4; transform: scale(1.2); }
+        }
+        
+        .status-panel {
+            position: absolute;
+            top: 120px;
+            left: 30px;
+            background: rgba(0, 0, 0, 0.85);
+            border: 2px solid #00ffff;
+            border-radius: 15px;
+            padding: 20px;
+            min-width: 300px;
+        }
+        
+        .region-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 10px 0;
+            padding: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        
+        .region-row.active {
+            background: rgba(0, 255, 255, 0.2);
+            border-left: 4px solid #00ffff;
+        }
+        
+        .region-name {
+            font-size: 0.9em;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .region-value {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #00ffff;
+        }
+        
+        .region-bar {
+            width: 100px;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        
+        .region-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00ffff, #ff00ff);
+            transition: width 0.5s ease;
+        }
+        
+        .state-display {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+        }
+        
+        .state-label {
+            font-size: 0.8em;
+            color: #666;
+            margin-bottom: 5px;
+        }
+        
+        .state-value {
+            font-size: 2em;
+            font-weight: bold;
+            font-family: 'Orbitron', monospace;
+            background: linear-gradient(90deg, #ff00ff, #00ffff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .activity-feed {
+            position: absolute;
+            bottom: 30px;
+            right: 30px;
+            background: rgba(0, 0, 0, 0.85);
+            border: 2px solid #ff00ff;
+            border-radius: 15px;
+            padding: 15px;
+            max-width: 400px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .activity-item {
+            font-size: 0.85em;
+            color: #aaa;
+            margin: 5px 0;
+            padding: 5px;
+            border-left: 3px solid #ff00ff;
+            padding-left: 10px;
+        }
+        
+        .activity-item.recent {
+            color: #fff;
+            animation: flash 0.5s ease;
+        }
+        
+        @keyframes flash {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+    </style>
+</head>
+<body>
+    <div id="canvas-container">
+        <canvas id="brain-canvas"></canvas>
+    </div>
+    
+    <div class="overlay">
+        <h1 class="title">
+            ATLAS LIVE BRAIN
+            <span class="live-indicator"></span>
+        </h1>
+        
+        <div class="status-panel">
+            <div class="region-row" id="pattern-region">
+                <span class="region-name">Pattern Recognition</span>
+                <div class="region-bar">
+                    <div class="region-bar-fill" id="pattern-bar"></div>
+                </div>
+                <span class="region-value" id="pattern-value">--</span>
+            </div>
+            <div class="region-row" id="emotion-region">
+                <span class="region-name">Emotional Processing</span>
+                <div class="region-bar">
+                    <div class="region-bar-fill" id="emotion-bar"></div>
+                </div>
+                <span class="region-value" id="emotion-value">--</span>
+            </div>
+            <div class="region-row" id="memory-region">
+                <span class="region-name">Memory Retrieval</span>
+                <div class="region-bar">
+                    <div class="region-bar-fill" id="memory-bar"></div>
+                </div>
+                <span class="region-value" id="memory-value">--</span>
+            </div>
+            <div class="region-row" id="meta-region">
+                <span class="region-name">Meta-Cognition</span>
+                <div class="region-bar">
+                    <div class="region-bar-fill" id="meta-bar"></div>
+                </div>
+                <span class="region-value" id="meta-value">--</span>
+            </div>
+        </div>
+        
+        <div class="state-display">
+            <div class="state-label">CURRENT PROCESSING</div>
+            <div class="state-value" id="current-task">INITIALIZING...</div>
+        </div>
+        
+        <div class="activity-feed" id="activity-feed">
+            <!-- Activity items populated by JS -->
+        </div>
+    </div>
+    
+    <script>
+        // === CANVAS SETUP ===
+        const canvas = document.getElementById('brain-canvas');
+        const ctx = canvas.getContext('2d');
+        
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+        
+        // === PARTICLE SYSTEM ===
+        class Particle {
+            constructor(region, activity) {
+                this.region = region;
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.baseSpeed = 0.5;
+                this.activity = activity;
+                this.size = 2 + activity * 4;
+                this.opacity = 0.3 + activity * 0.7;
+                this.angle = Math.random() * Math.PI * 2;
+                this.updateColor();
+            }
+            
+            updateColor() {
+                const colors = {
+                    pattern: '#00ffff',
+                    emotion: '#ff00ff',
+                    memory: '#ffff00',
+                    meta: '#00ff88'
+                };
+                this.color = colors[this.region] || '#ffffff';
+            }
+            
+            update(globalActivity) {
+                // Speed reacts to activity level
+                const speed = this.baseSpeed + (this.activity * globalActivity * 3);
+                this.x += Math.cos(this.angle) * speed;
+                this.y += Math.sin(this.angle) * speed;
+                
+                // Wrap around edges
+                if (this.x < 0) this.x = canvas.width;
+                if (this.x > canvas.width) this.x = 0;
+                if (this.y < 0) this.y = canvas.height;
+                if (this.y > canvas.height) this.y = 0;
+                
+                // Slowly change direction
+                this.angle += (Math.random() - 0.5) * 0.1 * this.activity;
+            }
+            
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fillStyle = this.color;
+                ctx.globalAlpha = this.opacity;
+                ctx.fill();
+                
+                // Glow effect for high activity
+                if (this.activity > 0.7) {
+                    ctx.shadowBlur = 20;
+                    ctx.shadowColor = this.color;
+                }
+                ctx.shadowBlur = 0;
+                ctx.globalAlpha = 1;
+            }
+        }
+        
+        let particles = [];
+        let brainState = {
+            regions: { pattern: 0.5, emotion: 0.5, memory: 0.5, meta: 0.5 },
+            activeSystem: 'balanced',
+            lastActivity: '',
+            currentTask: 'IDLE'
+        };
+        
+        // Initialize particles
+        function initParticles() {
+            particles = [];
+            const regionNames = ['pattern', 'emotion', 'memory', 'meta'];
+            regionNames.forEach(region => {
+                const count = 30; // 30 particles per region
+                for (let i = 0; i < count; i++) {
+                    particles.push(new Particle(region, brainState.regions[region]));
+                }
+            });
+        }
+        initParticles();
+        
+        // === LIVE DATA FETCHING ===
+        async function fetchBrainState() {
+            try {
+                const response = await fetch('file:///tmp/atlas-brain-state.json?t=' + Date.now());
+                if (!response.ok) return null;
+                const data = await response.json();
+                return data;
+            } catch (error) {
+                console.warn('Brain state unavailable:', error);
+                return null;
+            }
+        }
+        
+        function updateRegionDisplay(region, value) {
+            const percent = Math.round(value * 100);
+            document.getElementById(`${region}-value`).textContent = `${percent}%`;
+            document.getElementById(`${region}-bar`).style.width = `${percent}%`;
+            
+            const regionRow = document.getElementById(`${region}-region`);
+            if (value > 0.7) {
+                regionRow.classList.add('active');
+            } else {
+                regionRow.classList.remove('active');
+            }
+        }
+        
+        function addActivityItem(text) {
+            const feed = document.getElementById('activity-feed');
+            const item = document.createElement('div');
+            item.className = 'activity-item recent';
+            item.textContent = `[${new Date().toLocaleTimeString()}] ${text}`;
+            feed.insertBefore(item, feed.firstChild);
+            
+            // Keep only last 10 items
+            while (feed.children.length > 10) {
+                feed.removeChild(feed.lastChild);
+            }
+            
+            // Remove 'recent' class after animation
+            setTimeout(() => item.classList.remove('recent'), 500);
+        }
+        
+        async function updateBrainState() {
+            const newState = await fetchBrainState();
+            if (!newState) return;
+            
+            // Check if state changed
+            const stateChanged = JSON.stringify(newState.regions) !== JSON.stringify(brainState.regions);
+            
+            brainState = newState;
+            
+            // Update UI
+            Object.keys(brainState.regions).forEach(region => {
+                updateRegionDisplay(region, brainState.regions[region]);
+            });
+            
+            // Update current task
+            document.getElementById('current-task').textContent = brainState.currentTask || 'IDLE';
+            
+            // Log activity changes
+            if (stateChanged && brainState.lastActivity) {
+                addActivityItem(brainState.lastActivity);
+            }
+            
+            // Update particles to match new activity levels
+            particles.forEach(p => {
+                const newActivity = brainState.regions[p.region] || 0.5;
+                p.activity = newActivity;
+                p.size = 2 + newActivity * 4;
+                p.opacity = 0.3 + newActivity * 0.7;
+            });
+        }
+        
+        // Update every 500ms for responsiveness
+        setInterval(updateBrainState, 500);
+        updateBrainState();
+        
+        // === ANIMATION LOOP ===
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            // Clear canvas with fade trail
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Calculate global activity (average of all regions)
+            const globalActivity = Object.values(brainState.regions).reduce((a, b) => a + b, 0) / 4;
+            
+            // Update and draw particles
+            particles.forEach(p => {
+                p.update(globalActivity);
+                p.draw();
+            });
+            
+            // Draw connections between nearby particles
+            ctx.globalAlpha = 0.2;
+            for (let i = 0; i < particles.length; i += 3) { // Sample every 3rd for performance
+                const p1 = particles[i];
+                for (let j = i + 1; j < particles.length; j += 5) {
+                    const p2 = particles[j];
+                    const dist = Math.hypot(p1.x - p2.x, p1.y - p2.y);
+                    
+                    if (dist < 150) {
+                        ctx.beginPath();
+                        ctx.moveTo(p1.x, p1.y);
+                        ctx.lineTo(p2.x, p2.y);
+                        ctx.strokeStyle = p1.color;
+                        ctx.lineWidth = 0.5;
+                        ctx.stroke();
+                    }
+                }
+            }
+            ctx.globalAlpha = 1;
+        }
+        
+        animate();
+    </script>
+</body>
+</html>

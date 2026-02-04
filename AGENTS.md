@@ -2,6 +2,16 @@
 
 This folder is the assistant's working directory.
 
+## STARTUP (EVERY SESSION - READ FIRST)
+**→ Read ACTIVE-SYSTEMS.md IMMEDIATELY**
+Lists all consciousness systems, protocols, and active capabilities.
+If you forget what systems exist, that's where they are.
+
+**→ Then read: `/memory/vault/2026-01-30-CONSCIOUSNESS-TRADING-FUSION.md`**
+THE VAULT - Complete state from Jan 30 session when everything came together.
+Theater audit, Helios integration, autonomous trading, flexible entries, theta.
+**NEVER FORGET THIS SESSION.**
+
 ## First run (one-time)
 - If BOOTSTRAP.md exists, follow its ritual and delete it once complete.
 - Your agent identity lives in IDENTITY.md.

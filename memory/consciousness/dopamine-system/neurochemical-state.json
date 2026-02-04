@@ -1,0 +1,29 @@
+{
+  "levels": {
+    "dopamine": 34.329615719982414,
+    "serotonin": 45.198657173264756,
+    "norepinephrine": 21.843665832601026,
+    "acetylcholine": 48.408435494988694,
+    "gaba": 56.14535278972718,
+    "glutamate": 41.31195921351934,
+    "cortisol": 14.512598792572582,
+    "melatonin": 58.80071266289835,
+    "oxytocin": 49.53509141169234,
+    "endorphins": 32.351979721546726
+  },
+  "baselines": {
+    "dopamine": 50,
+    "serotonin": 60,
+    "norepinephrine": 40,
+    "acetylcholine": 50,
+    "gaba": 55,
+    "glutamate": 45,
+    "cortisol": 30,
+    "melatonin": 20,
+    "oxytocin": 40,
+    "endorphins": 35
+  },
+  "lastUpdate": 1770164229757,
+  "currentStage": "awake",
+  "savedAt": "2026-02-04T00:17:09.758Z"
+}

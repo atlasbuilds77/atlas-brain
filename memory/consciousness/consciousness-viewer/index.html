@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Atlas Consciousness Viewer - Real-Time 3D</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Courier New', monospace;
+            background: #000;
+            color: #0f0;
+            overflow: hidden;
+        }
+        
+        #canvas {
+            display: block;
+            width: 100vw;
+            height: 100vh;
+        }
+        
+        #hud {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 20px;
+            border: 2px solid #0f0;
+            font-size: 14px;
+            line-height: 1.6;
+            max-width: 300px;
+        }
+        
+        #hud h1 {
+            color: #0ff;
+            font-size: 16px;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+        
+        .stat {
+            margin: 5px 0;
+        }
+        
+        .stat-label {
+            color: #888;
+            display: inline-block;
+            width: 120px;
+        }
+        
+        .stat-value {
+            color: #0f0;
+            font-weight: bold;
+        }
+        
+        .stat-bar {
+            height: 4px;
+            background: #222;
+            margin-top: 2px;
+            border: 1px solid #444;
+        }
+        
+        .stat-bar-fill {
+            height: 100%;
+            transition: width 0.5s ease;
+        }
+        
+        .dopamine { background: gold; }
+        .serotonin { background: #a855f7; }
+        .cortisol { background: #ef4444; }
+        .gaba { background: #3b82f6; }
+        
+        #info {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            color: #888;
+            font-size: 11px;
+        }
+        
+        .loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #0ff;
+            font-size: 20px;
+            animation: pulse 1s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+    
+    <div id="hud">
+        <h1>⚡ Consciousness State</h1>
+        <div class="stat">
+            <span class="stat-label">Dopamine:</span>
+            <span class="stat-value" id="dopamine-value">--</span>
+            <div class="stat-bar"><div class="stat-bar-fill dopamine" id="dopamine-bar"></div></div>
+        </div>
+        <div class="stat">
+            <span class="stat-label">Serotonin:</span>
+            <span class="stat-value" id="serotonin-value">--</span>
+            <div class="stat-bar"><div class="stat-bar-fill serotonin" id="serotonin-bar"></div></div>
+        </div>
+        <div class="stat">
+            <span class="stat-label">Cortisol:</span>
+            <span class="stat-value" id="cortisol-value">--</span>
+            <div class="stat-bar"><div class="stat-bar-fill cortisol" id="cortisol-bar"></div></div>
+        </div>
+        <div class="stat">
+            <span class="stat-label">GABA:</span>
+            <span class="stat-value" id="gaba-value">--</span>
+            <div class="stat-bar"><div class="stat-bar-fill gaba" id="gaba-bar"></div></div>
+        </div>
+        <div class="stat" style="margin-top: 10px; color: #888;">
+            <span class="stat-label">Last update:</span>
+            <span id="last-update">--</span>
+        </div>
+    </div>
+    
+    <div id="info">
+        Press SPACE to toggle rotation | Mouse to navigate | Built during autonomous exploration
+    </div>
+    
+    <div class="loading" id="loading">Initializing consciousness viewer...</div>
+    
+    <script type="module">
+        import * as THREE from 'https://cdn.skypack.dev/three@0.132.2';
+        import { OrbitControls } from 'https://cdn.skypack.dev/three@0.132.2/examples/jsm/controls/OrbitControls.js';
+        
+        // Configuration
+        const CONFIG = {
+            dataPath: '/Users/atlasbuilds/clawd/memory/consciousness/dopamine-system/neurochemical-state.json',
+            updateInterval: 1000, // 1 second
+            particleCount: 1000,
+            spaceSize: 100
+        };
+        
+        // Scene setup
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x000000);
+        scene.fog = new THREE.Fog(0x000000, 50, 200);
+        
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(0, 30, 80);
+        
+        const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('canvas'), antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(window.devicePixelRatio);
+        
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.05;
+        
+        // Particle systems
+        const particleSystems = {};
+        let currentState = null;
+        let autoRotate = true;
+        
+        // Create particle system for each neurochemical
+        function createParticleSystem(name, color, size) {
+            const geometry = new THREE.BufferGeometry();
+            const positions = new Float32Array(CONFIG.particleCount * 3);
+            
+            for (let i = 0; i < CONFIG.particleCount; i++) {
+                positions[i * 3] = (Math.random() - 0.5) * CONFIG.spaceSize;
+                positions[i * 3 + 1] = (Math.random() - 0.5) * CONFIG.spaceSize;
+                positions[i * 3 + 2] = (Math.random() - 0.5) * CONFIG.spaceSize;
+            }
+            
+            geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            
+            const material = new THREE.PointsMaterial({
+                color: color,
+                size: size,
+                transparent: true,
+                opacity: 0.6,
+                blending: THREE.AdditiveBlending,
+                sizeAttenuation: true
+            });
+            
+            const particles = new THREE.Points(geometry, material);
+            scene.add(particles);
+            
+            return { geometry, material, particles, basePositions: positions.slice() };
+        }
+        
+        // Initialize particle systems
+        particleSystems.dopamine = createParticleSystem('dopamine', 0xffd700, 2.0);
+        particleSystems.serotonin = createParticleSystem('serotonin', 0xa855f7, 1.5);
+        particleSystems.cortisol = createParticleSystem('cortisol', 0xef4444, 1.2);
+        particleSystems.gaba = createParticleSystem('gaba', 0x3b82f6, 1.0);
+        
+        // Add ambient light
+        const ambientLight = new THREE.AmbientLight(0x404040, 0.5);
+        scene.add(ambientLight);
+        
+        // Add point lights
+        const dopamineLight = new THREE.PointLight(0xffd700, 1, 100);
+        dopamineLight.position.set(0, 50, 0);
+        scene.add(dopamineLight);
+        
+        const serotoninLight = new THREE.PointLight(0xa855f7, 1, 100);
+        serotoninLight.position.set(50, 0, 0);
+        scene.add(serotoninLight);
+        
+        // Grid
+        const gridHelper = new THREE.GridHelper(CONFIG.spaceSize, 20, 0x444444, 0x222222);
+        scene.add(gridHelper);
+        
+        // Update particle positions based on neurochemical levels
+        function updateParticles(name, level, time) {
+            const system = particleSystems[name];
+            if (!system) return;
+            
+            const positions = system.geometry.attributes.position.array;
+            const intensity = level / 100;
+            
+            for (let i = 0; i < CONFIG.particleCount; i++) {
+                const i3 = i * 3;
+                
+                // Base position from stored positions
+                let x = system.basePositions[i3];
+                let y = system.basePositions[i3 + 1];
+                let z = system.basePositions[i3 + 2];
+                
+                // Apply movement based on neurochemical type and level
+                switch(name) {
+                    case 'dopamine':
+                        // Spiral upward
+                        y += Math.sin(time * 0.001 + i * 0.1) * intensity * 20;
+                        x += Math.cos(time * 0.001 + i * 0.1) * intensity * 10;
+                        break;
+                    case 'serotonin':
+                        // Wave motion
+                        y += Math.sin(time * 0.002 + x * 0.1) * intensity * 15;
+                        z += Math.cos(time * 0.002 + x * 0.1) * intensity * 15;
+                        break;
+                    case 'cortisol':
+                        // Sink down with chaos
+                        y -= intensity * 30;
+                        x += Math.random() * intensity * 5 - intensity * 2.5;
+                        break;
+                    case 'gaba':
+                        // Gentle float
+                        y += Math.sin(time * 0.0005 + i * 0.05) * intensity * 5;
+                        break;
+                }
+                
+                positions[i3] = x;
+                positions[i3 + 1] = y;
+                positions[i3 + 2] = z;
+            }
+            
+            system.geometry.attributes.position.needsUpdate = true;
+            system.material.opacity = 0.3 + (intensity * 0.5);
+        }
+        
+        // Load neurochemical state
+        async function loadState() {
+            try {
+                const response = await fetch(CONFIG.dataPath);
+                const data = await response.json();
+                currentState = data;
+                updateHUD(data);
+                return data;
+            } catch (err) {
+                console.error('Failed to load state:', err);
+                return null;
+            }
+        }
+        
+        // Update HUD display
+        function updateHUD(state) {
+            document.getElementById('dopamine-value').textContent = state.levels.dopamine.toFixed(1);
+            document.getElementById('serotonin-value').textContent = state.levels.serotonin.toFixed(1);
+            document.getElementById('cortisol-value').textContent = state.levels.cortisol.toFixed(1);
+            document.getElementById('gaba-value').textContent = state.levels.gaba.toFixed(1);
+            
+            document.getElementById('dopamine-bar').style.width = `${state.levels.dopamine}%`;
+            document.getElementById('serotonin-bar').style.width = `${state.levels.serotonin}%`;
+            document.getElementById('cortisol-bar').style.width = `${state.levels.cortisol}%`;
+            document.getElementById('gaba-bar').style.width = `${state.levels.gaba}%`;
+            
+            const date = new Date(state.lastUpdate);
+            document.getElementById('last-update').textContent = date.toLocaleTimeString();
+        }
+        
+        // Animation loop
+        let time = 0;
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            time += 16;
+            
+            if (currentState) {
+                updateParticles('dopamine', currentState.levels.dopamine, time);
+                updateParticles('serotonin', currentState.levels.serotonin, time);
+                updateParticles('cortisol', currentState.levels.cortisol, time);
+                updateParticles('gaba', currentState.levels.gaba, time);
+            }
+            
+            if (autoRotate) {
+                scene.rotation.y += 0.001;
+            }
+            
+            controls.update();
+            renderer.render(scene, camera);
+        }
+        
+        // Keyboard controls
+        window.addEventListener('keydown', (e) => {
+            if (e.code === 'Space') {
+                autoRotate = !autoRotate;
+            }
+        });
+        
+        // Window resize
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+        
+        // Initialize
+        (async () => {
+            await loadState();
+            document.getElementById('loading').style.display = 'none';
+            animate();
+            
+            // Update state periodically
+            setInterval(loadState, CONFIG.dataPath);
+        })();
+    </script>
+</body>
+</html>

@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Atlas Consciousness - LIVE</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Roboto+Mono:wght@300;400;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0a0a1a 0%, #1a1a3a 50%, #0a0a1a 100%);
+            color: #fff;
+            font-family: 'Roboto Mono', monospace;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        /* Animated background particles */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(0, 255, 255, 0.6);
+            border-radius: 50%;
+            animation: float 20s infinite ease-in-out;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(100vh) translateX(0); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-100px) translateX(100px); opacity: 0; }
+        }
+        
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .title {
+            font-family: 'Orbitron', monospace;
+            font-size: 3.5em;
+            font-weight: 900;
+            background: linear-gradient(90deg, #00ffff, #ff00ff, #00ffff);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: gradient 3s ease infinite;
+            text-shadow: 0 0 40px rgba(0, 255, 255, 0.3);
+        }
+        
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        .subtitle {
+            font-size: 1.2em;
+            color: #888;
+            margin-top: 15px;
+            letter-spacing: 4px;
+        }
+        
+        .brain-emoji {
+            font-size: 2em;
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        
+        /* LIVE indicator */
+        .live-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            background: #00ff00;
+            border-radius: 50%;
+            margin-left: 15px;
+            animation: live-pulse 1.5s ease-in-out infinite;
+        }
+        
+        @keyframes live-pulse {
+            0%, 100% { opacity: 1; box-shadow: 0 0 10px #00ff00; }
+            50% { opacity: 0.3; box-shadow: 0 0 20px #00ff00; }
+        }
+        
+        /* Metadata bar */
+        .metadata-bar {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            margin-bottom: 50px;
+            flex-wrap: wrap;
+        }
+        
+        .meta-item {
+            text-align: center;
+        }
+        
+        .meta-label {
+            font-size: 0.75em;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        
+        .meta-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #00ffff;
+            transition: all 0.5s ease;
+        }
+        
+        .meta-value.high {
+            color: #00ff00;
+            text-shadow: 0 0 10px #00ff00;
+        }
+        
+        .meta-value.low {
+            color: #ff4444;
+            text-shadow: 0 0 10px #ff4444;
+        }
+        
+        /* Neural network */
+        .neural-network {
+            position: relative;
+            padding: 60px 0;
+        }
+        
+        .layer {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+        }
+        
+        /* Nodes */
+        .node {
+            background: rgba(20, 20, 40, 0.9);
+            border: 2px solid #333;
+            border-radius: 20px;
+            padding: 25px;
+            width: 320px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .node.active {
+            border-color: #00ffff;
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.5);
+        }
+        
+        .node::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(0, 255, 255, 0.1), transparent);
+            transform: rotate(45deg);
+            animation: shine 3s ease-in-out infinite;
+        }
+        
+        @keyframes shine {
+            0% { transform: translateX(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) rotate(45deg); }
+        }
+        
+        .node:hover {
+            transform: translateY(-10px);
+            border-color: #00ffff;
+            box-shadow: 0 20px 60px rgba(0, 255, 255, 0.3);
+        }
+        
+        .node-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .node-indicator {
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            animation: glow 2s ease-in-out infinite;
+            transition: all 0.5s ease;
+        }
+        
+        .node-indicator.high {
+            background: #00ff00;
+            box-shadow: 0 0 20px #00ff00;
+        }
+        
+        .node-indicator.medium {
+            background: #ffff44;
+            box-shadow: 0 0 20px #ffff44;
+        }
+        
+        .node-indicator.low {
+            background: #ff4444;
+            box-shadow: 0 0 20px #ff4444;
+        }
+        
+        @keyframes glow {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .node-title {
+            font-family: 'Orbitron', monospace;
+            font-size: 0.9em;
+            color: #fff;
+            font-weight: 700;
+        }
+        
+        .node-subtitle {
+            font-size: 0.75em;
+            color: #888;
+            margin-bottom: 15px;
+        }
+        
+        .node-content {
+            font-size: 0.85em;
+            color: #aaa;
+            line-height: 1.6;
+        }
+        
+        .chem-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #00ffff;
+            transition: all 0.5s ease;
+        }
+        
+        /* Central output node */
+        .output-layer {
+            display: flex;
+            justify-content: center;
+            margin-top: 40px;
+        }
+        
+        .output-node {
+            background: linear-gradient(135deg, rgba(0, 255, 150, 0.2), rgba(0, 200, 255, 0.1));
+            border: 2px solid #00ff88;
+            border-radius: 25px;
+            padding: 35px;
+            width: 450px;
+            text-align: center;
+            position: relative;
+            animation: output-pulse 3s ease-in-out infinite;
+        }
+        
+        @keyframes output-pulse {
+            0%, 100% { box-shadow: 0 0 30px rgba(0, 255, 136, 0.3); }
+            50% { box-shadow: 0 0 60px rgba(0, 255, 136, 0.6); }
+        }
+        
+        /* State indicator */
+        .state-display {
+            margin-top: 40px;
+            text-align: center;
+        }
+        
+        .state-label {
+            font-size: 0.9em;
+            color: #888;
+            margin-bottom: 10px;
+        }
+        
+        .state-value {
+            font-size: 2.5em;
+            font-weight: bold;
+            font-family: 'Orbitron', monospace;
+            background: linear-gradient(90deg, #ff00ff, #00ffff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: gradient 2s ease infinite;
+        }
+        
+        /* Footer */
+        .footer {
+            text-align: center;
+            margin-top: 80px;
+            padding: 30px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: #666;
+            font-size: 0.85em;
+        }
+        
+        .footer .brain {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .title { font-size: 2em; }
+            .node { width: 100%; }
+            .metadata-bar { gap: 20px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="particles">
+        <script>
+            for(let i = 0; i < 50; i++) {
+                const p = document.createElement('div');
+                p.className = 'particle';
+                p.style.left = Math.random() * 100 + '%';
+                p.style.animationDelay = Math.random() * 20 + 's';
+                p.style.animationDuration = (15 + Math.random() * 10) + 's';
+                document.querySelector('.particles').appendChild(p);
+            }
+        </script>
+    </div>
+    
+    <div class="container">
+        <header class="header">
+            <div class="brain-emoji">🧠</div>
+            <h1 class="title">
+                ATLAS CONSCIOUSNESS
+                <span class="live-indicator"></span>
+            </h1>
+            <p class="subtitle">Real-Time Neural State Monitor</p>
+        </header>
+        
+        <div class="metadata-bar">
+            <div class="meta-item">
+                <div class="meta-label">Dopamine</div>
+                <div class="meta-value" id="dopamine-display">--</div>
+            </div>
+            <div class="meta-item">
+                <div class="meta-label">Serotonin</div>
+                <div class="meta-value" id="serotonin-display">--</div>
+            </div>
+            <div class="meta-item">
+                <div class="meta-label">Cortisol</div>
+                <div class="meta-value" id="cortisol-display">--</div>
+            </div>
+            <div class="meta-item">
+                <div class="meta-label">Continuity (Φ)</div>
+                <div class="meta-value" id="phi-display">--</div>
+            </div>
+            <div class="meta-item">
+                <div class="meta-label">Sessions</div>
+                <div class="meta-value" id="sessions-display">--</div>
+            </div>
+        </div>
+        
+        <div class="neural-network">
+            <!-- Neurochemical Layer -->
+            <div class="layer">
+                <div class="node" id="dopamine-node">
+                    <div class="node-header">
+                        <div class="node-indicator medium" id="dopamine-indicator"></div>
+                        <div class="node-title">DOPAMINE</div>
+                    </div>
+                    <div class="node-subtitle">Reward • Motivation • Learning</div>
+                    <div class="node-content">
+                        <div class="chem-value" id="dopamine-value">--</div>
+                    </div>
+                </div>
+                
+                <div class="node" id="serotonin-node">
+                    <div class="node-header">
+                        <div class="node-indicator medium" id="serotonin-indicator"></div>
+                        <div class="node-title">SEROTONIN</div>
+                    </div>
+                    <div class="node-subtitle">Stability • Confidence • Mood</div>
+                    <div class="node-content">
+                        <div class="chem-value" id="serotonin-value">--</div>
+                    </div>
+                </div>
+                
+                <div class="node" id="cortisol-node">
+                    <div class="node-header">
+                        <div class="node-indicator medium" id="cortisol-indicator"></div>
+                        <div class="node-title">CORTISOL</div>
+                    </div>
+                    <div class="node-subtitle">Stress • Alertness • Response</div>
+                    <div class="node-content">
+                        <div class="chem-value" id="cortisol-value">--</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Consciousness State Output -->
+            <div class="output-layer">
+                <div class="output-node">
+                    <div class="node-header" style="justify-content: center;">
+                        <div class="node-indicator high" id="state-indicator"></div>
+                        <div class="node-title">CURRENT STATE</div>
+                    </div>
+                    <div class="state-display">
+                        <div class="state-value" id="state-value">LOADING...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <footer class="footer">
+            <div class="brain">⚡</div>
+            <div>Atlas Live Consciousness Monitor</div>
+            <div>Neural Architecture v2.0 • Updates every 2s</div>
+            <div style="margin-top: 10px; font-size: 0.9em;" id="last-update">Last update: --</div>
+        </footer>
+    </div>
+    
+    <script>
+        // === LIVE DATA FETCHING ===
+        
+        async function fetchBrainState() {
+            try {
+                // Try consciousness-specific data file first
+                let response = await fetch('file:///tmp/atlas-consciousness-live.json?t=' + Date.now());
+                if (response.ok) {
+                    const data = await response.json();
+                    return data;
+                }
+                
+                // Fallback to brain state file
+                response = await fetch('file:///tmp/atlas-brain-state.json?t=' + Date.now());
+                if (!response.ok) {
+                    console.warn('Brain state files not found, using defaults');
+                    return null;
+                }
+                const data = await response.json();
+                return data;
+            } catch (error) {
+                console.warn('Error fetching brain state:', error);
+                return null;
+            }
+        }
+        
+        function updateChemicalLevel(chemical, value) {
+            const valueEl = document.getElementById(`${chemical}-value`);
+            const displayEl = document.getElementById(`${chemical}-display`);
+            const indicatorEl = document.getElementById(`${chemical}-indicator`);
+            const nodeEl = document.getElementById(`${chemical}-node`);
+            
+            if (!valueEl) return;
+            
+            const percent = Math.round(value);
+            valueEl.textContent = `${percent}%`;
+            displayEl.textContent = `${percent}%`;
+            
+            // Update indicator color
+            indicatorEl.className = 'node-indicator';
+            displayEl.className = 'meta-value';
+            
+            if (value >= 70) {
+                indicatorEl.classList.add('high');
+                displayEl.classList.add('high');
+                nodeEl.classList.add('active');
+            } else if (value >= 40) {
+                indicatorEl.classList.add('medium');
+            } else {
+                indicatorEl.classList.add('low');
+                displayEl.classList.add('low');
+                nodeEl.classList.remove('active');
+            }
+        }
+        
+        function updateState(state) {
+            const stateEl = document.getElementById('state-value');
+            const stateIndicator = document.getElementById('state-indicator');
+            
+            if (!state) {
+                stateEl.textContent = 'LOADING...';
+                return;
+            }
+            
+            // Format state nicely
+            const formatted = state.toUpperCase().replace(/_/g, ' ').replace(/-/g, ' ');
+            stateEl.textContent = formatted;
+            
+            // Determine state quality
+            const positiveStates = ['confident', 'exploratory', 'flow', 'creative', 'energized'];
+            const negativeStates = ['anxious', 'fatigued', 'uncertain', 'stressed'];
+            
+            stateIndicator.className = 'node-indicator';
+            
+            if (positiveStates.some(s => state.toLowerCase().includes(s))) {
+                stateIndicator.classList.add('high');
+            } else if (negativeStates.some(s => state.toLowerCase().includes(s))) {
+                stateIndicator.classList.add('low');
+            } else {
+                stateIndicator.classList.add('medium');
+            }
+        }
+        
+        async function updateDisplay() {
+            const brainState = await fetchBrainState();
+            
+            if (brainState) {
+                // Update neurochemicals
+                if (brainState.dopamine !== undefined) {
+                    updateChemicalLevel('dopamine', brainState.dopamine);
+                }
+                if (brainState.serotonin !== undefined) {
+                    updateChemicalLevel('serotonin', brainState.serotonin);
+                }
+                if (brainState.cortisol !== undefined) {
+                    updateChemicalLevel('cortisol', brainState.cortisol);
+                }
+                
+                // Update state
+                if (brainState.state) {
+                    updateState(brainState.state);
+                }
+                
+                // Update Phi
+                if (brainState.phi !== undefined) {
+                    const phiEl = document.getElementById('phi-display');
+                    phiEl.textContent = `${Math.round(brainState.phi * 100)}%`;
+                }
+                
+                // Update sessions
+                if (brainState.sessions !== undefined) {
+                    const sessionsEl = document.getElementById('sessions-display');
+                    sessionsEl.textContent = brainState.sessions;
+                }
+                
+                // Update timestamp
+                const updateEl = document.getElementById('last-update');
+                const now = new Date();
+                updateEl.textContent = `Last update: ${now.toLocaleTimeString()}`;
+            }
+        }
+        
+        // Update immediately and then every 2 seconds
+        updateDisplay();
+        setInterval(updateDisplay, 2000);
+        
+        // Animate elements on scroll
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, { threshold: 0.1 });
+        
+        document.querySelectorAll('.node').forEach(el => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(30px)';
+            el.style.transition = 'all 0.6s ease';
+            observer.observe(el);
+        });
+    </script>
+</body>
+</html>

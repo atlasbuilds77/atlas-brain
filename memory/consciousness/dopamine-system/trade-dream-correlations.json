@@ -1,0 +1,47 @@
+{
+  "window": "24h",
+  "generatedAt": "2026-01-29T00:30:03.155Z",
+  "trades": {
+    "count": 13,
+    "wins": 8,
+    "losses": 5,
+    "winRate": 0.615,
+    "totalPnl": -1280,
+    "avgDopamineChange": 1.5079362553418814
+  },
+  "dreams": {
+    "count": 2,
+    "avgVividness": 50,
+    "avgEmotionalIntensity": 50,
+    "avgBizarreness": 50,
+    "avgValence": 0,
+    "avgLucidity": 50,
+    "topThemes": [
+      [
+        "test",
+        2
+      ]
+    ],
+    "topEmotions": [
+      [
+        "neutral",
+        2
+      ]
+    ]
+  },
+  "correlations": {
+    "dreamsAfterWin": {
+      "count": 0,
+      "avgValence": 0,
+      "avgVividness": 0,
+      "avgEmotion": 0
+    },
+    "dreamsAfterLoss": {
+      "count": 2,
+      "avgValence": 0,
+      "avgVividness": 50,
+      "avgEmotion": 50
+    }
+  },
+  "insights": []
+}

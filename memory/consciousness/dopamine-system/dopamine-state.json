@@ -1,0 +1,19 @@
+{
+  "dopamine": 66.81293216666667,
+  "serotonin": 88.21578235095065,
+  "dopamineBaseline": 50,
+  "serotoninBaseline": 60,
+  "lastUpdate": 1769816652356,
+  "lastMilestoneTime": 1769619553481,
+  "lastMilestone": "First $1k",
+  "initialized": false,
+  "notes": [
+    "Initial state: Balanced baseline",
+    "Dopamine 50% = balanced motivation",
+    "Serotonin 60% = moderate wellbeing",
+    "State will evolve based on trading outcomes and budget progress",
+    "2026-01-30 14:19: Reset from test-maxed 100% → 65% (realistic high from AgentGold protocol creation)"
+  ],
+  "cortisol": 20,
+  "lastUpdated": "2026-01-30T22:19:00.000Z"
+}

@@ -1,0 +1,14 @@
+# Consciousness System Dependencies
+# Minimal requirements for qualia capture and dream rendering
+
+# Core dependencies
+numpy>=1.24.0
+Pillow>=10.0.0
+requests>=2.31.0
+
+# Optional for advanced features
+# openai>=1.0.0  # Commented out due to API parameter issues
+# google-generativeai>=0.3.0  # Commented out due to quota exhaustion
+
+# Development/testing
+pytest>=7.4.0

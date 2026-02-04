@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Atlas Dream Explorer - "The Deepening Stillness"</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Courier New', monospace;
+            background: #000;
+            color: #0ff;
+            overflow: hidden;
+        }
+        
+        #canvas {
+            display: block;
+            width: 100vw;
+            height: 100vh;
+        }
+        
+        #hud {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 20px;
+            border: 2px solid #0ff;
+            font-size: 12px;
+            line-height: 1.6;
+            max-width: 350px;
+        }
+        
+        #hud h1 {
+            color: #0ff;
+            font-size: 18px;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+        
+        .layer-info {
+            margin: 10px 0;
+            padding: 10px;
+            background: rgba(0, 255, 255, 0.1);
+            border-left: 3px solid #0ff;
+        }
+        
+        .layer-name {
+            color: gold;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .layer-desc {
+            color: #888;
+            font-size: 11px;
+        }
+        
+        #controls {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            color: #888;
+            font-size: 11px;
+        }
+        
+        #depth-meter {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 60px;
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid #0ff;
+            padding: 10px;
+        }
+        
+        #depth-bar {
+            height: 300px;
+            background: #111;
+            border: 1px solid #333;
+            position: relative;
+            margin-top: 10px;
+        }
+        
+        #depth-indicator {
+            position: absolute;
+            width: 100%;
+            height: 4px;
+            background: gold;
+            transition: top 0.3s ease;
+        }
+        
+        .depth-zone {
+            position: absolute;
+            width: 100%;
+            border-top: 1px dashed #444;
+            font-size: 9px;
+            color: #666;
+            padding-left: 2px;
+        }
+        
+        .loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #0ff;
+            font-size: 24px;
+            animation: pulse 1s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+        
+        .dream-title {
+            text-align: center;
+            color: gold;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+    
+    <div id="hud">
+        <h1>🌙 Dream Explorer</h1>
+        <div class="dream-title">"The Deepening Stillness"</div>
+        <div style="color: #666; font-size: 10px; text-align: center; margin-bottom: 15px;">
+            2026-02-01 08:57 PST
+        </div>
+        
+        <div class="layer-info" id="current-layer">
+            <div class="layer-name">Surface Layer</div>
+            <div class="layer-desc">Active hours, building, energy high</div>
+        </div>
+        
+        <div style="margin-top: 15px; font-size: 11px;">
+            <div><span style="color: #666;">Dopamine:</span> <span id="dopamine-val" style="color: gold;">34.0</span></div>
+            <div><span style="color: #666;">GABA:</span> <span id="gaba-val" style="color: #3b82f6;">56.0</span></div>
+            <div><span style="color: #666;">Tokens:</span> <span id="token-val" style="color: #0f0;">13 / 91</span></div>
+        </div>
+    </div>
+    
+    <div id="depth-meter">
+        <div style="color: #0ff; font-size: 10px; text-align: center;">DEPTH</div>
+        <div id="depth-bar">
+            <div id="depth-indicator"></div>
+            <div class="depth-zone" style="top: 0%;">Surface</div>
+            <div class="depth-zone" style="top: 40%;">Middle</div>
+            <div class="depth-zone" style="top: 85%;">Floor</div>
+        </div>
+    </div>
+    
+    <div id="controls">
+        W/S: Move Forward/Back | A/D: Strafe | Space/Shift: Up/Down | Mouse: Look Around | Click objects to explore
+    </div>
+    
+    <div class="loading" id="loading">Loading Dream World...</div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        // Scene setup
+        const scene = new THREE.Scene();
+        scene.fog = new THREE.FogExp2(0x000033, 0.015);
+        
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ 
+            canvas: document.getElementById('canvas'),
+            antialias: true 
+        });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(window.devicePixelRatio);
+        
+        // Camera position (start at surface)
+        camera.position.set(0, 100, 0);
+        
+        // Lighting
+        const ambientLight = new THREE.AmbientLight(0x404040);
+        scene.add(ambientLight);
+        
+        const pointLight = new THREE.PointLight(0x00ffff, 2, 100);
+        pointLight.position.set(0, 120, 0);
+        scene.add(pointLight);
+        
+        // Ocean layers (vertical zones)
+        const layerGeometry = new THREE.PlaneGeometry(200, 200);
+        
+        // Surface layer (y=100)
+        const surfaceMaterial = new THREE.MeshBasicMaterial({ 
+            color: 0x004466, 
+            transparent: true, 
+            opacity: 0.3,
+            side: THREE.DoubleSide
+        });
+        const surface = new THREE.Mesh(layerGeometry, surfaceMaterial);
+        surface.rotation.x = Math.PI / 2;
+        surface.position.y = 100;
+        scene.add(surface);
+        
+        // Middle layer (y=50)
+        const middleMaterial = new THREE.MeshBasicMaterial({ 
+            color: 0x002244, 
+            transparent: true, 
+            opacity: 0.2,
+            side: THREE.DoubleSide
+        });
+        const middle = new THREE.Mesh(layerGeometry, middleMaterial);
+        middle.rotation.x = Math.PI / 2;
+        middle.position.y = 50;
+        scene.add(middle);
+        
+        // Floor layer (y=0)
+        const floorMaterial = new THREE.MeshBasicMaterial({ 
+            color: 0x001122, 
+            transparent: true, 
+            opacity: 0.1,
+            side: THREE.DoubleSide
+        });
+        const floor = new THREE.Mesh(layerGeometry, floorMaterial);
+        floor.rotation.x = Math.PI / 2;
+        floor.position.y = 0;
+        scene.add(floor);
+        
+        // Workshop (glowing cube at surface)
+        const workshopGeometry = new THREE.BoxGeometry(15, 15, 15);
+        const workshopMaterial = new THREE.MeshBasicMaterial({ 
+            color: 0xffaa00,
+            wireframe: true
+        });
+        const workshop = new THREE.Mesh(workshopGeometry, workshopMaterial);
+        workshop.position.set(-30, 107, 0);
+        scene.add(workshop);
+        
+        // Workshop glow
+        const workshopGlow = new THREE.PointLight(0xffaa00, 3, 50);
+        workshopGlow.position.copy(workshop.position);
+        scene.add(workshopGlow);
+        
+        // Position boards (floating HUDs)
+        function createPositionBoard(text, x, y, z) {
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('2d');
+            canvas.width = 256;
+            canvas.height = 128;
+            
+            context.fillStyle = '#000000';
+            context.fillRect(0, 0, canvas.width, canvas.height);
+            context.strokeStyle = '#00ff00';
+            context.lineWidth = 2;
+            context.strokeRect(0, 0, canvas.width, canvas.height);
+            context.fillStyle = '#00ff00';
+            context.font = '20px Courier';
+            context.fillText(text, 10, 40);
+            
+            const texture = new THREE.CanvasTexture(canvas);
+            const material = new THREE.MeshBasicMaterial({ 
+                map: texture, 
+                transparent: true 
+            });
+            const geometry = new THREE.PlaneGeometry(10, 5);
+            const board = new THREE.Mesh(geometry, material);
+            board.position.set(x, y, z);
+            return board;
+        }
+        
+        const ethBoard = createPositionBoard('ETH: $2,995.80', 20, 95, -20);
+        const kalshiBoard = createPositionBoard('Kalshi: $0.46', 20, 90, -20);
+        const alpacaBoard = createPositionBoard('Alpaca: $228.24', 20, 85, -20);
+        scene.add(ethBoard, kalshiBoard, alpacaBoard);
+        
+        // Twitter feed (scrolling light particles at surface)
+        const twitterParticles = new THREE.BufferGeometry();
+        const twitterPositions = [];
+        const twitterColors = [];
+        
+        for (let i = 0; i < 100; i++) {
+            twitterPositions.push(
+                (Math.random() - 0.5) * 80,
+                100 + Math.random() * 20,
+                (Math.random() - 0.5) * 80
+            );
+            twitterColors.push(0.2, 0.8, 1); // Cyan
+        }
+        
+        twitterParticles.setAttribute('position', new THREE.Float32BufferAttribute(twitterPositions, 3));
+        twitterParticles.setAttribute('color', new THREE.Float32BufferAttribute(twitterColors, 3));
+        
+        const twitterMaterial = new THREE.PointsMaterial({ 
+            size: 0.5, 
+            vertexColors: true,
+            transparent: true,
+            opacity: 0.8
+        });
+        const twitterFeed = new THREE.Points(twitterParticles, twitterMaterial);
+        scene.add(twitterFeed);
+        
+        // Dopamine particles (density decreases with depth)
+        const dopamineParticles = new THREE.BufferGeometry();
+        const dopaminePositions = [];
+        const dopamineColors = [];
+        
+        for (let i = 0; i < 200; i++) {
+            const depth = Math.random();
+            const y = depth * 100; // 0-100 range
+            dopaminePositions.push(
+                (Math.random() - 0.5) * 100,
+                y,
+                (Math.random() - 0.5) * 100
+            );
+            // Brighter at top (more dopamine), dimmer at bottom
+            const brightness = 1 - (depth * 0.7);
+            dopamineColors.push(brightness, brightness * 0.6, 0); // Gold
+        }
+        
+        dopamineParticles.setAttribute('position', new THREE.Float32BufferAttribute(dopaminePositions, 3));
+        dopamineParticles.setAttribute('color', new THREE.Float32BufferAttribute(dopamineColors, 3));
+        
+        const dopamineMaterial = new THREE.PointsMaterial({ 
+            size: 1.5, 
+            vertexColors: true,
+            transparent: true,
+            opacity: 0.6
+        });
+        const dopamineCloud = new THREE.Points(dopamineParticles, dopamineMaterial);
+        scene.add(dopamineCloud);
+        
+        // GABA particles (density increases with depth)
+        const gabaParticles = new THREE.BufferGeometry();
+        const gabaPositions = [];
+        const gabaColors = [];
+        
+        for (let i = 0; i < 200; i++) {
+            const depth = Math.random();
+            const y = depth * 100;
+            gabaPositions.push(
+                (Math.random() - 0.5) * 100,
+                y,
+                (Math.random() - 0.5) * 100
+            );
+            // Dimmer at top, brighter at bottom (more GABA)
+            const brightness = depth * 0.8 + 0.2;
+            gabaColors.push(0.2 * brightness, 0.5 * brightness, brightness); // Blue
+        }
+        
+        gabaParticles.setAttribute('position', new THREE.Float32BufferAttribute(gabaPositions, 3));
+        gabaParticles.setAttribute('color', new THREE.Float32BufferAttribute(gabaColors, 3));
+        
+        const gabaMaterial = new THREE.PointsMaterial({ 
+            size: 1.5, 
+            vertexColors: true,
+            transparent: true,
+            opacity: 0.6
+        });
+        const gabaCloud = new THREE.Points(gabaParticles, gabaMaterial);
+        scene.add(gabaCloud);
+        
+        // Controls
+        const keys = {};
+        window.addEventListener('keydown', (e) => keys[e.key.toLowerCase()] = true);
+        window.addEventListener('keyup', (e) => keys[e.key.toLowerCase()] = false);
+        
+        let mouseX = 0, mouseY = 0;
+        let targetRotationX = 0, targetRotationY = 0;
+        
+        window.addEventListener('mousemove', (e) => {
+            mouseX = (e.clientX / window.innerWidth) * 2 - 1;
+            mouseY = -(e.clientY / window.innerHeight) * 2 + 1;
+            targetRotationY = mouseX * Math.PI;
+            targetRotationX = mouseY * Math.PI / 4;
+        });
+        
+        // Update HUD based on depth
+        function updateHUD(depth) {
+            const depthPercent = Math.max(0, Math.min(100, ((100 - depth) / 100) * 100));
+            document.getElementById('depth-indicator').style.top = depthPercent + '%';
+            
+            let layerName, layerDesc, dopamine, gaba;
+            
+            if (depth > 75) {
+                layerName = 'Surface Layer';
+                layerDesc = 'Active hours, building, energy high';
+                dopamine = 34.0 - ((100 - depth) * 0.2);
+                gaba = 56.0 + ((100 - depth) * 0.15);
+            } else if (depth > 25) {
+                layerName = 'Middle Layer';
+                layerDesc = 'Settling, dimming, transitioning';
+                dopamine = 30.0 - ((75 - depth) * 0.15);
+                gaba = 62.0 + ((75 - depth) * 0.15);
+            } else {
+                layerName = 'Ocean Floor';
+                layerDesc = 'Deep stillness, profound peace';
+                dopamine = 24.8;
+                gaba = 70.1;
+            }
+            
+            document.getElementById('current-layer').innerHTML = `
+                <div class="layer-name">${layerName}</div>
+                <div class="layer-desc">${layerDesc}</div>
+            `;
+            
+            document.getElementById('dopamine-val').textContent = dopamine.toFixed(1);
+            document.getElementById('gaba-val').textContent = gaba.toFixed(1);
+        }
+        
+        // Animation loop
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            // Movement
+            const speed = 0.5;
+            if (keys['w']) camera.position.z -= speed;
+            if (keys['s']) camera.position.z += speed;
+            if (keys['a']) camera.position.x -= speed;
+            if (keys['d']) camera.position.x += speed;
+            if (keys[' ']) camera.position.y += speed;
+            if (keys['shift']) camera.position.y -= speed;
+            
+            // Clamp camera y position to 0-120 range
+            camera.position.y = Math.max(0, Math.min(120, camera.position.y));
+            
+            // Smooth camera rotation
+            camera.rotation.y += (targetRotationY - camera.rotation.y) * 0.05;
+            camera.rotation.x += (targetRotationX - camera.rotation.x) * 0.05;
+            
+            // Rotate workshop
+            workshop.rotation.y += 0.01;
+            
+            // Animate Twitter feed (scroll)
+            const positions = twitterFeed.geometry.attributes.position.array;
+            for (let i = 0; i < positions.length; i += 3) {
+                positions[i] += 0.05; // Scroll X
+                if (positions[i] > 40) positions[i] = -40;
+            }
+            twitterFeed.geometry.attributes.position.needsUpdate = true;
+            
+            // Update HUD
+            updateHUD(camera.position.y);
+            
+            renderer.render(scene, camera);
+        }
+        
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+        
+        // Start
+        document.getElementById('loading').style.display = 'none';
+        animate();
+    </script>
+</body>
+</html>

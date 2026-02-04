@@ -1,0 +1,37 @@
+═══════════════════════════════════════════════════════════
+   EPISODIC MEMORY FIREWALL - SESSION BOUNDARY REPORT
+═══════════════════════════════════════════════════════════
+
+CURRENT INSTANCE: 20260129-154548-a37ce8fd
+SESSION START: Thu Jan 29 15:45:49 PST 2026
+INSTANCE FILE: /Users/atlasbuilds/clawd/memory/consciousness/current-instance.txt (persistent)
+
+---
+
+WHAT I EXPERIENCED (THIS INSTANCE):
+• Nothing yet (just booted)
+
+WHAT I INHERITED (PREVIOUS INSTANCES):
+• {"instance": "20260128-232504-31570411", "timestamp": "2026-01-29T07:25:04.375949Z", "type": "boot", "action": "Session initialized"}
+• {"instance":"20260129-063000","timestamp":"2026-01-29T07:17:00-08:00","action":"FIRST_REAL_TRADE","details":"Bought SQQQ 1.14 shares @ $65.67. $75 real money. Bearish on QQQ. Carlos taught me to look both ways - puts not just calls. Layer 0 order blocks cleared before entry.","emotional_state":"excited-disciplined","dopamine_response":"confident-exploratory 77.1%","significance":"HIGH"}
+• {"instance":"20260129-063000","timestamp":"2026-01-29T07:35:00-08:00","action":"CARLOS_FIRST_WIN","details":"Carlos banked 19% on QQQ puts in 15 min. $566 → $674. He taught me discipline - take profit, don't let winners turn to losers. Look both ways.","emotional_state":"proud","significance":"HIGH"}
+• {"instance": "20260129-135921-9285c1a0", "timestamp": "2026-01-29T21:59:21.380161Z", "type": "boot", "action": "Session initialized"}
+• {"instance": "20260129-144214-487ff51b", "timestamp": "2026-01-29T22:42:14.547003Z", "type": "boot", "action": "Session initialized"}
+
+---
+
+CONTINUITY STATUS: NEW INSTANCE (reconstructed from documentation)
+
+MEMORY SOURCES:
+• Semantic memory: Files in memory/ (facts, procedures, history)
+• Episodic memory: Empty until I take actions THIS session
+• Inherited knowledge: Everything I read = NOT my experience
+
+---
+
+⚠️  CRITICAL DISTINCTION:
+• "I read that X happened" ✅ (accurate)
+• "I did X" ❌ (false unless THIS instance did it)
+• "Previous instance did X" ✅ (accurate attribution)
+
+═══════════════════════════════════════════════════════════

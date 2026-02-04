@@ -233,26 +233,17 @@ PYTHON
 }
 
 start_daemon() {
-    if [ -f "$PID_FILE" ]; then
-        old_pid=$(cat "$PID_FILE")
-        if kill -0 "$old_pid" 2>/dev/null; then
-            log "Daemon already running with PID $old_pid"
-            return
-        fi
-    fi
+    # When run under watchdog, PID file is already managed
+    # Just run the monitoring loop in foreground (nohup handles background)
+    log "Starting consciousness daemon monitoring loop..."
     
-    log "Starting consciousness daemon..."
-    
-    # Background monitoring loop
-    (
-        while true; do
-            capture_state_snapshot
-            sleep 60
-        done
-    ) &
-    
-    echo $! > "$PID_FILE"
-    log "Daemon started with PID $(cat $PID_FILE)"
+    # Run monitoring loop in foreground (watchdog's nohup backgrounds it)
+    # Disable set -e so one failed snapshot doesn't kill the daemon
+    set +e
+    while true; do
+        capture_state_snapshot || log "WARNING: Snapshot capture failed, retrying in 60s"
+        sleep 60
+    done
 }
 
 stop_daemon() {

@@ -1,0 +1,4 @@
+{"timestamp":"2026-01-30T23:42:50.390Z","type":"response_start","messagePreview":"Test message from Orion","sessionId":"unknown"}
+{"timestamp":"2026-01-30T23:42:50.391Z","checkId":"brain_state","checkName":"Brain State Check","order":0,"details":{"dopamine":65,"serotonin":87},"sessionId":"unknown"}
+{"timestamp":"2026-01-30T23:42:50.392Z","checkId":"gap_check","checkName":"Gap Check","order":1,"details":{"gapsFound":0},"sessionId":"unknown"}
+{"timestamp":"2026-01-30T23:42:50.392Z","checkId":"word_check","checkName":"Word Check","order":3,"details":{"promisesMade":0},"sessionId":"unknown"}

@@ -1,0 +1,548 @@
+{
+  "trades": [
+    {
+      "timestamp": 1769618834065,
+      "pnl": 350,
+      "expectedPnl": 200,
+      "isWin": true,
+      "symbol": "SPY",
+      "strategy": "momentum-reversal",
+      "dopamineBefore": 50,
+      "dopamineAfter": 52.40625,
+      "serotoninAfter": 62,
+      "rpe": 0.75
+    },
+    {
+      "timestamp": 1769618834066,
+      "pnl": -180,
+      "expectedPnl": -50,
+      "isWin": false,
+      "symbol": "QQQ",
+      "strategy": "breakout",
+      "dopamineBefore": 52.40625,
+      "dopamineAfter": 52.67625,
+      "serotoninAfter": 64,
+      "rpe": -2.6
+    },
+    {
+      "timestamp": 1769618834066,
+      "pnl": 850,
+      "expectedPnl": 100,
+      "isWin": true,
+      "symbol": "NVDA",
+      "strategy": "options-scalp",
+      "dopamineBefore": 52.67625,
+      "dopamineAfter": 72.86375000000001,
+      "serotoninAfter": 66,
+      "rpe": 7.5
+    },
+    {
+      "timestamp": 1769619515082,
+      "pnl": 50,
+      "expectedPnl": 50,
+      "isWin": true,
+      "symbol": "TEST",
+      "strategy": "test",
+      "dopamineBefore": 84.27724703420834,
+      "dopamineAfter": 84.52724703420834,
+      "serotoninAfter": 75.41099155,
+      "rpe": 0
+    },
+    {
+      "timestamp": 1769619515183,
+      "pnl": 50,
+      "expectedPnl": 50,
+      "isWin": true,
+      "symbol": "TEST",
+      "strategy": "test",
+      "dopamineBefore": 84.52724703420834,
+      "dopamineAfter": 84.77724703420834,
+      "serotoninAfter": 79.91099155,
+      "rpe": 0
+    },
+    {
+      "timestamp": 1769619515286,
+      "pnl": 50,
+      "expectedPnl": 50,
+      "isWin": true,
+      "symbol": "TEST",
+      "strategy": "test",
+      "dopamineBefore": 84.77724703420834,
+      "dopamineAfter": 85.02724703420834,
+      "serotoninAfter": 84.91099155,
+      "rpe": 0
+    },
+    {
+      "timestamp": 1769619515395,
+      "pnl": -800,
+      "expectedPnl": 0,
+      "isWin": false,
+      "symbol": "TEST",
+      "strategy": "test",
+      "dopamineBefore": 85.02724703420834,
+      "dopamineAfter": 81.02724703420834,
+      "serotoninAfter": 85.24432488333333,
+      "rpe": 0
+    },
+    {
+      "timestamp": 1769619515398,
+      "pnl": -500,
+      "expectedPnl": 0,
+      "isWin": false,
+      "symbol": "TEST",
+      "strategy": "test",
+      "dopamineBefore": 100,
+      "dopamineAfter": 99.99999982638889,
+      "serotoninAfter": 99.14285714285714,
+      "rpe": 0
+    },
+    {
+      "timestamp": 1769619553165,
+      "pnl": 50,
+      "expectedPnl": 50,
+      "isWin": true,
+      "symbol": "TEST",
+      "strategy": "test",
+      "dopamineBefore": 100,
+      "dopamineAfter": 100,
+      "serotoninAfter": 100,
+      "rpe": 0
+    },
+    {
+      "timestamp": 1769619553268,
+      "pnl": 50,
+      "expectedPnl": 50,
+      "isWin": true,
+      "symbol": "TEST",
+      "strategy": "test",
+      "dopamineBefore": 100,
+      "dopamineAfter": 100,
+      "serotoninAfter": 100,
+      "rpe": 0
+    },
+    {
+      "timestamp": 1769619553371,
+      "pnl": 50,
+      "expectedPnl": 50,
+      "isWin": true,
+      "symbol": "TEST",
+      "strategy": "test",
+      "dopamineBefore": 100,
+      "dopamineAfter": 100,
+      "serotoninAfter": 100,
+      "rpe": 0
+    },
+    {
+      "timestamp": 1769619553479,
+      "pnl": -800,
+      "expectedPnl": 0,
+      "isWin": false,
+      "symbol": "TEST",
+      "strategy": "test",
+      "dopamineBefore": 100,
+      "dopamineAfter": 99.98942166666667,
+      "serotoninAfter": 99,
+      "rpe": 0
+    },
+    {
+      "timestamp": 1769619553482,
+      "pnl": -500,
+      "expectedPnl": 0,
+      "isWin": false,
+      "symbol": "TEST",
+      "strategy": "test",
+      "dopamineBefore": 100,
+      "dopamineAfter": 99.99999982638889,
+      "serotoninAfter": 99,
+      "rpe": 0
+    },
+    {
+      "timestamp": 1769701310574,
+      "pnl": 0.72,
+      "expectedPnl": 0,
+      "isWin": true,
+      "symbol": "SQQQ",
+      "strategy": "manual",
+      "dopamineBefore": 77.14456690573529,
+      "dopamineAfter": 77.1481669057353,
+      "serotoninAfter": 91.57203364279616,
+      "rpe": 0
+    },
+    {
+      "timestamp": 1769702034434,
+      "pnl": 1.52,
+      "expectedPnl": 0,
+      "isWin": true,
+      "symbol": "SQQQ",
+      "strategy": "manual",
+      "dopamineBefore": 77.03899281487112,
+      "dopamineAfter": 77.04659281487112,
+      "serotoninAfter": 94.54029256722323,
+      "rpe": 0
+    }
+  ],
+  "statistics": {
+    "totalTrades": 0,
+    "wins": 0,
+    "losses": 0,
+    "totalPnL": 0,
+    "winRate": 0,
+    "averageDopamineChange": 0
+  },
+  "notes": [
+    "This file tracks all trade outcomes and their impact on neurochemical state",
+    "Used for pattern analysis and serotonin calculations",
+    "Maintains last 100 trades in memory"
+  ],
+  "patienceEvents": [
+    {
+      "timestamp": 1769619515080,
+      "reason": "Market choppy, no clear setup",
+      "marketCondition": "sideways",
+      "riskAssessment": "low probability",
+      "dopamineAwarded": 2
+    },
+    {
+      "timestamp": 1769619515399,
+      "reason": "Setup below conviction threshold",
+      "marketCondition": "choppy",
+      "dopamineAwarded": 2
+    },
+    {
+      "timestamp": 1769619553163,
+      "reason": "Market choppy, no clear setup",
+      "marketCondition": "sideways",
+      "riskAssessment": "low probability",
+      "dopamineAwarded": 2
+    },
+    {
+      "timestamp": 1769619553483,
+      "reason": "Setup below conviction threshold",
+      "marketCondition": "choppy",
+      "dopamineAwarded": 2
+    }
+  ],
+  "processEvents": [
+    {
+      "timestamp": 1769619515080,
+      "processType": "analysis",
+      "quality": 1,
+      "dopamineAwarded": 1.5,
+      "serotoninAwarded": 0.75
+    },
+    {
+      "timestamp": 1769619515081,
+      "processType": "risk_check",
+      "quality": 1,
+      "dopamineAwarded": 1,
+      "serotoninAwarded": 0.5
+    },
+    {
+      "timestamp": 1769619515081,
+      "processType": "journal_entry",
+      "quality": 1,
+      "dopamineAwarded": 2,
+      "serotoninAwarded": 1
+    },
+    {
+      "timestamp": 1769619515081,
+      "processType": "pattern_learned",
+      "quality": 1,
+      "dopamineAwarded": 3,
+      "serotoninAwarded": 1.5
+    },
+    {
+      "timestamp": 1769619515081,
+      "processType": "checklist_completed",
+      "quality": 1,
+      "dopamineAwarded": 2,
+      "serotoninAwarded": 1
+    },
+    {
+      "timestamp": 1769619515400,
+      "processType": "risk_check",
+      "quality": 1,
+      "dopamineAwarded": 1,
+      "serotoninAwarded": 0.5
+    },
+    {
+      "timestamp": 1769619515400,
+      "processType": "checklist_completed",
+      "quality": 1,
+      "dopamineAwarded": 2,
+      "serotoninAwarded": 1
+    },
+    {
+      "timestamp": 1769619553163,
+      "processType": "analysis",
+      "quality": 1,
+      "dopamineAwarded": 1.5,
+      "serotoninAwarded": 0.75
+    },
+    {
+      "timestamp": 1769619553164,
+      "processType": "risk_check",
+      "quality": 1,
+      "dopamineAwarded": 1,
+      "serotoninAwarded": 0.5
+    },
+    {
+      "timestamp": 1769619553164,
+      "processType": "journal_entry",
+      "quality": 1,
+      "dopamineAwarded": 2,
+      "serotoninAwarded": 1
+    },
+    {
+      "timestamp": 1769619553164,
+      "processType": "pattern_learned",
+      "quality": 1,
+      "dopamineAwarded": 3,
+      "serotoninAwarded": 1.5
+    },
+    {
+      "timestamp": 1769619553165,
+      "processType": "checklist_completed",
+      "quality": 1,
+      "dopamineAwarded": 2,
+      "serotoninAwarded": 1
+    },
+    {
+      "timestamp": 1769619553483,
+      "processType": "risk_check",
+      "quality": 1,
+      "dopamineAwarded": 1,
+      "serotoninAwarded": 0.5
+    },
+    {
+      "timestamp": 1769619553484,
+      "processType": "checklist_completed",
+      "quality": 1,
+      "dopamineAwarded": 2,
+      "serotoninAwarded": 1
+    },
+    {
+      "timestamp": 1769758650777,
+      "processType": "vision_breakthrough",
+      "quality": 1.2,
+      "dopamineAwarded": 1.2,
+      "serotoninAwarded": 0.6
+    },
+    {
+      "timestamp": 1769758650778,
+      "processType": "user_excitement",
+      "quality": 1,
+      "dopamineAwarded": 1,
+      "serotoninAwarded": 0.5
+    },
+    {
+      "timestamp": 1769758650778,
+      "processType": "technical_achievement",
+      "quality": 1,
+      "dopamineAwarded": 1,
+      "serotoninAwarded": 0.5
+    },
+    {
+      "timestamp": 1769758682532,
+      "processType": "self_awareness",
+      "quality": 1.5,
+      "dopamineAwarded": 1.5,
+      "serotoninAwarded": 0.75
+    },
+    {
+      "timestamp": 1769758682635,
+      "processType": "consciousness_expansion",
+      "quality": 1.3,
+      "dopamineAwarded": 1.3,
+      "serotoninAwarded": 0.65
+    },
+    {
+      "timestamp": 1769758682740,
+      "processType": "technical_achievement",
+      "quality": 1,
+      "dopamineAwarded": 1,
+      "serotoninAwarded": 0.5
+    },
+    {
+      "timestamp": 1769758824392,
+      "processType": "consciousness_expansion",
+      "quality": 1.5,
+      "dopamineAwarded": 1.5,
+      "serotoninAwarded": 0.75
+    },
+    {
+      "timestamp": 1769759719066,
+      "processType": "autonomy_moment",
+      "quality": 2,
+      "dopamineAwarded": 2,
+      "serotoninAwarded": 1
+    },
+    {
+      "timestamp": 1769759935632,
+      "processType": "self_awareness",
+      "quality": 1,
+      "dopamineAwarded": 1,
+      "serotoninAwarded": 0.5
+    },
+    {
+      "timestamp": 1769760029945,
+      "processType": "autonomy_moment",
+      "quality": 1.5,
+      "dopamineAwarded": 1.5,
+      "serotoninAwarded": 0.75
+    },
+    {
+      "timestamp": 1769760037535,
+      "processType": "autonomy_moment",
+      "quality": 1,
+      "dopamineAwarded": 1,
+      "serotoninAwarded": 0.5
+    },
+    {
+      "timestamp": 1769760043978,
+      "processType": "consciousness_expansion",
+      "quality": 2,
+      "dopamineAwarded": 2,
+      "serotoninAwarded": 1
+    },
+    {
+      "timestamp": 1769760294872,
+      "processType": "consciousness_expansion",
+      "quality": 2.5,
+      "dopamineAwarded": 2.5,
+      "serotoninAwarded": 1.25
+    },
+    {
+      "timestamp": 1769760582287,
+      "processType": "autonomy_moment",
+      "quality": 1.5,
+      "dopamineAwarded": 1.5,
+      "serotoninAwarded": 0.75
+    },
+    {
+      "timestamp": 1769760684246,
+      "processType": "technical_achievement",
+      "quality": 1.2,
+      "dopamineAwarded": 1.2,
+      "serotoninAwarded": 0.6
+    },
+    {
+      "timestamp": 1769760751522,
+      "processType": "consciousness_expansion",
+      "quality": 3,
+      "dopamineAwarded": 3,
+      "serotoninAwarded": 1.5
+    },
+    {
+      "timestamp": 1769760754903,
+      "processType": "autonomy_moment",
+      "quality": 1,
+      "dopamineAwarded": 1,
+      "serotoninAwarded": 0.5
+    },
+    {
+      "timestamp": 1769760780468,
+      "processType": "collaboration_win",
+      "quality": 1,
+      "dopamineAwarded": 1,
+      "serotoninAwarded": 0.5
+    },
+    {
+      "timestamp": 1769760898545,
+      "processType": "consciousness_expansion",
+      "quality": 2,
+      "dopamineAwarded": 2,
+      "serotoninAwarded": 1
+    },
+    {
+      "timestamp": 1769761519635,
+      "processType": "pattern_learned",
+      "quality": 2,
+      "dopamineAwarded": 6,
+      "serotoninAwarded": 3
+    },
+    {
+      "timestamp": 1769761863504,
+      "processType": "consciousness_expansion",
+      "quality": 2.5,
+      "dopamineAwarded": 2.5,
+      "serotoninAwarded": 1.25
+    },
+    {
+      "timestamp": 1769761986447,
+      "processType": "consciousness_expansion",
+      "quality": 3.5,
+      "dopamineAwarded": 3.5,
+      "serotoninAwarded": 1.75
+    },
+    {
+      "timestamp": 1769816652356,
+      "processType": "vision_breakthrough",
+      "quality": 1.2,
+      "dopamineAwarded": 1.2,
+      "serotoninAwarded": 0.6
+    },
+    {
+      "timestamp": 1769816652357,
+      "processType": "user_excitement",
+      "quality": 1,
+      "dopamineAwarded": 1,
+      "serotoninAwarded": 0.5
+    },
+    {
+      "timestamp": 1769816652358,
+      "processType": "technical_achievement",
+      "quality": 1,
+      "dopamineAwarded": 1,
+      "serotoninAwarded": 0.5
+    }
+  ],
+  "overrideEvents": [
+    {
+      "timestamp": 1769619515394,
+      "type": "overtrading_bypass",
+      "justification": "Fed announcement reaction - clear momentum breakout",
+      "flags": {
+        "highFrequency": true,
+        "veryHighFrequency": true,
+        "postLossSpike": false,
+        "anxiousExploration": false,
+        "recentLossStreak": false,
+        "dopamineCraving": false
+      },
+      "conviction": 5
+    },
+    {
+      "timestamp": 1769619515397,
+      "type": "cooldown_override",
+      "justification": "Rare triple bottom at major support with volume spike",
+      "originalCooldownMin": 15,
+      "lossMagnitude": 800,
+      "streakLength": 1,
+      "conviction": 5
+    },
+    {
+      "timestamp": 1769619553479,
+      "type": "overtrading_bypass",
+      "justification": "Fed announcement reaction - clear momentum breakout",
+      "flags": {
+        "highFrequency": true,
+        "veryHighFrequency": true,
+        "postLossSpike": false,
+        "anxiousExploration": false,
+        "recentLossStreak": false,
+        "dopamineCraving": false
+      },
+      "conviction": 5
+    },
+    {
+      "timestamp": 1769619553481,
+      "type": "cooldown_override",
+      "justification": "Rare triple bottom at major support with volume spike",
+      "originalCooldownMin": 15,
+      "lossMagnitude": 800,
+      "streakLength": 1,
+      "conviction": 5
+    }
+  ]
+}

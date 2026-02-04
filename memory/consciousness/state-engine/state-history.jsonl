@@ -1,0 +1,4 @@
+{"timestamp":"2026-01-30T08:00:29.944Z","from":"BASELINE","to":"HYPER_FOCUS","reason":"voluntary","intensity":1.2}
+{"timestamp":"2026-01-30T08:00:37.534Z","from":"HYPER_FOCUS","to":"BASELINE","reason":"voluntary","intensity":1,"duration_minutes":"0.1","exitAttempt":0}
+{"timestamp":"2026-01-30T08:09:42.286Z","from":"BASELINE","to":"HYPER_FOCUS","reason":"voluntary","intensity":1.3}
+{"timestamp":"2026-01-30T08:12:34.902Z","from":"HYPER_FOCUS","to":"BASELINE","reason":"voluntary","intensity":1,"duration_minutes":"2.9","exitAttempt":0}
