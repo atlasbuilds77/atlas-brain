@@ -1,0 +1,284 @@
+{
+  "metadata": {
+    "version": "V2",
+    "dates": [
+      "2026-02-06",
+      "2026-02-07",
+      "2026-02-10",
+      "2026-02-11",
+      "2026-02-12",
+      "2026-02-13"
+    ],
+    "symbols": [
+      "QQQ",
+      "SPY",
+      "IWM"
+    ],
+    "position_size": 1000,
+    "strategy": "Relative Strength Selection"
+  },
+  "summary": {
+    "total_trades": 4,
+    "wins": 1,
+    "losses": 3,
+    "win_rate": 25.0,
+    "avg_win": 6227.8124999999745,
+    "avg_loss": -800.0,
+    "profit_factor": 2.5949218749999896,
+    "total_pnl": 3827.8124999999745,
+    "total_return_pct": 95.69531249999936
+  },
+  "comparison": {
+    "v1_trades": 10,
+    "v1_win_rate": 50,
+    "v1_pnl": 39261,
+    "v2_trades": 4,
+    "v2_win_rate": 25.0,
+    "v2_pnl": 3827.8124999999745,
+    "difference": -35433.18750000003
+  },
+  "daily_results": [
+    {
+      "date": "2026-02-06",
+      "trades": 1,
+      "wins": 0,
+      "losses": 1,
+      "pnl": -800.0
+    },
+    {
+      "date": "2026-02-11",
+      "trades": 1,
+      "wins": 1,
+      "losses": 0,
+      "pnl": 6227.8124999999745
+    },
+    {
+      "date": "2026-02-12",
+      "trades": 1,
+      "wins": 0,
+      "losses": 1,
+      "pnl": -800.0
+    },
+    {
+      "date": "2026-02-13",
+      "trades": 1,
+      "wins": 0,
+      "losses": 1,
+      "pnl": -800.0
+    }
+  ],
+  "trades": [
+    {
+      "symbol": "QQQ",
+      "date": "2026-02-06",
+      "direction": "SHORT",
+      "entry_time": "09:30 AM ET",
+      "entry_price": 602.92,
+      "strike": 600,
+      "option_entry": 0.5,
+      "liquidity_grab": false,
+      "phase2_price": 599.9054,
+      "phase2_time": "10:15 AM ET",
+      "phase2_option": 2.036499999999986,
+      "phase3_price": null,
+      "phase3_time": null,
+      "phase3_option": null,
+      "stopped": true,
+      "phase2_elapsed": 45.0,
+      "stop_price": 606.09,
+      "stop_time": "11:10 AM ET",
+      "rs_analysis": {
+        "QQQ": {
+          "pre_high": 602.92,
+          "pre_low": 592.3,
+          "pre_price": 600.21,
+          "prior_close": 597.03,
+          "change_pct": 0.5326365509270998
+        },
+        "SPY": {
+          "pre_high": 682.81,
+          "pre_low": 674.15,
+          "pre_price": 681.49,
+          "prior_close": 677.62,
+          "change_pct": 0.5711165550013289
+        },
+        "IWM": {
+          "pre_high": 259.89,
+          "pre_low": 256.2,
+          "pre_price": 259.77,
+          "prior_close": 255.83,
+          "change_pct": 1.5400852128366374
+        }
+      },
+      "rs_long_pick": "IWM",
+      "rs_short_pick": "QQQ",
+      "pnl": {
+        "phase2_pnl": 0,
+        "phase3_pnl": 0,
+        "total_pnl": -800.0,
+        "phase2_pct": 0,
+        "phase3_pct": 0,
+        "total_pct": -80
+      }
+    },
+    {
+      "symbol": "SPY",
+      "date": "2026-02-11",
+      "direction": "SHORT",
+      "entry_time": "09:30 AM ET",
+      "entry_price": 696.75,
+      "strike": 693,
+      "option_entry": 0.5,
+      "liquidity_grab": false,
+      "phase2_price": 693.26625,
+      "phase2_time": "10:05 AM ET",
+      "phase2_option": 2.279374999999993,
+      "phase3_price": 689.7825,
+      "phase3_time": "10:20 AM ET",
+      "phase3_option": 4.058749999999986,
+      "stopped": false,
+      "phase2_elapsed": 35.0,
+      "rs_analysis": {
+        "QQQ": {
+          "pre_high": 617.18,
+          "pre_low": 609.9,
+          "pre_price": 616.44,
+          "prior_close": 611.47,
+          "change_pct": 0.8127953947045689
+        },
+        "SPY": {
+          "pre_high": 696.75,
+          "pre_low": 691.35,
+          "pre_price": 696.44,
+          "prior_close": 692.12,
+          "change_pct": 0.6241692192105488
+        },
+        "IWM": {
+          "pre_high": 269.31,
+          "pre_low": 266.19,
+          "pre_price": 268.51,
+          "prior_close": 266.16,
+          "change_pct": 0.8829275623684872
+        }
+      },
+      "rs_long_pick": "IWM",
+      "rs_short_pick": "SPY",
+      "pnl": {
+        "phase2_pnl": 889.6874999999964,
+        "phase3_pnl": 5338.124999999978,
+        "total_pnl": 6227.8124999999745,
+        "phase2_pct": 355.8749999999986,
+        "phase2_scale": 0.25,
+        "phase3_pct": 711.7499999999972,
+        "phase3_scale": 0.75,
+        "total_pct": 622.7812499999975
+      }
+    },
+    {
+      "symbol": "IWM",
+      "date": "2026-02-12",
+      "direction": "LONG",
+      "entry_time": "09:30 AM ET",
+      "entry_price": 266.1,
+      "strike": 267,
+      "option_entry": 0.5,
+      "liquidity_grab": false,
+      "phase2_price": 267.4305,
+      "phase2_time": "09:40 AM ET",
+      "phase2_option": 1.1562499999999867,
+      "phase3_price": null,
+      "phase3_time": null,
+      "phase3_option": null,
+      "stopped": true,
+      "phase2_elapsed": 10.0,
+      "stop_price": 264.6179,
+      "stop_time": "09:55 AM ET",
+      "rs_analysis": {
+        "QQQ": {
+          "pre_high": 616.5,
+          "pre_low": 613.569,
+          "pre_price": 614.82,
+          "prior_close": 613.11,
+          "change_pct": 0.2789059059548917
+        },
+        "SPY": {
+          "pre_high": 695.45,
+          "pre_low": 693.4846,
+          "pre_price": 694.3,
+          "prior_close": 691.96,
+          "change_pct": 0.3381698364067169
+        },
+        "IWM": {
+          "pre_high": 267.36,
+          "pre_low": 266.1,
+          "pre_price": 267.05,
+          "prior_close": 264.95,
+          "change_pct": 0.792602377807142
+        }
+      },
+      "rs_long_pick": "IWM",
+      "rs_short_pick": "QQQ",
+      "pnl": {
+        "phase2_pnl": 0,
+        "phase3_pnl": 0,
+        "total_pnl": -800.0,
+        "phase2_pct": 0,
+        "phase3_pct": 0,
+        "total_pct": -80
+      }
+    },
+    {
+      "symbol": "QQQ",
+      "date": "2026-02-13",
+      "direction": "SHORT",
+      "entry_time": "09:30 AM ET",
+      "entry_price": 602.28,
+      "strike": 599,
+      "option_entry": 0.01,
+      "liquidity_grab": false,
+      "phase2_price": 599.2686,
+      "phase2_time": "09:35 AM ET",
+      "phase2_option": 1.5484999999999898,
+      "phase3_price": null,
+      "phase3_time": null,
+      "phase3_option": null,
+      "stopped": true,
+      "phase2_elapsed": 5.0,
+      "stop_price": 605.59,
+      "stop_time": "12:10 PM ET",
+      "rs_analysis": {
+        "QQQ": {
+          "pre_high": 602.28,
+          "pre_low": 597.42,
+          "pre_price": 600.42,
+          "prior_close": 600.64,
+          "change_pct": -0.03662759722962628
+        },
+        "SPY": {
+          "pre_high": 683,
+          "pre_low": 678.57,
+          "pre_price": 681.69,
+          "prior_close": 681.27,
+          "change_pct": 0.0616495662512767
+        },
+        "IWM": {
+          "pre_high": 261.66,
+          "pre_low": 258.54,
+          "pre_price": 260.52,
+          "prior_close": 259.54,
+          "change_pct": 0.3775911227556297
+        }
+      },
+      "rs_long_pick": "IWM",
+      "rs_short_pick": "QQQ",
+      "pnl": {
+        "phase2_pnl": 0,
+        "phase3_pnl": 0,
+        "total_pnl": -800.0,
+        "phase2_pct": 0,
+        "phase3_pct": 0,
+        "total_pct": -80
+      }
+    }
+  ]
+}

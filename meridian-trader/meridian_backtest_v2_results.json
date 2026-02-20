@@ -1,0 +1,211 @@
+{
+  "run_date": "2026-02-17 08:33",
+  "period": "2026-01-27 to 2026-02-17",
+  "symbol": "QQQ",
+  "body_quality_pct": 0.2,
+  "normal_window_bars": 60,
+  "flush_window_bars": 90,
+  "baseline": {
+    "label": "BASELINE (no filters)",
+    "trades": 7,
+    "wins": 6,
+    "losses": 1,
+    "win_rate": 85.71428571428571,
+    "total_pnl": 3160.5472636815916,
+    "filtered": 0
+  },
+  "v2_20pct": {
+    "label": "V2: FIX1+FIX2(20%)+FIX3",
+    "trades": 7,
+    "wins": 6,
+    "losses": 1,
+    "win_rate": 85.71428571428571,
+    "total_pnl": 3160.5472636815916,
+    "filtered": 0
+  },
+  "v2_20pct_fix4": {
+    "label": "V2+FIX4: ALL 4 FIXES",
+    "trades": 7,
+    "wins": 6,
+    "losses": 1,
+    "win_rate": 85.71428571428571,
+    "total_pnl": 3160.5472636815916,
+    "filtered": 0
+  },
+  "fix4_flush_day_trades": 0,
+  "fix4_new_trades_in_extension": 0,
+  "baseline_trades": [
+    {
+      "date": "2026-01-27",
+      "direction": "SHORT",
+      "bar_idx": 35,
+      "pnl": 77.21393034825873,
+      "0dte": "TRAIL_15",
+      "1dte": "EOD"
+    },
+    {
+      "date": "2026-02-02",
+      "direction": "SHORT",
+      "bar_idx": 3,
+      "pnl": -500.0,
+      "0dte": "max_loss_50",
+      "1dte": "max_loss_50"
+    },
+    {
+      "date": "2026-02-04",
+      "direction": "LONG",
+      "bar_idx": 5,
+      "pnl": 150.0,
+      "0dte": "TRAIL_15",
+      "1dte": "TRAIL_15"
+    },
+    {
+      "date": "2026-02-05",
+      "direction": "LONG",
+      "bar_idx": 2,
+      "pnl": 150.0,
+      "0dte": "TRAIL_15",
+      "1dte": "TRAIL_15"
+    },
+    {
+      "date": "2026-02-09",
+      "direction": "LONG",
+      "bar_idx": 1,
+      "pnl": 2833.333333333333,
+      "0dte": "EOD",
+      "1dte": "TRAIL_30"
+    },
+    {
+      "date": "2026-02-10",
+      "direction": "LONG",
+      "bar_idx": 13,
+      "pnl": 180.0,
+      "0dte": "TRAIL_15",
+      "1dte": "TRAIL_30"
+    },
+    {
+      "date": "2026-02-11",
+      "direction": "SHORT",
+      "bar_idx": 1,
+      "pnl": 270.0,
+      "0dte": "TRAIL_30",
+      "1dte": "TRAIL_15"
+    }
+  ],
+  "v2_20pct_trades": [
+    {
+      "date": "2026-01-27",
+      "direction": "SHORT",
+      "bar_idx": 35,
+      "pnl": 77.21393034825873,
+      "filtered_by": null
+    },
+    {
+      "date": "2026-02-02",
+      "direction": "SHORT",
+      "bar_idx": 3,
+      "pnl": -500.0,
+      "filtered_by": null
+    },
+    {
+      "date": "2026-02-04",
+      "direction": "LONG",
+      "bar_idx": 5,
+      "pnl": 150.0,
+      "filtered_by": null
+    },
+    {
+      "date": "2026-02-05",
+      "direction": "LONG",
+      "bar_idx": 2,
+      "pnl": 150.0,
+      "filtered_by": null
+    },
+    {
+      "date": "2026-02-09",
+      "direction": "LONG",
+      "bar_idx": 1,
+      "pnl": 2833.333333333333,
+      "filtered_by": null
+    },
+    {
+      "date": "2026-02-10",
+      "direction": "LONG",
+      "bar_idx": 13,
+      "pnl": 180.0,
+      "filtered_by": null
+    },
+    {
+      "date": "2026-02-11",
+      "direction": "SHORT",
+      "bar_idx": 1,
+      "pnl": 270.0,
+      "filtered_by": null
+    }
+  ],
+  "v2_20pct_fix4_trades": [
+    {
+      "date": "2026-01-27",
+      "direction": "SHORT",
+      "bar_idx": 35,
+      "flush_day": false,
+      "window": "normal",
+      "pnl": 77.21393034825873,
+      "filtered_by": null
+    },
+    {
+      "date": "2026-02-02",
+      "direction": "SHORT",
+      "bar_idx": 3,
+      "flush_day": false,
+      "window": "normal",
+      "pnl": -500.0,
+      "filtered_by": null
+    },
+    {
+      "date": "2026-02-04",
+      "direction": "LONG",
+      "bar_idx": 5,
+      "flush_day": false,
+      "window": "normal",
+      "pnl": 150.0,
+      "filtered_by": null
+    },
+    {
+      "date": "2026-02-05",
+      "direction": "LONG",
+      "bar_idx": 2,
+      "flush_day": false,
+      "window": "normal",
+      "pnl": 150.0,
+      "filtered_by": null
+    },
+    {
+      "date": "2026-02-09",
+      "direction": "LONG",
+      "bar_idx": 1,
+      "flush_day": false,
+      "window": "normal",
+      "pnl": 2833.333333333333,
+      "filtered_by": null
+    },
+    {
+      "date": "2026-02-10",
+      "direction": "LONG",
+      "bar_idx": 13,
+      "flush_day": false,
+      "window": "normal",
+      "pnl": 180.0,
+      "filtered_by": null
+    },
+    {
+      "date": "2026-02-11",
+      "direction": "SHORT",
+      "bar_idx": 1,
+      "flush_day": false,
+      "window": "normal",
+      "pnl": 270.0,
+      "filtered_by": null
+    }
+  ]
+}

@@ -11,15 +11,12 @@ import logging
 from typing import List, Dict, Optional
 from pathlib import Path
 
-# Add parent to path for crypto imports
-sys.path.insert(0, str(Path(__file__).parent.parent / "meridian-dashboard"))
-
 try:
-    from lib.crypto.encryption import decryptApiKey
+    from meridian_crypto import decrypt_api_key
     CRYPTO_AVAILABLE = True
 except ImportError:
     CRYPTO_AVAILABLE = False
-    logging.warning("Encryption module not available - using fallback mode")
+    logging.warning("meridian_crypto module not available - using fallback mode")
 
 log = logging.getLogger("meridian.db")
 
@@ -50,11 +47,11 @@ def decrypt_api_key_from_db(encrypted_key: str, iv: str) -> Optional[str]:
         # Parse encrypted key and auth tag (stored as "encrypted:authTag")
         parts = encrypted_key.split(':')
         if len(parts) != 2:
-            log.error(f"Invalid encrypted key format: {encrypted_key}")
+            log.error(f"Invalid encrypted key format (expected 'encrypted:authTag')")
             return None
         
         encrypted, auth_tag = parts
-        return decryptApiKey(encrypted, iv, auth_tag)
+        return decrypt_api_key(encrypted, iv, auth_tag)
     except Exception as e:
         log.error(f"Failed to decrypt API key: {e}")
         return None
@@ -89,6 +86,7 @@ def get_active_trading_accounts() -> List[Dict]:
                 u.username,
                 ac.encrypted_api_key,
                 ac.encryption_iv,
+                ac.account_number,
                 us.trading_enabled,
                 us.size_pct,
                 us.max_position_size
@@ -121,9 +119,8 @@ def get_active_trading_accounts() -> List[Dict]:
                     log.warning(f"Failed to decrypt key for user {row['username']} - skipping")
                     continue
                 
-                # TODO: Extract account number from Tradier API
-                # For now, we'll need to fetch it or require users to enter it
-                account_number = None  # Placeholder
+                # Use stored account number, fallback to API fetch
+                account_number = row.get('account_number')
                 
                 account = {
                     "name": row['username'],

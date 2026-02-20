@@ -1,0 +1,54 @@
+{
+  "period": "Feb 12-14, 2026",
+  "symbols": [
+    "QQQ",
+    "SPY"
+  ],
+  "starting_capital_per_symbol": 1000,
+  "results_by_symbol": {
+    "QQQ": {
+      "trades": 1,
+      "wins": 1,
+      "win_rate": 100.0,
+      "total_pnl": 240.0,
+      "trades_detail": [
+        {
+          "date": "2026-02-13",
+          "direction": "LONG",
+          "entry_price": 597.07,
+          "entry_time": "09:43",
+          "0dte_exit": "TRAIL_30",
+          "0dte_pnl": 240.0,
+          "1dte_exit": "no_data",
+          "1dte_pnl": 0,
+          "combined_pnl": 240.0
+        }
+      ]
+    },
+    "SPY": {
+      "trades": 1,
+      "wins": 1,
+      "win_rate": 100.0,
+      "total_pnl": 240.0,
+      "trades_detail": [
+        {
+          "date": "2026-02-13",
+          "direction": "LONG",
+          "entry_price": 678.22,
+          "entry_time": "09:43",
+          "0dte_exit": "TRAIL_30",
+          "0dte_pnl": 240.0,
+          "1dte_exit": "no_data",
+          "1dte_pnl": 0,
+          "combined_pnl": 240.0
+        }
+      ]
+    }
+  },
+  "summary": {
+    "total_trades": 2,
+    "total_wins": 2,
+    "win_rate": 100.0,
+    "total_pnl": 480.0
+  }
+}

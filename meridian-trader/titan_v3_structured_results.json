@@ -1,0 +1,186 @@
+{
+  "config": {
+    "symbol": "QQQ",
+    "months": 3,
+    "split_0dte": 0.8,
+    "split_1dte": 0.2,
+    "otm_offset": 3.0,
+    "max_loss": -50
+  },
+  "summary": {
+    "total_trades": 24,
+    "wins": 20,
+    "win_rate": 83.33333333333334,
+    "total_pnl": 7195.03816793893
+  },
+  "trades": [
+    {
+      "date": "2025-11-17",
+      "direction": "LONG",
+      "pnl": 300.0,
+      "0dte_pnl": 240.0,
+      "1dte_pnl": 60.0
+    },
+    {
+      "date": "2025-11-20",
+      "direction": "SHORT",
+      "pnl": 2746.666666666666,
+      "0dte_pnl": 120.0,
+      "1dte_pnl": 2626.666666666666
+    },
+    {
+      "date": "2025-11-25",
+      "direction": "LONG",
+      "pnl": -340.0,
+      "0dte_pnl": -400.0,
+      "1dte_pnl": 60.0
+    },
+    {
+      "date": "2025-12-04",
+      "direction": "LONG",
+      "pnl": 150.0,
+      "0dte_pnl": 120.0,
+      "1dte_pnl": 30.0
+    },
+    {
+      "date": "2025-12-10",
+      "direction": "LONG",
+      "pnl": 150.0,
+      "0dte_pnl": 120.0,
+      "1dte_pnl": 30.0
+    },
+    {
+      "date": "2025-12-11",
+      "direction": "LONG",
+      "pnl": 300.0,
+      "0dte_pnl": 240.0,
+      "1dte_pnl": 60.0
+    },
+    {
+      "date": "2025-12-15",
+      "direction": "SHORT",
+      "pnl": 300.0,
+      "0dte_pnl": 240.0,
+      "1dte_pnl": 60.0
+    },
+    {
+      "date": "2025-12-16",
+      "direction": "SHORT",
+      "pnl": 180.0,
+      "0dte_pnl": 120.0,
+      "1dte_pnl": 60.0
+    },
+    {
+      "date": "2025-12-17",
+      "direction": "LONG",
+      "pnl": 150.0,
+      "0dte_pnl": 120.0,
+      "1dte_pnl": 30.0
+    },
+    {
+      "date": "2025-12-18",
+      "direction": "SHORT",
+      "pnl": 180.0,
+      "0dte_pnl": 120.0,
+      "1dte_pnl": 60.0
+    },
+    {
+      "date": "2025-12-22",
+      "direction": "SHORT",
+      "pnl": 270.0,
+      "0dte_pnl": 240.0,
+      "1dte_pnl": 30.0
+    },
+    {
+      "date": "2026-01-05",
+      "direction": "SHORT",
+      "pnl": 150.0,
+      "0dte_pnl": 120.0,
+      "1dte_pnl": 30.0
+    },
+    {
+      "date": "2026-01-06",
+      "direction": "SHORT",
+      "pnl": 20.0,
+      "0dte_pnl": 120.0,
+      "1dte_pnl": -100.0
+    },
+    {
+      "date": "2026-01-08",
+      "direction": "LONG",
+      "pnl": -500.0,
+      "0dte_pnl": -400.0,
+      "1dte_pnl": -100.0
+    },
+    {
+      "date": "2026-01-13",
+      "direction": "LONG",
+      "pnl": -340.0,
+      "0dte_pnl": -400.0,
+      "1dte_pnl": 60.0
+    },
+    {
+      "date": "2026-01-14",
+      "direction": "LONG",
+      "pnl": 150.0,
+      "0dte_pnl": 120.0,
+      "1dte_pnl": 30.0
+    },
+    {
+      "date": "2026-01-15",
+      "direction": "SHORT",
+      "pnl": 150.0,
+      "0dte_pnl": 120.0,
+      "1dte_pnl": 30.0
+    },
+    {
+      "date": "2026-01-27",
+      "direction": "SHORT",
+      "pnl": 65.03816793893128,
+      "0dte_pnl": 120.0,
+      "1dte_pnl": -54.96183206106872
+    },
+    {
+      "date": "2026-02-02",
+      "direction": "SHORT",
+      "pnl": -500.0,
+      "0dte_pnl": -400.0,
+      "1dte_pnl": -100.0
+    },
+    {
+      "date": "2026-02-04",
+      "direction": "LONG",
+      "pnl": 150.0,
+      "0dte_pnl": 120.0,
+      "1dte_pnl": 30.0
+    },
+    {
+      "date": "2026-02-05",
+      "direction": "LONG",
+      "pnl": 180.0,
+      "0dte_pnl": 120.0,
+      "1dte_pnl": 60.0
+    },
+    {
+      "date": "2026-02-09",
+      "direction": "LONG",
+      "pnl": 2833.333333333333,
+      "0dte_pnl": 2773.333333333333,
+      "1dte_pnl": 60.0
+    },
+    {
+      "date": "2026-02-10",
+      "direction": "LONG",
+      "pnl": 180.0,
+      "0dte_pnl": 120.0,
+      "1dte_pnl": 60.0
+    },
+    {
+      "date": "2026-02-11",
+      "direction": "SHORT",
+      "pnl": 270.0,
+      "0dte_pnl": 240.0,
+      "1dte_pnl": 30.0
+    }
+  ]
+}
