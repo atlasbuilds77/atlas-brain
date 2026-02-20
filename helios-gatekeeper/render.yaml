@@ -1,0 +1,23 @@
+# Render Cron Job Configuration for Gatekeeper
+# Add this to ProjectHelios render.yaml
+
+- type: cron
+  name: gatekeeper-review
+  env: docker
+  schedule: "* 9-22 * * 1-5"  # Every minute, 9 AM-10 PM UTC (1 AM-2 PM PST), Mon-Fri (trading hours)
+  dockerfilePath: ./Dockerfile
+  dockerContext: .
+  envVars:
+    - key: DATABASE_URL
+      value: postgresql://postgresql_e5fi_user:moo24YFbny662K6sJvhpJLTAI6DSVlR5@dpg-d48i5r2li9vc739av9cg-a.oregon-postgres.render.com/postgresql_e5fi
+    - key: WEBHOOK_KEY
+      sync: false  # Same as Helios service
+    - key: DISCORD_HELIOS_WEBHOOK
+      sync: false  # Same as Helios service
+    - key: HELIOS_EXECUTE_URL
+      value: https://helios-px7f.onrender.com/execute
+  # Command to run
+  plan: starter
+  region: oregon
+  buildCommand: pip install -r requirements.txt
+  startCommand: python3 gatekeeper/gatekeeper_cron.py
