@@ -23,7 +23,7 @@ log = logging.getLogger("meridian.db")
 # Database connection
 DATABASE_URL = os.environ.get(
     "DATABASE_URL",
-    "postgresql://postgresql_e5fi_user:moo24YFbny662K6sJvhpJLTAI6DSVlR5@dpg-d48i5r2li9vc739av9cg-a.oregon-postgres.render.com/postgresql_e5fi"
+    "postgresql://meridian_user:8uOhIfyylf2gExR4yU8z7L9bg1z2kbC3@dpg-d6cfdna4d50c7383a61g-a.oregon-postgres.render.com/meridian_0j0f"
 )
 
 
@@ -209,6 +209,219 @@ def get_trading_accounts_with_fallback(hardcoded_accounts: List[Dict]) -> List[D
     else:
         log.info(f"No database accounts available - using {len(hardcoded_accounts)} hardcoded accounts as fallback")
         return hardcoded_accounts
+
+
+def get_user_id_by_account(account_number: str) -> Optional[int]:
+    """
+    Lookup user_id from account number in api_credentials table
+    
+    Args:
+        account_number: Tradier account number (e.g., "6YB71689")
+    
+    Returns:
+        user_id or None if not found
+    """
+    conn = get_db_connection()
+    if not conn:
+        log.warning("Database unavailable - cannot lookup user_id")
+        return None
+    
+    try:
+        with conn.cursor() as cur:
+            query = """
+            SELECT user_id 
+            FROM api_credentials 
+            WHERE account_number = %s 
+              AND platform = 'tradier'
+              AND is_active = true
+            LIMIT 1
+            """
+            cur.execute(query, (account_number,))
+            row = cur.fetchone()
+            
+            if row:
+                return row[0]
+            else:
+                log.warning(f"No user_id found for account {account_number}")
+                return None
+                
+    except Exception as e:
+        log.error(f"Error looking up user_id for account {account_number}: {e}")
+        return None
+    finally:
+        conn.close()
+
+
+def log_trade_entry(
+    account_number: str,
+    symbol: str,
+    direction: str,
+    asset_type: str,
+    strike: float,
+    expiry: str,
+    entry_price: float,
+    quantity: int,
+    notes: str = None
+) -> Optional[int]:
+    """
+    Log trade entry to database
+    
+    Args:
+        account_number: Tradier account number
+        symbol: Underlying symbol (e.g., "QQQ")
+        direction: "bull" or "bear"
+        asset_type: Asset type (e.g., "option", "stock", "future", "crypto")
+        strike: Strike price
+        expiry: Expiration date (YYYY-MM-DD)
+        entry_price: Entry price per contract
+        quantity: Number of contracts
+        notes: Optional notes (include call/put type here)
+    
+    Returns:
+        trade_id if successful, None otherwise
+    """
+    conn = get_db_connection()
+    if not conn:
+        log.warning("Database unavailable - cannot log trade entry")
+        return None
+    
+    try:
+        # Get user_id from account number
+        user_id = get_user_id_by_account(account_number)
+        if not user_id:
+            log.warning(f"Cannot log trade - no user_id for account {account_number}")
+            return None
+        
+        # Get account_id from api_credentials
+        with conn.cursor() as cur:
+            cur.execute("""
+                SELECT id FROM api_credentials 
+                WHERE account_number = %s AND platform = 'tradier' AND is_active = true
+                LIMIT 1
+            """, (account_number,))
+            row = cur.fetchone()
+            account_id = row[0] if row else None
+            
+            if not account_id:
+                log.warning(f"No account_id found for account {account_number}")
+                return None
+            
+            # Insert trade record
+            insert_query = """
+            INSERT INTO trades (
+                user_id, account_id, symbol, direction, asset_type,
+                strike, expiry, entry_price, quantity, entry_date,
+                status, notes, created_at, updated_at
+            ) VALUES (
+                %s, %s, %s, %s, %s,
+                %s, %s, %s, %s, NOW(),
+                'open', %s, NOW(), NOW()
+            )
+            RETURNING id
+            """
+            
+            cur.execute(insert_query, (
+                user_id, account_id, symbol, direction, asset_type,
+                strike, expiry, entry_price, quantity, notes
+            ))
+            
+            trade_id = cur.fetchone()[0]
+            conn.commit()
+            
+            log.info(f"Trade entry logged: trade_id={trade_id}, account={account_number}, "
+                    f"{direction} {quantity}x {symbol} ${strike} {asset_type}")
+            
+            return trade_id
+            
+    except Exception as e:
+        log.error(f"Error logging trade entry for account {account_number}: {e}")
+        conn.rollback()
+        return None
+    finally:
+        conn.close()
+
+
+def log_trade_exit(
+    account_number: str,
+    symbol: str,
+    strike: float,
+    expiry: str,
+    exit_price: float,
+    notes: str = None
+) -> bool:
+    """
+    Update trade record with exit data
+    
+    Args:
+        account_number: Tradier account number
+        symbol: Underlying symbol
+        strike: Strike price
+        expiry: Expiration date (YYYY-MM-DD)
+        exit_price: Exit price per contract
+        notes: Optional exit notes (e.g., "STOP (-50%)")
+    
+    Returns:
+        True if successful, False otherwise
+    """
+    conn = get_db_connection()
+    if not conn:
+        log.warning("Database unavailable - cannot log trade exit")
+        return False
+    
+    try:
+        with conn.cursor() as cur:
+            # Find the most recent open trade matching criteria
+            update_query = """
+            UPDATE trades
+            SET exit_price = %s,
+                exit_date = NOW(),
+                pnl = ((%s - entry_price) * quantity * 100),
+                pnl_percent = ((%s - entry_price) / NULLIF(entry_price, 0)),
+                status = 'closed',
+                notes = CASE 
+                    WHEN notes IS NULL THEN %s
+                    ELSE notes || ' | Exit: ' || %s
+                END,
+                updated_at = NOW()
+            WHERE id = (
+                SELECT t.id 
+                FROM trades t
+                JOIN api_credentials ac ON t.account_id = ac.id
+                WHERE ac.account_number = %s
+                  AND t.symbol = %s
+                  AND t.strike = %s
+                  AND t.expiry = %s
+                  AND t.status = 'open'
+                ORDER BY t.entry_date DESC
+                LIMIT 1
+            )
+            RETURNING id, pnl, pnl_percent
+            """
+            
+            cur.execute(update_query, (
+                exit_price, exit_price, exit_price, notes, notes,
+                account_number, symbol, strike, expiry
+            ))
+            
+            result = cur.fetchone()
+            
+            if result:
+                trade_id, pnl, pnl_pct = result
+                conn.commit()
+                log.info(f"Trade exit logged: trade_id={trade_id}, account={account_number}, "
+                        f"P&L=${pnl:.2f} ({pnl_pct:+.1%})")
+                return True
+            else:
+                log.warning(f"No open trade found to update for account {account_number}, "
+                           f"{symbol} ${strike} exp {expiry}")
+                return False
+                
+    except Exception as e:
+        log.error(f"Error logging trade exit for account {account_number}: {e}")
+        conn.rollback()
+        return False
+    finally:
+        conn.close()
 
 
 if __name__ == "__main__":

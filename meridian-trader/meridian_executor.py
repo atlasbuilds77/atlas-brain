@@ -14,6 +14,7 @@ import pytz
 import meridian_config as cfg
 from meridian_alerts import alerts
 from meridian_scanner import SweepEvent
+from meridian_db import log_trade_entry, log_trade_exit
 
 log = logging.getLogger("meridian.executor")
 ET = pytz.timezone("US/Eastern")
@@ -254,6 +255,36 @@ class MeridianExecutor:
                     "name": acct_name, "account": acct_id, "token": acct_token,
                     "qty_0dte": qty_0, "qty_1dte": qty_1,
                 })
+                
+                # ── Log trades to database ──
+                try:
+                    # Log 0DTE trade
+                    log_trade_entry(
+                        account_number=acct_id,
+                        symbol=cfg.SYMBOL,
+                        direction=sweep.direction,
+                        asset_type="option",  # Fixed: use "option" not "call"/"put"
+                        strike=float(strike_0dte["strike"]),
+                        expiry=exp_0dte,
+                        entry_price=ask_0dte,
+                        quantity=qty_0,
+                        notes=f"0DTE {opt_type} entry | sweep_level={sweep.level} | order_id={oid_0}"
+                    )
+                    
+                    # Log 1DTE trade
+                    log_trade_entry(
+                        account_number=acct_id,
+                        symbol=cfg.SYMBOL,
+                        direction=sweep.direction,
+                        asset_type="option",  # Fixed: use "option" not "call"/"put"
+                        strike=float(strike_1dte["strike"]),
+                        expiry=exp_1dte,
+                        entry_price=ask_1dte,
+                        quantity=qty_1,
+                        notes=f"1DTE {opt_type} entry | sweep_level={sweep.level} | order_id={oid_1}"
+                    )
+                except Exception as e:
+                    log.warning(f"Failed to log trade entry for {acct_name}: {e}")
 
             if not any(all_order_ids):
                 log.error("All orders failed across all accounts!")
@@ -385,6 +416,54 @@ class MeridianExecutor:
         total_exit = (price_0dte * pos.qty_0dte + price_1dte * pos.qty_1dte)
         pnl = (total_exit - total_entry) * 100
         pnl_pct = (total_exit - total_entry) / total_entry if total_entry > 0 else 0
+
+        # ── Log trade exits to database ──
+        # Parse option symbols to extract strike and expiry
+        # Option symbol format: QQQ260221C00500000 (SYMBOL-YYMMDD-C/P-STRIKE*1000)
+        try:
+            # Extract strike and expiry from 0DTE symbol
+            sym_0 = pos.symbol_0dte
+            expiry_0dte = f"20{sym_0[3:5]}-{sym_0[5:7]}-{sym_0[7:9]}"  # YYMMDD -> YYYY-MM-DD
+            strike_0dte = float(sym_0[10:]) / 1000  # Strike * 1000 -> actual strike
+            
+            # Extract strike and expiry from 1DTE symbol
+            sym_1 = pos.symbol_1dte
+            expiry_1dte = f"20{sym_1[3:5]}-{sym_1[5:7]}-{sym_1[7:9]}"
+            strike_1dte = float(sym_1[10:]) / 1000
+            
+            # Log exits for each account
+            if pos.account_lots:
+                for lot in pos.account_lots:
+                    acct_id = lot["account"]
+                    acct_name = lot["name"]
+                    
+                    try:
+                        # Update 0DTE trade
+                        if lot["qty_0dte"] > 0:
+                            log_trade_exit(
+                                account_number=acct_id,
+                                symbol=cfg.SYMBOL,
+                                strike=strike_0dte,
+                                expiry=expiry_0dte,
+                                exit_price=price_0dte,
+                                notes=reason
+                            )
+                        
+                        # Update 1DTE trade
+                        if lot["qty_1dte"] > 0:
+                            log_trade_exit(
+                                account_number=acct_id,
+                                symbol=cfg.SYMBOL,
+                                strike=strike_1dte,
+                                expiry=expiry_1dte,
+                                exit_price=price_1dte,
+                                notes=reason
+                            )
+                    except Exception as e:
+                        log.warning(f"Failed to log trade exit for {acct_name}: {e}")
+                        
+        except Exception as e:
+            log.warning(f"Failed to parse option symbols for trade exit logging: {e}")
 
         await alerts.exit_executed(pos.direction, pnl, pnl_pct, reason)
         self.position = None
