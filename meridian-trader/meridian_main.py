@@ -36,6 +36,15 @@ async def on_signal(sweep: SweepEvent):
     global session_bias
     log.info(f"🎯 SIGNAL: {sweep.direction} sweep+reclaim at {sweep.level}")
 
+    # ── Time Check: Don't enter too close to trade window end ──
+    now_et = datetime.now(ET)
+    if now_et.hour == cfg.TRADE_END_HOUR and now_et.minute >= 20:
+        log.warning(
+            f"⛔ Signal BLOCKED: Too close to trade window end (10:30 ET). "
+            f"Not enough time to reach target. Current time: {now_et.strftime('%H:%M:%S')} ET"
+        )
+        return
+
     # ── Session Bias Lock ──
     # First signal of the day sets the bias. Opposing signals are blocked.
     if session_bias is None:

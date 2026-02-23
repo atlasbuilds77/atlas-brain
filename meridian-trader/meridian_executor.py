@@ -258,17 +258,39 @@ class MeridianExecutor:
                 
                 # ── Log trades to database ──
                 try:
+                    # Build entry reasoning
+                    setup_name = f"PM {'LOW' if sweep.level < price else 'HIGH'} Sweep"
+                    entry_reasoning = f"""
+{setup_name} + {'Reclaim' if sweep.direction == 'bull' else 'Rejection'}
+
+Entry Signal:
+- Swept level: ${sweep.level:.2f}
+- Direction: {sweep.direction.upper()} ({opt_type})
+- Current price: ${price:.2f}
+
+Risk Management:
+- Stop loss: -50% (${ask_0dte * 0.5:.2f} for 0DTE)
+- Target: GEX cluster
+- VIX regime: Monitor volatility
+
+Setup detected by Meridian scanner at {datetime.now(ET).strftime('%H:%M:%S ET')}
+                    """.strip()
+                    
                     # Log 0DTE trade
                     log_trade_entry(
                         account_number=acct_id,
                         symbol=cfg.SYMBOL,
                         direction=sweep.direction,
-                        asset_type="option",  # Fixed: use "option" not "call"/"put"
+                        asset_type="option",
                         strike=float(strike_0dte["strike"]),
                         expiry=exp_0dte,
                         entry_price=ask_0dte,
                         quantity=qty_0,
-                        notes=f"0DTE {opt_type} entry | sweep_level={sweep.level} | order_id={oid_0}"
+                        notes=f"0DTE {opt_type} entry | sweep_level={sweep.level} | order_id={oid_0}",
+                        stop_loss=ask_0dte * 0.5,  # -50% stop
+                        take_profit=None,  # Will be determined by GEX levels
+                        entry_reasoning=entry_reasoning,
+                        setup_type=f"{setup_name} + {'Reclaim' if sweep.direction == 'bull' else 'Rejection'}"
                     )
                     
                     # Log 1DTE trade
@@ -276,12 +298,16 @@ class MeridianExecutor:
                         account_number=acct_id,
                         symbol=cfg.SYMBOL,
                         direction=sweep.direction,
-                        asset_type="option",  # Fixed: use "option" not "call"/"put"
+                        asset_type="option",
                         strike=float(strike_1dte["strike"]),
                         expiry=exp_1dte,
                         entry_price=ask_1dte,
                         quantity=qty_1,
-                        notes=f"1DTE {opt_type} entry | sweep_level={sweep.level} | order_id={oid_1}"
+                        notes=f"1DTE {opt_type} entry | sweep_level={sweep.level} | order_id={oid_1}",
+                        stop_loss=ask_1dte * 0.5,  # -50% stop
+                        take_profit=None,  # Will be determined by GEX levels
+                        entry_reasoning=entry_reasoning,
+                        setup_type=f"{setup_name} + {'Reclaim' if sweep.direction == 'bull' else 'Rejection'}"
                     )
                 except Exception as e:
                     log.warning(f"Failed to log trade entry for {acct_name}: {e}")
@@ -347,6 +373,41 @@ class MeridianExecutor:
         async with aiohttp.ClientSession() as session:
             while self.position:
                 now_et = datetime.now(ET)
+                
+                # ── Smart Trade Window Close ──
+                # Hard cutoff: 10:45 AM ET (7:45 AM PT) - must exit by then
+                # Smart window: 10:28 AM ET (7:28 AM PT) - check if profitable & trending
+                if now_et.hour >= cfg.TRADE_END_HOUR:
+                    if now_et.minute >= 45:
+                        # Hard stop - close everything
+                        await self._exit_position(session, "TRADE_WINDOW_HARD_CLOSE")
+                        break
+                    elif now_et.minute >= 28:
+                        # Smart window - check P&L and momentum
+                        price_0dte = await self.get_quote(session, pos.symbol_0dte) or 0
+                        price_1dte = await self.get_quote(session, pos.symbol_1dte) or 0
+                        
+                        if price_0dte > 0 and price_1dte > 0:
+                            total_entry = (pos.entry_price_0dte * pos.qty_0dte +
+                                          pos.entry_price_1dte * pos.qty_1dte)
+                            total_current = (price_0dte * pos.qty_0dte +
+                                            price_1dte * pos.qty_1dte)
+                            pnl_pct = (total_current - total_entry) / total_entry if total_entry > 0 else 0
+                            
+                            # If profitable and moving toward target, let it run until 7:45 AM
+                            if pnl_pct > 0.20:  # At least +20% profit
+                                log.info(f"Smart window: +{pnl_pct:.1%} profit, letting position run until 10:45 AM ET")
+                                # Continue managing - will hit hard stop at 10:45 or stop loss
+                            else:
+                                # Not profitable enough or losing - close now
+                                await self._exit_position(session, f"TRADE_WINDOW_CLOSE (P&L {pnl_pct:+.1%})")
+                                break
+                        else:
+                            # Can't get quotes - close to be safe
+                            await self._exit_position(session, "TRADE_WINDOW_CLOSE (no quotes)")
+                            break
+                
+                # End of day close
                 if now_et.hour >= 15 and now_et.minute >= 55:
                     await self._exit_position(session, "EOD")
                     break
