@@ -197,6 +197,9 @@ def post_to_discord(signal: dict, decision: str, review: str, final_direction: s
     if not DISCORD_WEBHOOK:
         return
     
+    # Role ID to tag
+    HELIOS_ROLE_ID = "1440026585053794465"
+    
     color = 0x00FF00 if decision == "approved" else 0xFF0000
     
     direction_display = final_direction if final_direction != signal['direction'] else signal['direction']
@@ -217,8 +220,14 @@ def post_to_discord(signal: dict, decision: str, review: str, final_direction: s
         "timestamp": datetime.utcnow().isoformat()
     }
     
+    # Add role mention
+    payload = {
+        "content": f"<@&{HELIOS_ROLE_ID}>",
+        "embeds": [embed]
+    }
+    
     try:
-        requests.post(DISCORD_WEBHOOK, json={"embeds": [embed]}, timeout=10)
+        requests.post(DISCORD_WEBHOOK, json=payload, timeout=10)
         print(f"✅ Posted to Discord")
     except Exception as e:
         print(f"❌ Discord failed: {e}")
