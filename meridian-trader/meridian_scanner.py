@@ -96,6 +96,14 @@ class MeridianScanner:
                 else:
                     log.error(f"Tradier API failed after {max_retries} attempts. Returning empty.")
                     return []
+            except Exception as e:
+                # Catch-all for unexpected errors
+                log.error(f"Unexpected error in fetch_bars (attempt {attempt+1}/{max_retries}): {type(e).__name__}: {e}")
+                if attempt < max_retries - 1:
+                    await asyncio.sleep(2 ** attempt)
+                else:
+                    log.error("fetch_bars failed after retries with unexpected error. Returning empty.")
+                    return []
         return []
 
     async def fetch_daily_bars(self, session: aiohttp.ClientSession, days: int = 15) -> list:
