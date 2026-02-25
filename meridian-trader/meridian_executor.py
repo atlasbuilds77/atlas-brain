@@ -14,7 +14,10 @@ import pytz
 import meridian_config as cfg
 from meridian_alerts import alerts
 from meridian_scanner import SweepEvent
-from meridian_db import log_trade_entry, log_trade_exit
+from meridian_db import (
+    log_trade_entry, log_trade_exit,
+    save_order, check_existing_order, update_order_fill
+)
 
 log = logging.getLogger("meridian.executor")
 ET = pytz.timezone("US/Eastern")
@@ -35,6 +38,11 @@ class Position:
     order_ids: list = field(default_factory=list)
     # Per-account tracking for multi-account exit
     account_lots: list = field(default_factory=list)  # [{name, account, token, qty_0dte, qty_1dte}]
+    # Profit milestone tracking for scaling exits
+    scale_30_hit: bool = False
+    scale_50_hit: bool = False
+    scale_75_hit: bool = False
+    scale_100_hit: bool = False
 
 
 class MeridianExecutor:
@@ -130,27 +138,66 @@ class MeridianExecutor:
             return str(order_id) if order_id else None
 
     async def get_account_balance(self, session: aiohttp.ClientSession,
-                                   account: str, token: str) -> float:
-        """Get account equity for position sizing."""
+                                   account: str, token: str) -> dict:
+        """
+        Get detailed account balance including buying power.
+        
+        Returns:
+            {
+                "total_equity": float,
+                "cash_available": float,
+                "option_buying_power": float,
+                "unsettled_funds": float,
+            }
+        """
         url = f"{self.base}/v1/accounts/{account}/balances"
         headers = {"Authorization": f"Bearer {token}", "Accept": "application/json"}
         try:
             async with session.get(url, headers=headers) as resp:
                 if resp.status != 200:
                     log.warning(f"Balance API {resp.status} for {account}")
-                    return 0.0
+                    return {
+                        "total_equity": 0.0,
+                        "cash_available": 0.0,
+                        "option_buying_power": 0.0,
+                        "unsettled_funds": 0.0,
+                    }
                 data = await resp.json()
                 bal = data.get("balances", {})
-                # Cash accounts: equity=0, use total_equity or total_cash
-                val = (bal.get("total_equity") or
-                       bal.get("total_cash") or
-                       bal.get("equity") or 0)
-                log.info(f"[{account}] balance raw: total_equity={bal.get('total_equity')} "
-                         f"total_cash={bal.get('total_cash')} equity={bal.get('equity')}")
-                return float(val)
+                
+                # Extract all relevant balance fields
+                total_equity = float(bal.get("total_equity") or bal.get("total_cash") or bal.get("equity") or 0)
+                
+                # Get cash details
+                cash = bal.get("cash", {})
+                cash_available = float(cash.get("cash_available", 0))
+                unsettled_funds = float(cash.get("unsettled_funds", 0))
+                
+                # Option buying power
+                option_bp = float(bal.get("option_buying_power", 0))
+                
+                # Fallback: if cash_available is 0 but total_cash exists, use it
+                if cash_available == 0 and bal.get("total_cash"):
+                    cash_available = float(bal.get("total_cash", 0))
+                
+                log.info(f"[{account}] Balance: equity=${total_equity:.2f}, "
+                         f"available=${cash_available:.2f}, unsettled=${unsettled_funds:.2f}, "
+                         f"option_bp=${option_bp:.2f}")
+                
+                return {
+                    "total_equity": total_equity,
+                    "cash_available": cash_available,
+                    "option_buying_power": option_bp,
+                    "unsettled_funds": unsettled_funds,
+                }
         except Exception as e:
             log.warning(f"Balance fetch exception for {account}: {e}")
-            return 0.0
+            return {
+                "total_equity": 0.0,
+                "cash_available": 0.0,
+                "option_buying_power": 0.0,
+                "unsettled_funds": 0.0,
+            }
 
     async def get_quote(self, session: aiohttp.ClientSession, symbol: str) -> Optional[float]:
         """Get current quote for a symbol."""
@@ -227,36 +274,92 @@ class MeridianExecutor:
                 size_pct     = acct_cfg["size_pct"]
                 fallback_eq  = acct_cfg.get("fallback_equity", 0)
 
-                equity = await self.get_account_balance(session, acct_id, acct_token)
+                # Get detailed balance (including buying power)
+                balance_info = await self.get_account_balance(session, acct_id, acct_token)
+                equity = balance_info["total_equity"]
+                cash_available = balance_info["cash_available"]
+                unsettled_funds = balance_info["unsettled_funds"]
+                option_bp = balance_info["option_buying_power"]
+                
                 if equity <= 0:
                     if fallback_eq > 0:
                         log.warning(f"[{acct_name}] API equity=0, using hardwired fallback=${fallback_eq:.2f}")
                         equity = fallback_eq
+                        # Also set cash_available to fallback if it's 0
+                        if cash_available == 0:
+                            cash_available = fallback_eq
                     else:
                         log.error(f"[{acct_name}] No equity and no fallback — skipping")
                         continue
 
-                budget = equity * size_pct
+                # Position sizing based on AVAILABLE CASH (not total equity)
+                budget = cash_available * size_pct
                 budget_0dte = budget * cfg.POSITION_0DTE_PCT
                 budget_1dte = budget * cfg.POSITION_1DTE_PCT
 
+                log.info(f"[{acct_name}] Position sizing from available cash (not equity)")
+                log.info(f"[{acct_name}]   Cash available: ${cash_available:.2f}")
+                log.info(f"[{acct_name}]   Size %: {size_pct*100:.0f}%")
+                log.info(f"[{acct_name}]   Budget: ${budget:.2f}")
+
                 qty_0 = max(1, int(budget_0dte / (ask_0dte * 100)))
                 qty_1 = max(1, int(budget_1dte / (ask_1dte * 100)))
-
-                log.info(f"[{acct_name}] equity=${equity:.0f} budget=${budget:.0f} "
-                         f"→ {qty_0}x 0DTE + {qty_1}x 1DTE")
-
-                oid_0 = await self.place_order(session, sym_0dte, qty_0, account=acct_id, token=acct_token)
-                oid_1 = await self.place_order(session, sym_1dte, qty_1, account=acct_id, token=acct_token)
-                all_order_ids.extend([oid_0, oid_1])
-                total_qty_0dte += qty_0
-                total_qty_1dte += qty_1
-                account_lots.append({
-                    "name": acct_name, "account": acct_id, "token": acct_token,
-                    "qty_0dte": qty_0, "qty_1dte": qty_1,
-                })
                 
-                # ── Log trades to database ──
+                # ── BUYING POWER PRE-FLIGHT CHECK ──
+                cost_0dte = ask_0dte * qty_0 * 100
+                cost_1dte = ask_1dte * qty_1 * 100
+                total_cost = cost_0dte + cost_1dte
+                
+                # Use available cash (NOT total equity) - this is the key fix
+                buying_power = cash_available if cash_available > 0 else option_bp
+                
+                log.info(f"[{acct_name}] Checking buying power...")
+                log.info(f"[{acct_name}]   Available: ${buying_power:.2f} | Unsettled: ${unsettled_funds:.2f} | Need: ${total_cost:.2f}")
+                
+                if buying_power < total_cost:
+                    # INSUFFICIENT BUYING POWER - SKIP THIS ACCOUNT
+                    shortage = total_cost - buying_power
+                    log.warning(f"[{acct_name}] 🚫 Insufficient buying power - skipping order")
+                    log.info(f"[{acct_name}]   Short by: ${shortage:.2f}")
+                    log.info(f"[{acct_name}]   Total equity: ${equity:.2f} (includes unsettled)")
+                    
+                    # Log skipped trade to database
+                    try:
+                        setup_name = f"PM {'LOW' if sweep.level < price else 'HIGH'} Sweep"
+                        skip_reason = f"Insufficient buying power: ${buying_power:.2f} available, ${total_cost:.2f} needed (unsettled: ${unsettled_funds:.2f})"
+                        
+                        # Log as skipped entry
+                        log_trade_entry(
+                            account_number=acct_id,
+                            symbol=cfg.SYMBOL,
+                            direction=sweep.direction,
+                            asset_type="option",
+                            strike=float(strike_0dte["strike"]),
+                            expiry=exp_0dte,
+                            entry_price=ask_0dte,
+                            quantity=0,  # 0 qty indicates skipped
+                            notes=f"SKIPPED: {skip_reason}",
+                            setup_type=f"{setup_name} - SKIPPED",
+                            entry_reasoning=skip_reason,
+                            status="skipped"  # Mark as skipped in database
+                        )
+                        log.info(f"[{acct_name}] 📝 Logged skipped trade to database")
+                    except Exception as e:
+                        log.warning(f"[{acct_name}] Failed to log skipped trade: {e}")
+                    
+                    # Skip this account, continue to next
+                    continue
+                
+                # SUCCESS - Buying power check passed
+                margin = buying_power - total_cost
+                log.info(f"[{acct_name}]   ✅ Buying power check PASSED | Margin: ${margin:.2f}")
+                log.info(f"[{acct_name}]   Total equity: ${equity:.2f} (reference only)")
+                log.info(f"[{acct_name}]   Order: {qty_0}x 0DTE + {qty_1}x 1DTE")
+
+                # ── Log trades to database FIRST (to get trade_id) ──
+                trade_id_0dte = None
+                trade_id_1dte = None
+                
                 try:
                     # Build entry reasoning
                     setup_name = f"PM {'LOW' if sweep.level < price else 'HIGH'} Sweep"
@@ -276,8 +379,8 @@ Risk Management:
 Setup detected by Meridian scanner at {datetime.now(ET).strftime('%H:%M:%S ET')}
                     """.strip()
                     
-                    # Log 0DTE trade
-                    log_trade_entry(
+                    # Log 0DTE trade (get trade_id)
+                    trade_id_0dte = log_trade_entry(
                         account_number=acct_id,
                         symbol=cfg.SYMBOL,
                         direction=sweep.direction,
@@ -286,15 +389,15 @@ Setup detected by Meridian scanner at {datetime.now(ET).strftime('%H:%M:%S ET')}
                         expiry=exp_0dte,
                         entry_price=ask_0dte,
                         quantity=qty_0,
-                        notes=f"0DTE {opt_type} entry | sweep_level={sweep.level} | order_id={oid_0}",
+                        notes=f"0DTE {opt_type} entry | sweep_level={sweep.level}",
                         stop_loss=ask_0dte * 0.5,  # -50% stop
                         take_profit=None,  # Will be determined by GEX levels
                         entry_reasoning=entry_reasoning,
                         setup_type=f"{setup_name} + {'Reclaim' if sweep.direction == 'bull' else 'Rejection'}"
                     )
                     
-                    # Log 1DTE trade
-                    log_trade_entry(
+                    # Log 1DTE trade (get trade_id)
+                    trade_id_1dte = log_trade_entry(
                         account_number=acct_id,
                         symbol=cfg.SYMBOL,
                         direction=sweep.direction,
@@ -303,14 +406,60 @@ Setup detected by Meridian scanner at {datetime.now(ET).strftime('%H:%M:%S ET')}
                         expiry=exp_1dte,
                         entry_price=ask_1dte,
                         quantity=qty_1,
-                        notes=f"1DTE {opt_type} entry | sweep_level={sweep.level} | order_id={oid_1}",
+                        notes=f"1DTE {opt_type} entry | sweep_level={sweep.level}",
                         stop_loss=ask_1dte * 0.5,  # -50% stop
                         take_profit=None,  # Will be determined by GEX levels
                         entry_reasoning=entry_reasoning,
                         setup_type=f"{setup_name} + {'Reclaim' if sweep.direction == 'bull' else 'Rejection'}"
                     )
+                    
+                    log.info(f"[{acct_name}] Trade entries logged: 0DTE trade_id={trade_id_0dte}, 1DTE trade_id={trade_id_1dte}")
                 except Exception as e:
                     log.warning(f"Failed to log trade entry for {acct_name}: {e}")
+
+                # ── Check for existing orders (DUPLICATE PREVENTION) ──
+                log.info(f"[{acct_name}] Checking for existing orders...")
+                
+                existing_0dte = None
+                existing_1dte = None
+                
+                if trade_id_0dte:
+                    existing_0dte = check_existing_order(trade_id_0dte, sym_0dte, "buy_to_open")
+                if trade_id_1dte:
+                    existing_1dte = check_existing_order(trade_id_1dte, sym_1dte, "buy_to_open")
+                
+                # ── Place orders (only if they don't exist) ──
+                oid_0 = None
+                oid_1 = None
+                
+                if existing_0dte:
+                    log.warning(f"[{acct_name}] 🚫 Order already exists for 0DTE, skipping duplicate (order_id={existing_0dte['order_id']})")
+                    oid_0 = existing_0dte['order_id']
+                else:
+                    log.info(f"[{acct_name}] ✅ No existing order, placing new 0DTE order...")
+                    oid_0 = await self.place_order(session, sym_0dte, qty_0, account=acct_id, token=acct_token)
+                    if oid_0 and trade_id_0dte:
+                        save_order(trade_id_0dte, oid_0, acct_id, cfg.SYMBOL, sym_0dte, "buy_to_open", qty_0)
+                        log.info(f"[{acct_name}] 📝 Saved order to database: order_id={oid_0}")
+                
+                if existing_1dte:
+                    log.warning(f"[{acct_name}] 🚫 Order already exists for 1DTE, skipping duplicate (order_id={existing_1dte['order_id']})")
+                    oid_1 = existing_1dte['order_id']
+                else:
+                    log.info(f"[{acct_name}] ✅ No existing order, placing new 1DTE order...")
+                    oid_1 = await self.place_order(session, sym_1dte, qty_1, account=acct_id, token=acct_token)
+                    if oid_1 and trade_id_1dte:
+                        save_order(trade_id_1dte, oid_1, acct_id, cfg.SYMBOL, sym_1dte, "buy_to_open", qty_1)
+                        log.info(f"[{acct_name}] 📝 Saved order to database: order_id={oid_1}")
+                
+                all_order_ids.extend([oid_0, oid_1])
+                total_qty_0dte += qty_0
+                total_qty_1dte += qty_1
+                account_lots.append({
+                    "name": acct_name, "account": acct_id, "token": acct_token,
+                    "qty_0dte": qty_0, "qty_1dte": qty_1,
+                    "trade_id_0dte": trade_id_0dte, "trade_id_1dte": trade_id_1dte,
+                })
 
             if not any(all_order_ids):
                 log.error("All orders failed across all accounts!")
@@ -368,10 +517,12 @@ Setup detected by Meridian scanner at {datetime.now(ET).strftime('%H:%M:%S ET')}
             return
 
         pos = self.position
-        log.info(f"Managing position: {pos.direction}")
+        log.info(f"Managing position: {pos.direction} | {pos.qty_0dte} 0DTE + {pos.qty_1dte} 1DTE")
+        log.info(f"Scaling milestones: 30%→1/3, 50%→1/2, 75%→2/3, 100%→ALL")
 
-        async with aiohttp.ClientSession() as session:
-            while self.position:
+        try:
+            async with aiohttp.ClientSession() as session:
+              while self.position:
                 now_et = datetime.now(ET)
                 
                 # ── Smart Trade Window Close ──
@@ -428,6 +579,45 @@ Setup detected by Meridian scanner at {datetime.now(ET).strftime('%H:%M:%S ET')}
                 if pnl_pct > pos.high_water:
                     pos.high_water = pnl_pct
 
+                # ── SCALING EXITS AT PROFIT MILESTONES ──
+                # +30% = 1/3 off, +50% = half off, +75% = 2/3 off, +100% = all off
+                
+                try:
+                    if pnl_pct >= 1.00 and not pos.scale_100_hit:
+                        # +100%: Exit ALL remaining contracts
+                        log.info(f"🎯 PROFIT TARGET: +{pnl_pct:.1%} - Closing ALL remaining position")
+                        await alerts.send(f"🎯 <b>SCALE EXIT +100%</b> | P&L: +{pnl_pct:.1%} | Closing ALL")
+                        await self._scale_exit(session, pos, 1.0, reason="SCALE_100")
+                        pos.scale_100_hit = True
+                        break  # Exit fully
+                        
+                    elif pnl_pct >= 0.75 and not pos.scale_75_hit:
+                        # +75%: Exit 2/3 of original position
+                        log.info(f"🎯 PROFIT MILESTONE: +{pnl_pct:.1%} - Scaling 2/3 off (locking profit)")
+                        await alerts.send(f"🎯 <b>SCALE EXIT +75%</b> | P&L: +{pnl_pct:.1%} | Selling 2/3")
+                        await self._scale_exit(session, pos, 2.0/3.0, reason="SCALE_75")
+                        pos.scale_75_hit = True
+                        pos.stop_pct = max(pos.stop_pct, 0.50)  # Raise stop to +50%
+                        
+                    elif pnl_pct >= 0.50 and not pos.scale_50_hit:
+                        # +50%: Exit half of original position
+                        log.info(f"🎯 PROFIT MILESTONE: +{pnl_pct:.1%} - Scaling half off (locking profit)")
+                        await alerts.send(f"🎯 <b>SCALE EXIT +50%</b> | P&L: +{pnl_pct:.1%} | Selling 1/2")
+                        await self._scale_exit(session, pos, 0.5, reason="SCALE_50")
+                        pos.scale_50_hit = True
+                        pos.stop_pct = max(pos.stop_pct, 0.25)  # Raise stop to +25%
+                        
+                    elif pnl_pct >= 0.30 and not pos.scale_30_hit:
+                        # +30%: Exit 1/3 of original position
+                        log.info(f"🎯 PROFIT MILESTONE: +{pnl_pct:.1%} - Scaling 1/3 off (locking profit)")
+                        await alerts.send(f"🎯 <b>SCALE EXIT +30%</b> | P&L: +{pnl_pct:.1%} | Selling 1/3")
+                        await self._scale_exit(session, pos, 1.0/3.0, reason="SCALE_30")
+                        pos.scale_30_hit = True
+                        pos.stop_pct = max(pos.stop_pct, 0.0)  # Raise stop to breakeven
+                except Exception as e:
+                    log.error(f"❌ Scale exit FAILED: {e}", exc_info=True)
+
+                # ── TRAILING STOP (Safety net below milestones) ──
                 for threshold, trail in cfg.TRAIL_LEVELS:
                     if pos.high_water >= threshold:
                         new_stop = trail
@@ -439,8 +629,99 @@ Setup detected by Meridian scanner at {datetime.now(ET).strftime('%H:%M:%S ET')}
                     await self._exit_position(session, f"STOP ({pos.stop_pct:.0%})")
                     break
 
-                log.debug(f"P&L: {pnl_pct:+.1%} | HW: {pos.high_water:+.1%} | Stop: {pos.stop_pct:.0%}")
+                log.info(f"P&L: {pnl_pct:+.1%} | HW: {pos.high_water:+.1%} | Stop: {pos.stop_pct:.0%} | Qty: {pos.qty_0dte}+{pos.qty_1dte}")
                 await asyncio.sleep(15)
+        except Exception as e:
+            log.error(f"❌ manage_position CRASHED: {e}", exc_info=True)
+            await alerts.send(f"🚨 <b>POSITION MONITOR CRASHED</b>\n{e}\nManual exit may be needed!")
+
+    async def _scale_exit(self, session: aiohttp.ClientSession, pos: Position, 
+                          scale_fraction: float, reason: str):
+        """
+        Partial exit: sell scale_fraction of ORIGINAL position.
+        
+        Example:
+            - Original: 38 contracts 0DTE, 4 contracts 1DTE
+            - scale_fraction=0.33 (1/3): Sell 13 0DTE, 1 1DTE
+            - scale_fraction=0.50 (1/2): Sell 19 0DTE, 2 1DTE
+        
+        This tracks cumulative exits so we don't oversell.
+        """
+        if not pos or not pos.account_lots:
+            return
+            
+        log.info(f"📊 Scaling exit: {scale_fraction:.1%} of original position ({reason})")
+        
+        # For each account, calculate what fraction to sell
+        for lot in pos.account_lots:
+            acct_id = lot["account"]
+            acct_token = lot["token"]
+            acct_name = lot["name"]
+            
+            # Get ORIGINAL quantities (at entry)
+            original_0dte = lot.get("original_qty_0dte", lot["qty_0dte"])
+            original_1dte = lot.get("original_qty_1dte", lot["qty_1dte"])
+            
+            # Store original if not set
+            if "original_qty_0dte" not in lot:
+                lot["original_qty_0dte"] = lot["qty_0dte"]
+            if "original_qty_1dte" not in lot:
+                lot["original_qty_1dte"] = lot["qty_1dte"]
+            
+            # Calculate target total sold (cumulative)
+            target_sold_0dte = int(original_0dte * scale_fraction)
+            target_sold_1dte = int(original_1dte * scale_fraction)
+            
+            # Calculate how much we've already sold
+            already_sold_0dte = original_0dte - lot["qty_0dte"]
+            already_sold_1dte = original_1dte - lot["qty_1dte"]
+            
+            # Calculate how much MORE to sell now
+            to_sell_0dte = max(0, target_sold_0dte - already_sold_0dte)
+            to_sell_1dte = max(0, target_sold_1dte - already_sold_1dte)
+            
+            if to_sell_0dte > 0:
+                log.info(f"[{acct_name}] Selling {to_sell_0dte}x 0DTE (keeping {lot['qty_0dte'] - to_sell_0dte})")
+                await self.place_order(session, pos.symbol_0dte, to_sell_0dte,
+                                      "sell_to_close", account=acct_id, token=acct_token)
+                lot["qty_0dte"] -= to_sell_0dte
+                pos.qty_0dte -= to_sell_0dte
+                
+            if to_sell_1dte > 0:
+                log.info(f"[{acct_name}] Selling {to_sell_1dte}x 1DTE (keeping {lot['qty_1dte'] - to_sell_1dte})")
+                await self.place_order(session, pos.symbol_1dte, to_sell_1dte,
+                                      "sell_to_close", account=acct_id, token=acct_token)
+                lot["qty_1dte"] -= to_sell_1dte
+                pos.qty_1dte -= to_sell_1dte
+        
+        log.info(f"✅ Scale exit complete - Position now: {pos.qty_0dte} 0DTE, {pos.qty_1dte} 1DTE")
+
+    async def _verify_position_exists(self, session: aiohttp.ClientSession,
+                                       account: str, token: str, symbol: str) -> int:
+        """
+        Verify position actually exists before attempting to close.
+        Returns actual quantity held, or 0 if position doesn't exist.
+        """
+        url = f"{self.base}/v1/accounts/{account}/positions"
+        headers = {"Authorization": f"Bearer {token}", "Accept": "application/json"}
+        try:
+            async with session.get(url, headers=headers) as resp:
+                if resp.status != 200:
+                    return 0
+                data = await resp.json()
+                if 'positions' not in data or data['positions'] == 'null':
+                    return 0
+                positions = data['positions'].get('position', [])
+                if not isinstance(positions, list):
+                    positions = [positions]
+                
+                for pos in positions:
+                    if pos.get('symbol') == symbol:
+                        return int(pos.get('quantity', 0))
+                return 0
+        except Exception as e:
+            log.warning(f"Failed to verify position for {symbol}: {e}")
+            return 0
 
     async def _exit_position(self, session: aiohttp.ClientSession, reason: str):
         """Close all position legs across all accounts."""
@@ -456,14 +737,28 @@ Setup detected by Meridian scanner at {datetime.now(ET).strftime('%H:%M:%S ET')}
                 acct_id = lot["account"]
                 acct_token = lot["token"]
                 acct_name = lot["name"]
-                if lot["qty_0dte"] > 0:
-                    log.info(f"Closing [{acct_name}] {lot['qty_0dte']}x 0DTE")
-                    await self.place_order(session, pos.symbol_0dte, lot["qty_0dte"],
+                
+                # VERIFY positions actually exist before closing
+                actual_qty_0dte = await self._verify_position_exists(
+                    session, acct_id, acct_token, pos.symbol_0dte
+                )
+                actual_qty_1dte = await self._verify_position_exists(
+                    session, acct_id, acct_token, pos.symbol_1dte
+                )
+                
+                if actual_qty_0dte > 0:
+                    log.info(f"Closing [{acct_name}] {actual_qty_0dte}x 0DTE (verified)")
+                    await self.place_order(session, pos.symbol_0dte, actual_qty_0dte,
                                            "sell_to_close", account=acct_id, token=acct_token)
-                if lot["qty_1dte"] > 0:
-                    log.info(f"Closing [{acct_name}] {lot['qty_1dte']}x 1DTE")
-                    await self.place_order(session, pos.symbol_1dte, lot["qty_1dte"],
+                elif lot["qty_0dte"] > 0:
+                    log.warning(f"[{acct_name}] 0DTE position already closed externally (expected {lot['qty_0dte']}, found 0)")
+                
+                if actual_qty_1dte > 0:
+                    log.info(f"Closing [{acct_name}] {actual_qty_1dte}x 1DTE (verified)")
+                    await self.place_order(session, pos.symbol_1dte, actual_qty_1dte,
                                            "sell_to_close", account=acct_id, token=acct_token)
+                elif lot["qty_1dte"] > 0:
+                    log.warning(f"[{acct_name}] 1DTE position already closed externally (expected {lot['qty_1dte']}, found 0)")
         else:
             # Fallback: old behavior (single account)
             if pos.qty_0dte > 0:
