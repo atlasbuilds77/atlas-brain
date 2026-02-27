@@ -44,6 +44,7 @@ class ScannerState:
     bars_since_sweep: int = 0
     bar_count: int = 0
     flush_mode: bool = False  # FIX 1: True if opening 3 bars were all red
+    scan_iterations: int = 0  # Track loop iterations for heartbeat logging
 
 
 class MeridianScanner:
@@ -389,6 +390,12 @@ class MeridianScanner:
                 # Process latest bar
                 latest = bars[-1]
                 self.state.bar_count = len(bars)
+                self.state.scan_iterations += 1
+                
+                # Heartbeat log on first iteration and then every 8 iterations (~2 minutes at 15s interval)
+                if self.state.scan_iterations == 1 or self.state.scan_iterations % 8 == 0:
+                    close_price = float(latest.get("close", latest.get("price", 0)))
+                    log.info(f"Scanning... iter={self.state.scan_iterations}, bar={self.state.bar_count}, price={close_price:.2f}, PM H={self.state.pm_high:.2f}/L={self.state.pm_low:.2f}")
 
                 if self.state.active_sweep:
                     # Check for reclaim
