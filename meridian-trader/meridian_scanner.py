@@ -8,6 +8,7 @@ v1 Fixes:
   FIX 3 - Level Fatigue: skip level after 2+ successful reclaims this session
 """
 import asyncio
+import json
 import logging
 import time
 from datetime import datetime, timedelta
@@ -45,6 +46,7 @@ class ScannerState:
     bar_count: int = 0
     flush_mode: bool = False  # FIX 1: True if opening 3 bars were all red
     scan_iterations: int = 0  # Track loop iterations for heartbeat logging
+    last_processed_bar_count: int = 0  # Closed bars already processed this session
 
 
 class MeridianScanner:
@@ -55,6 +57,42 @@ class MeridianScanner:
             "Accept": "application/json",
         }
         self.base = cfg.TRADIER_BASE_URL
+
+    def _pm_cache_path(self, now_et: datetime):
+        return cfg.LOG_DIR / f"pm_levels_{now_et.strftime('%Y%m%d')}.json"
+
+    def _save_pm_cache(self, now_et: datetime):
+        """Persist PM levels so restarts can recover without refetching."""
+        if self.state.pm_high is None or self.state.pm_low is None:
+            return
+        payload = {
+            "pm_high": self.state.pm_high,
+            "pm_low": self.state.pm_low,
+            "clusters": self.state.clusters,
+            "saved_at": now_et.isoformat(),
+        }
+        cache_path = self._pm_cache_path(now_et)
+        try:
+            with open(cache_path, "w") as f:
+                json.dump(payload, f)
+        except Exception as e:
+            log.warning(f"Failed to save PM cache ({cache_path}): {e}")
+
+    def _load_pm_cache(self, now_et: datetime) -> bool:
+        """Load PM levels from same-day cache when API fetch fails."""
+        cache_path = self._pm_cache_path(now_et)
+        if not cache_path.exists():
+            return False
+        try:
+            with open(cache_path) as f:
+                payload = json.load(f)
+            self.state.pm_high = float(payload["pm_high"])
+            self.state.pm_low = float(payload["pm_low"])
+            self.state.clusters = payload.get("clusters", self.state.clusters) or self.state.clusters
+            return True
+        except Exception as e:
+            log.warning(f"Failed to load PM cache ({cache_path}): {e}")
+            return False
 
     # ── Tradier Data ──
 
@@ -212,7 +250,7 @@ class MeridianScanner:
         return len(recent) < 2
 
     def check_sweep(self, bar: dict) -> Optional[SweepEvent]:
-        """Check if current bar sweeps a PM level."""
+        """Detect a sweep wick; reclaim is validated separately in check_reclaim()."""
         if self.state.pm_high is None or self.state.pm_low is None:
             return None
         if self.state.active_sweep is not None:
@@ -220,10 +258,9 @@ class MeridianScanner:
 
         price_high = float(bar.get("high", bar.get("price", 0)))
         price_low = float(bar.get("low", bar.get("price", 0)))
-        close = float(bar.get("close", bar.get("price", 0)))
 
-        # Bear sweep: price goes ABOVE pm_high then closes below
-        if price_high > self.state.pm_high and close <= self.state.pm_high:
+        # Bear sweep: price wicks ABOVE pm_high
+        if price_high > self.state.pm_high:
             if self._cooldown_ok(self.state.pm_high):
                 return SweepEvent(
                     direction="bear",
@@ -232,8 +269,8 @@ class MeridianScanner:
                     sweep_price=price_high,
                 )
 
-        # Bull sweep: price goes BELOW pm_low then closes above
-        if price_low < self.state.pm_low and close >= self.state.pm_low:
+        # Bull sweep: price wicks BELOW pm_low
+        if price_low < self.state.pm_low:
             if self._cooldown_ok(self.state.pm_low):
                 return SweepEvent(
                     direction="bull",
@@ -263,10 +300,10 @@ class MeridianScanner:
 
         # Check directional reclaim
         reclaim_confirmed = False
-        if sweep.direction == "bear":
+        if sweep.direction == "bull":
             if close > sweep.level:
                 reclaim_confirmed = True
-        else:
+        else:  # bear
             if close < sweep.level:
                 reclaim_confirmed = True
 
@@ -314,7 +351,14 @@ class MeridianScanner:
             # Fetch PM bars (4:00-9:30 ET)
             pm_start = f"{today} 04:00"
             pm_end = f"{today} 09:30"
-            bars = await self.fetch_bars(session, start=pm_start, end=pm_end)
+            bars = []
+            for attempt in range(3):
+                bars = await self.fetch_bars(session, start=pm_start, end=pm_end)
+                if bars:
+                    break
+                if attempt < 2:
+                    log.warning(f"No PM bars available (attempt {attempt + 1}/3), retrying...")
+                    await asyncio.sleep(2)
 
             if bars:
                 self.state.pm_high, self.state.pm_low = self.compute_pm_levels(bars)
@@ -327,7 +371,13 @@ class MeridianScanner:
                         self.state.pm_high = None
                         self.state.pm_low = None
             else:
-                log.warning("No PM bars available yet")
+                log.warning("No PM bars available; attempting to load same-day cached PM levels")
+                if self._load_pm_cache(now_et):
+                    log.warning(
+                        f"Using cached PM levels: H={self.state.pm_high:.2f} L={self.state.pm_low:.2f}"
+                    )
+                else:
+                    log.warning("No PM cache found - sweep checks will stay disabled until levels load")
 
             # Fetch daily bars for clusters
             daily = await self.fetch_daily_bars(session, cfg.CLUSTER_LOOKBACK_DAYS)
@@ -335,6 +385,7 @@ class MeridianScanner:
             log.info(f"Found {len(self.state.clusters)} clusters")
 
             if self.state.pm_high and self.state.pm_low:
+                self._save_pm_cache(now_et)
                 await alerts.pm_levels(self.state.pm_high, self.state.pm_low, self.state.clusters)
 
         return self.state
@@ -342,8 +393,10 @@ class MeridianScanner:
     async def run_market_scan(self, on_signal_callback=None):
         """Monitor market open for sweeps. Calls on_signal_callback(SweepEvent) on valid setup."""
         log.info("Starting market-open sweep scanner...")
+        self.state.last_processed_bar_count = 0
         async with aiohttp.ClientSession() as session:
             while True:
+                loop_started = time.monotonic()
                 now_et = datetime.now(ET)
 
                 # Only trade 9:30 ET onward (end computed dynamically below)
@@ -367,68 +420,108 @@ class MeridianScanner:
                     log.info(f"Trade window closed ({window_label})")
                     break
 
-                # Fetch latest bars
+                # Fetch latest bars with task-level timeout to prevent scan loop from hanging
                 today = now_et.strftime("%Y-%m-%d")
-                bars = await self.fetch_bars(session, start=f"{today} 09:30")
+                try:
+                    bars = await asyncio.wait_for(
+                        self.fetch_bars(session, start=f"{today} 09:30"),
+                        timeout=30.0  # Hard 30-second timeout for entire fetch operation
+                    )
+                except asyncio.TimeoutError:
+                    log.error("fetch_bars timed out after 30s - scan loop protection triggered")
+                    bars = []
 
                 if not bars:
-                    await asyncio.sleep(10)
+                    log.warning("No regular-session bars returned; retrying")
+                    await asyncio.sleep(15)
                     continue
 
                 # ── FIX 1: Opening Flush Detection ──
                 # Run once when we have at least 3 bars
-                if self.state.bar_count == 0 and len(bars) >= 3:
+                if self.state.last_processed_bar_count == 0 and len(bars) >= 3:
                     self._check_opening_flush(bars)
 
                 # Update PM levels if not set (late start)
-                if self.state.pm_high is None:
+                if self.state.pm_high is None or self.state.pm_low is None:
                     pm_bars = await self.fetch_bars(session, start=f"{today} 04:00", end=f"{today} 09:30")
                     if pm_bars:
                         self.state.pm_high, self.state.pm_low = self.compute_pm_levels(pm_bars)
                         log.info(f"Late PM levels: H={self.state.pm_high} L={self.state.pm_low}")
-
-                # Process latest bar
-                latest = bars[-1]
-                self.state.bar_count = len(bars)
-                self.state.scan_iterations += 1
-                
-                # Heartbeat log on first iteration and then every 8 iterations (~2 minutes at 15s interval)
-                if self.state.scan_iterations == 1 or self.state.scan_iterations % 8 == 0:
-                    close_price = float(latest.get("close", latest.get("price", 0)))
-                    log.info(f"Scanning... iter={self.state.scan_iterations}, bar={self.state.bar_count}, price={close_price:.2f}, PM H={self.state.pm_high:.2f}/L={self.state.pm_low:.2f}")
-
-                if self.state.active_sweep:
-                    # Check for reclaim
-                    if self.check_reclaim(latest):
-                        sweep = self.state.active_sweep
-
-                        # ── FIX 1: Block bull signals during flush mode ──
-                        if self.state.flush_mode and sweep.direction == "bull" and self.state.bar_count < 30:
-                            log.info(f"Opening flush active — bull signal blocked (bar {self.state.bar_count}/30)")
-                        else:
-                            log.info(f"✅ RECLAIM! {sweep.direction} sweep at {sweep.level}")
-                            self.state.sweep_history.append((sweep.level, time.time()))
-                            # FIX 3: Record successful reclaim separately
-                            self.state.reclaim_history.append((sweep.level, time.time()))
-                            if on_signal_callback:
-                                await on_signal_callback(sweep)
-
-                        self.state.active_sweep = None
-                    elif self.state.active_sweep.expired:
-                        log.info("Sweep expired, clearing")
-                        self.state.active_sweep = None
-                else:
-                    # Check for new sweep
-                    sweep = self.check_sweep(latest)
-                    if sweep:
-                        self.state.active_sweep = sweep
-                        log.info(f"🔍 SWEEP: {sweep.direction} at {sweep.level}")
-                        await alerts.sweep_detected(
-                            sweep.direction, sweep.level, sweep.sweep_price
+                        self._save_pm_cache(now_et)
+                    elif self._load_pm_cache(now_et):
+                        log.warning(
+                            f"Using cached PM levels in scan loop: H={self.state.pm_high:.2f} L={self.state.pm_low:.2f}"
                         )
 
-                # Poll every ~15 seconds
-                await asyncio.sleep(15)
+                # On first market-scan iteration after a restart, avoid replaying stale setups
+                # from the full morning history. Keep only a small recent window.
+                if self.state.last_processed_bar_count == 0 and len(bars) > (cfg.MAX_RECLAIM_BARS + 1):
+                    self.state.last_processed_bar_count = len(bars) - (cfg.MAX_RECLAIM_BARS + 1)
+                    log.warning(
+                        f"Warm start at bar {len(bars)}: skipping stale history, "
+                        f"processing last {cfg.MAX_RECLAIM_BARS + 1} bars only"
+                    )
+
+                # Handle API resets or history truncation safely.
+                if len(bars) < self.state.last_processed_bar_count:
+                    log.warning(
+                        f"Bar count moved backward ({self.state.last_processed_bar_count} -> {len(bars)}), resetting cursor"
+                    )
+                    self.state.last_processed_bar_count = 0
+
+                new_bars = bars[self.state.last_processed_bar_count:]
+                for idx, bar in enumerate(new_bars, start=self.state.last_processed_bar_count + 1):
+                    self.state.bar_count = idx
+                    self.state.scan_iterations += 1
+
+                    # Heartbeat log: every iteration for first 20 bars (critical window), then every 8
+                    close_price = float(bar.get("close", bar.get("price", 0)))
+                    log_threshold = 1 if self.state.bar_count < 20 else 8
+                    if self.state.scan_iterations == 1 or self.state.scan_iterations % log_threshold == 0:
+                        pm_high_str = f"{self.state.pm_high:.2f}" if self.state.pm_high is not None else "NA"
+                        pm_low_str = f"{self.state.pm_low:.2f}" if self.state.pm_low is not None else "NA"
+                        log.info(
+                            f"Scanning... iter={self.state.scan_iterations}, bar={self.state.bar_count}, "
+                            f"price={close_price:.2f}, PM H={pm_high_str}/L={pm_low_str}"
+                        )
+
+                    if self.state.active_sweep:
+                        # Check for reclaim
+                        if self.check_reclaim(bar):
+                            sweep = self.state.active_sweep
+
+                            # ── FIX 1: Block bull signals during flush mode ──
+                            if self.state.flush_mode and sweep.direction == "bull" and self.state.bar_count < 30:
+                                log.info(f"Opening flush active — bull signal blocked (bar {self.state.bar_count}/30)")
+                            else:
+                                log.info(f"✅ RECLAIM! {sweep.direction} sweep at {sweep.level}")
+                                self.state.sweep_history.append((sweep.level, time.time()))
+                                # FIX 3: Record successful reclaim separately
+                                self.state.reclaim_history.append((sweep.level, time.time()))
+                                if on_signal_callback:
+                                    await on_signal_callback(sweep)
+
+                            self.state.active_sweep = None
+                        elif self.state.active_sweep.expired:
+                            log.info("Sweep expired, clearing")
+                            self.state.active_sweep = None
+                    else:
+                        # Check for new sweep
+                        sweep = self.check_sweep(bar)
+                        if sweep:
+                            self.state.active_sweep = sweep
+                            log.info(f"🔍 SWEEP: {sweep.direction} at {sweep.level}")
+                            await alerts.sweep_detected(
+                                sweep.direction, sweep.level, sweep.sweep_price
+                            )
+
+                self.state.last_processed_bar_count = len(bars)
+
+                # Keep scanner at 15-second cadence; warn if API latency causes drift.
+                elapsed = time.monotonic() - loop_started
+                if elapsed > 15:
+                    log.warning(f"Scan loop drift: {elapsed:.2f}s (target 15s)")
+                await asyncio.sleep(max(1, 15 - elapsed))
 
 
 scanner = MeridianScanner()
